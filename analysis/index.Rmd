@@ -10,8 +10,8 @@ editor_options:
 
 # Figures code
 
-1. [Figures](plot_figures.html)
+[Figures](plot_figures.html)
 
 # Processing code
 
-1. [Process genotypes](00_process_genotypes.html)
+[Process genotypes](00_process_genotypes.html)

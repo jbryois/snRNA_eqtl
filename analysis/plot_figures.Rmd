@@ -11,16 +11,11 @@ editor_options:
   chunk_output_type: console
 ---
 
-# Setup
-
-Load libraries
-
 ```{r,message=FALSE}
 library(tidyverse)
 ```
 
 # Main figures
-
 
 # Suplementary figures
 
