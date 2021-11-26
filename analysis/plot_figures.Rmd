@@ -1,0 +1,44 @@
+---
+title: "Plot figures"
+site: workflowr::wflow_site
+author: "Julien Bryois"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output:
+  workflowr::wflow_html:
+   toc: true
+   toc_float: true
+editor_options:
+  chunk_output_type: console
+---
+
+# Setup
+
+Load libraries
+
+```{r,message=FALSE}
+library(tidyverse)
+```
+
+# Main figures
+
+
+# Suplementary figures
+
+## Genotype PCA
+
+```{r}
+data <- read.table("data_sensitive/genotypes/Combined_with1kg.mds",header=TRUE) %>% dplyr::select(-FID) %>% dplyr::select(IID,C1,C2)
+ancestry <- read.table("data_sensitive/genotypes/integrated_call_samples_v3.20130502.ALL.panel",header=TRUE) %>% dplyr::rename(IID=sample)
+d <- left_join(data,ancestry,by="IID")
+d <- mutate(d,super_pop=ifelse(is.na(super_pop),'This study',super_pop))
+
+threshold <- d %>% filter(super_pop=='EUR') %>% summarise(meanC1=mean(C1),sdC1=sd(C1),meanC2=mean(C2),sdC2=sd(C2)) %>% 
+  mutate(x1=meanC1-3*sdC1,x2=meanC1+3*sdC1,y1=meanC2-3*sdC2,y2=meanC2+3*sdC2)
+
+d <- mutate(d,outlier=ifelse(C1>threshold$x1 & C1<threshold$x2 & C2>threshold$y1 & C2<threshold$y2,'keep','outlier'))
+
+p <- ggplot(d) +geom_point(aes(C1,C2,col= super_pop),size=0.5) + theme_bw() + xlab('MDS1') + ylab('MDS2') + geom_rect(data=threshold,aes(xmin=x1,xmax=x2,ymin=y1,ymax=y2),alpha=0.1,color='red') + theme(text=element_text(size=18))
+ggsave(p,filename='output/Figures/mds_genotype.pdf',width=7,height=5)
+p
+```
+

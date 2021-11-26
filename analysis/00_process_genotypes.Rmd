@@ -1,0 +1,723 @@
+---
+title: "Process genotypes"
+site: workflowr::wflow_site
+author: "Julien Bryois"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output:
+  workflowr::wflow_html:
+   toc: true
+   toc_float: true
+editor_options:
+  chunk_output_type: console
+---
+
+```{r,echo=FALSE}
+#Necessary for module load to work
+knitr::opts_chunk$set(engine.opts = list(bash="--login"))
+```
+
+# Setup
+
+Load libraries
+
+```{r,message=FALSE}
+library(tidyverse)
+library(SingleCellExperiment)
+```
+
+Set path for genotype data
+
+```{r,eval=FALSE}
+Sys.setenv(geno_path='data_sensitive/genotypes')
+```
+
+```{bash,eval=FALSE,echo=FALSE,results=FALSE}
+cd $geno_path
+rm *
+ln -s ../../../Alzheimer_2020_June/data/genotypes/data/ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all.{bed,bim,fam} .
+ln -s ../../../MS_snRNAseq_genetics/data/genotypes/processed_ROSMAP/RES0103_GSAv3+_imputed_HRC.{bed,bim,fam} .
+ln -s ../../../MS_snRNAseq_genetics/data/genotypes/processed_ROSMAP/inversion.txt .
+ln -s ../../../MS_snRNAseq_genetics/data/genotypes/processed/info_score.tsv .
+ln -s ../../../MS_snRNAseq_genetics/data/genotypes/1kg/out/all_phase3.{bim,bed,fam} .
+ln -s ../../../MS_snRNAseq_genetics/data/genotypes/1kg/out/integrated_call_samples_v3.20130502.ALL.panel .
+```
+
+# Merge genotypes
+
+We need to merge the genotypes coming from the genotyping array (AD + MS Roche Cohort) with the whole genome genotypes from the ROSMAP cohort.
+
+## GSA array QC
+
+Samples from the AD and MS Roche dataset were genotyped using a GSA array and imputed with the HRC reference panel. 
+
+We remove SNPs with more than 5% missing genotypes, as well as individuals with more than 2% missing genotypes.
+
+Finally, we remove any SNP with MAF<0.01.
+
+```{bash,eval=FALSE,results = FALSE}
+cd $geno_path
+module load PLINK/1.90-goolf-1.7.20
+
+#remove SNPs with more than 5% missing genotypes
+plink --bfile RES0103_GSAv3+_imputed_HRC --geno 0.05 --allow-no-sex --allow-extra-chr --make-bed --out RES0103_GSAv3+_imputed_HRC_1
+
+#remove individuals with more than 2% missing genotypes
+plink --bfile RES0103_GSAv3+_imputed_HRC_1 --mind 0.02 --maf 0.01 --allow-no-sex --allow-extra-chr --make-bed --out RES0103_GSAv3+_imputed_HRC_2
+```
+
+## ROSMAP dataset QC
+
+Set SNP position as name if the SNP name is '.'
+
+```{bash,eval=FALSE,results = FALSE}
+cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+awk '{if($2 == ".") {OFS = "\t "; print $1,"chr"$1":"$4"_"$5"_"$6,$3,$4,$5,$6} else {print $0}}' ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all.bim > tmp
+mv tmp ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all.bim
+```
+
+We remove SNPs with more than 5% missing genotypes, as well as individuals with more than 2% missing genotypes.
+
+Finally, we remove any SNP with MAF<0.01.
+
+```{bash,eval=FALSE,results = FALSE}
+cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+#remove SNPs with more than 5% missing genotypes
+plink --bfile ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all --geno 0.05 --allow-no-sex --allow-extra-chr --make-bed --out ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_1
+
+#remove individuals with more than 2% missing genotypes
+plink --bfile ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_1 --mind 0.02 --maf 0.01 --allow-no-sex --allow-extra-chr --make-bed --out ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_2
+```
+
+### Update SNP names of ROSMAP according to HRC imputed genotype file
+
+```{r,eval=FALSE}
+#load rosmap bim file
+rosmap <- data.table::fread('data_sensitive/genotypes/ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_2.bim',header = FALSE,data.table=FALSE) %>% setNames(c('chr','snp_rosmap','unclear_rosmap','pos','A1_rosmap','A2_rosmap'))
+
+#load gsa bim file
+gsa <- data.table::fread('data_sensitive/genotypes/RES0103_GSAv3+_imputed_HRC_2.bim',header = F,data.table = FALSE) %>% setNames(c('chr','snp_gsa','unclear_gsa','pos','A1_gsa','A2_gsa'))
+```
+
+Add gsa genotype data for same chromosome and same position
+
+```{r,eval=FALSE}
+rosmap_merged <- rosmap %>% 
+  left_join(.,gsa,by=c('chr','pos'))
+```
+
+Get allele combination possibilities
+
+```{r,eval=FALSE}
+rosmap_merged <- mutate(rosmap_merged,
+  allele_combination_gsa=paste0(A1_gsa,A2_gsa),
+  allele_combination_gsa_rev=paste0(A2_gsa,A1_gsa),
+  allele_combination_rosmap=paste0(A1_rosmap,A2_rosmap))
+```      
+          
+Get opposite strand alleles 
+
+```{r,eval=FALSE}
+rosmap_merged <- rosmap_merged %>% mutate(allele_combination_gsa_opposite_strand=case_when(
+  allele_combination_gsa=='AT' ~ 'TA',
+  allele_combination_gsa=='AC' ~ 'TG',
+  allele_combination_gsa=='AG' ~ 'TC',
+  allele_combination_gsa=='CA' ~ 'GT',
+  allele_combination_gsa=='CT' ~ 'GA',
+  allele_combination_gsa=='CG' ~ 'GC',
+  allele_combination_gsa=='TA' ~ 'AT',
+  allele_combination_gsa=='TC' ~ 'AG',
+  allele_combination_gsa=='TG' ~ 'AC',
+  allele_combination_gsa=='GA' ~ 'CT',
+  allele_combination_gsa=='GT' ~ 'CA',
+  allele_combination_gsa=='GC' ~ 'CG',
+  TRUE ~ 'unknown'
+))
+```
+
+```{r,eval=FALSE}
+rosmap_merged <- rosmap_merged %>% mutate(allele_combination_gsa_opposite_strand_rev=case_when(
+  allele_combination_gsa=='AT' ~ 'AT',
+  allele_combination_gsa=='AC' ~ 'GT',
+  allele_combination_gsa=='AG' ~ 'CT',
+  allele_combination_gsa=='CA' ~ 'TG',
+  allele_combination_gsa=='CT' ~ 'AG',
+  allele_combination_gsa=='CG' ~ 'CG',
+  allele_combination_gsa=='TA' ~ 'TA',
+  allele_combination_gsa=='TC' ~ 'GA',
+  allele_combination_gsa=='TG' ~ 'CA',
+  allele_combination_gsa=='GA' ~ 'TC',
+  allele_combination_gsa=='GT' ~ 'AC',
+  allele_combination_gsa=='GC' ~ 'GC',
+  TRUE ~ 'unknown'
+))
+```
+
+If the alleles of ROSMAP data match the one from the gsa genotype (on any strand), set the name of the position to the GSA genotype name for the ROSMAP data, otherwise, keep the ROSMAP SNP name
+
+```{r,eval=FALSE}
+rosmap_merged <- rosmap_merged %>% mutate(SNP_name_rosmap=case_when(
+  (allele_combination_rosmap == allele_combination_gsa) | 
+  (allele_combination_rosmap == allele_combination_gsa_rev)  |
+  (allele_combination_rosmap == allele_combination_gsa_opposite_strand) | 
+  (allele_combination_rosmap == allele_combination_gsa_opposite_strand_rev) ~ snp_gsa,
+  TRUE ~ snp_rosmap
+))
+```
+
+```{r,eval=FALSE}
+rosmap_bim_new_name <- rosmap_merged %>% 
+  dplyr::select(snp_rosmap,SNP_name_rosmap) %>%
+  unique() %>% 
+  as_tibble()
+```
+
+Remove SNPs with the same name
+
+```{r,eval=FALSE}
+duplicated_original_name <- rosmap_bim_new_name$snp_rosmap[duplicated(rosmap_bim_new_name$snp_rosmap)]
+duplicated_new_name <- rosmap_bim_new_name$SNP_name_rosmap[duplicated(rosmap_bim_new_name$SNP_name_rosmap)]
+```
+
+```{r,eval=FALSE}
+rosmap_bim_new_name <- rosmap_bim_new_name %>% filter(!snp_rosmap%in%duplicated_original_name,!SNP_name_rosmap%in%duplicated_new_name)
+```
+
+```{r,eval=FALSE}
+write_tsv(rosmap_bim_new_name,'data_sensitive/genotypes/rosmap_snp_names_to_update.txt',col_names=FALSE)
+```
+
+Now update names for the ROSMAP data
+
+```{bash,eval=FALSE,results = FALSE}
+cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+#Get duplicated ids (same pos, same alleles)
+awk '{print$2}' ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_2.bim | sort |uniq -d > rosmap_SNPs.dups.txt
+awk '{print$2}' RES0103_GSAv3+_imputed_HRC_2.bim | sort |uniq -d > gsa_SNPs.dups.txt
+cat rosmap_SNPs.dups.txt gsa_SNPs.dups.txt | sort -u > dups.txt
+
+#Remove duplicated SNPs
+plink --bfile ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_2 --exclude dups.txt --allow-no-sex --allow-extra-chr --make-bed --out ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_3
+
+#update names of ROSMAP data with GSA genotype name when position and allele match
+plink --bfile ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_3  --update-name rosmap_snp_names_to_update.txt --allow-no-sex --allow-extra-chr --make-bed --out ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_4
+```
+
+## Keep common SNPs only
+
+Keep SNP on chromosome 1-22 that are present in both datasets, and not duplicated in any datasets
+
+```{r,eval=FALSE}
+dups <- read_tsv('data_sensitive/genotypes/dups.txt',col_names = F)
+```
+
+```{r,eval=FALSE}
+rosmap <- data.table::fread('data_sensitive/genotypes/ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_4.bim',header = FALSE,data.table=FALSE) %>% setNames(c('chr','snp_rosmap','unclear_rosmap','pos','A1_rosmap','A2_rosmap')) %>% 
+  filter(chr%in%c(1:22))
+gsa <- data.table::fread('data_sensitive/genotypes/RES0103_GSAv3+_imputed_HRC_2.bim',header = F,data.table = FALSE) %>% setNames(c('chr','snp_gsa','unclear_gsa','pos','A1_gsa','A2_gsa')) %>% 
+  filter(chr%in%c(1:22))
+```
+
+```{r,eval=FALSE}
+common_snp <- intersect(rosmap$snp_rosmap,gsa$snp_gsa) %>% unique()
+```
+
+```{r,eval=FALSE}
+common_snp_no_dups <- common_snp[!common_snp%in%dups$X1]
+```
+
+```{r,eval=FALSE}
+write_tsv(as.data.frame(common_snp_no_dups),'data_sensitive/genotypes/snps_1_22_common_no_dups.txt',col_names = FALSE)
+```
+
+Filter ROSMAP and GSA data set to only keep common SNPs
+
+```{bash,eval=FALSE,results = FALSE}
+cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+#ROSMAP
+plink --bfile ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_4 --extract snps_1_22_common_no_dups.txt --allow-no-sex --allow-extra-chr --make-bed --out ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_5
+
+#GSA
+plink --bfile RES0103_GSAv3+_imputed_HRC_2 --extract snps_1_22_common_no_dups.txt --allow-no-sex --allow-extra-chr --make-bed --out RES0103_GSAv3+_imputed_HRC_3
+```
+
+## Resolving merging issues
+
+Here we will merge the genotype datasets and check for potential issues
+
+```{bash,eval=FALSE,results = FALSE}
+cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+# Prior to merging, we want to make sure that the files are mergeable, for this we conduct 3 steps:
+# 1) Make sure the reference genome is similar
+# 2) Resolve strand issues.
+# 3) Remove the SNPs which after the previous two steps still differ between datasets.
+
+# The following steps are maybe quite technical in terms of commands, but we just compare the two data sets and make sure they correspond.
+
+# 1) set reference genome 
+awk '{print$2,$5}' RES0103_GSAv3+_imputed_HRC_3.bim  > ref-list.txt
+plink --bfile ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_5 --reference-allele ref-list.txt --make-bed --out ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_6
+
+# The files now have the same reference genome for all SNPs.
+# This command will generate some warnings for impossible A1 allele assignment.
+
+# 2) Resolve strand issues.
+# Check for potential strand issues.
+awk '{print$2,$5,$6}' RES0103_GSAv3+_imputed_HRC_3.bim > gsa_tmp
+awk '{print$2,$5,$6}' ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_6.bim > rosmap_tmp
+sort gsa_tmp rosmap_tmp | uniq -u > all_differences.txt
+
+#No differences, we can merge
+
+# Merge
+plink --bfile RES0103_GSAv3+_imputed_HRC_3 --bmerge ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_6.bed ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_6.bim ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_6.fam --allow-no-sex --allow-extra-chr --make-bed --out combined
+```
+
+Finally, we will delete low MAF SNPs (MAF<0.01) from the combined dataset (if any remains).
+
+```{bash,eval=FALSE,results = FALSE}
+cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+plink --bfile combined --maf 0.01 --make-bed --out combined_2
+```
+
+# Genotype checks
+
+## Heterozygocity check
+
+```{bash,eval=FALSE,results=FALSE}
+cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+# Checks for heterozygosity are performed on a set of SNPs which are not highly correlated.
+# Therefore, to generate a list of non-(highly)correlated SNPs, we exclude high inversion regions (inversion.txt [High LD regions]) and prune the SNPs using the command --indep-pairwise.
+# The parameters 50 5 0.2 stand respectively for: the window size, the number of SNPs to shift the window at each step, and the multiple correlation coefficient for a SNP being regressed on all other SNPs simultaneously.
+plink --bfile combined_2 --exclude inversion.txt --indep-pairwise 50 5 0.2 --out indepSNP
+plink --bfile combined_2 --extract indepSNP.prune.in --het --out R_check
+```
+
+All samples look good
+
+##Relatedness check
+
+```{bash,eval=FALSE,results=FALSE}
+cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+plink --bfile combined_2 --extract indepSNP.prune.in --genome --min 0.2 --out pihat_min0.2
+```
+
+S03-009-A, S03-009-B are duplicated (one from MS, other from AD)
+
+11-091, S11-091 are same sample (keep only S11 as it matches)
+
+07-122 is the sister of S08-153 (a control AD sample)
+
+For each pair of 'related' individuals with a pihat > 0.2, we remove the individual with the lowest call rate. 
+
+```{bash,eval=FALSE,results=FALSE}
+cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+plink --bfile combined_2 --missing
+```
+
+To be removed:
+S03-009-A because it has lower genotyping rate than S03-009-B (name to be modified to S03-009)
+S08-230-A and S08-230-B because they were genotyped twice and have discrepency
+07-122 because it's the sister of S08-153 (pihat=0.5) and lower genotyping rate.
+11-091 because of lower genotype calls (and wrong name).
+
+```{bash,eval=FALSE}
+cd $geno_path
+
+echo "RES0103_S03-009-A_GSAv3+        RES0103_S03-009-A_GSAv3+
+RES0103_S08-230-A_GSAv3+        RES0103_S08-230-A_GSAv3+
+RES0103_S08-230-B_GSAv3+        RES0103_S08-230-B_GSAv3+
+RES0103_07-122_GSAv3+   RES0103_07-122_GSAv3+
+RES0103_11-091_GSAv3+   RES0103_11-091_GSAv3+
+" > related_ind_to_remove.txt
+```
+
+```{bash,eval=FALSE,results=FALSE}
+cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+plink --bfile combined_2 --remove related_ind_to_remove.txt --make-bed --out combined_3
+```
+
+## Imputation check
+
+Check info score of selected SNP
+
+Load selected SNPs
+
+```{r,eval=FALSE,results=FALSE}
+snps <- read_tsv('data_sensitive/genotypes/combined_3.bim',col_names=F) %>% mutate(ID=paste0('chr',X1,':',X4))
+```
+
+Load info scores
+
+```{r,eval=FALSE}
+info <- data.table::fread('data_sensitive/genotypes/info_score.tsv',data.table=F) %>% mutate(chr_pos=gsub('_.+','',ID))
+```
+
+Check SNPs not in info scores
+
+```{r,eval=FALSE}
+not_in_info <- snps[!snps$ID%in%info$chr_pos,]
+```
+
+471689 SNPs not in info score (I assume they were genotyped)
+
+Select SNPs that have info score
+
+```{r,eval=FALSE}
+info_selected_snps <- info[info$chr_pos%in%snps$ID,]
+```
+
+Remove SNPs with INFO score <0.4
+
+```{r,eval=FALSE}
+to_remove <- filter(info_selected_snps,INFO<0.4)
+```
+
+```{r,eval=FALSE}
+to_remove_original_id <- filter(snps,ID%in%to_remove$chr_pos) %>% dplyr::select(X2)
+```
+
+```{r,eval=FALSE}
+write_tsv(to_remove_original_id,'data_sensitive/genotypes/snps_info_below_0.4.txt')
+```
+
+```{bash,eval=FALSE,results=FALSE}
+cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+plink --bfile combined_3 --exclude snps_info_below_0.4.txt --make-bed --out combined_4
+```
+
+# Population stratification
+
+See: https://cran.r-project.org/web/packages/plinkQC/vignettes/Genomes1000.pdf
+See also: https://github.com/MareesAT/GWA_tutorial/blob/master/2_Population_stratification.zip
+
+Download 1000 genomes data
+
+```{bash,eval=FALSE,results=FALSE}
+#commented as we don't want to download the data again
+#cd $geno_path
+#wget https://www.dropbox.com/s/afvvf1e15gqzsqo/all_phase3.pgen.zst
+#wget https://www.dropbox.com/s/yozrzsdrwqej63q/phase3_corrected.psam
+#wget https://www.dropbox.com/s/op9osq6luy3pjg8/all_phase3.pvar.zst
+```
+
+```{bash,eval=FALSE,results=FALSE}
+#cd $geno_path
+#ml PLINK/2.0
+#
+#plink2 --zst-decompress all_phase3.pgen.zst > all_phase3.pgen
+#mv phase3_corrected.psam all_phase3.psam
+#
+#plink2 --pfile all_phase3 vzs \
+#--max-alleles 2 \
+#--make-bed \
+#--out out/all_phase3
+```
+
+Perform standard QC on 1000 genome data
+
+```{bash,eval=FALSE,results=FALSE}
+cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+# Remove variants based on missing genotype data.
+plink --bfile all_phase3 --geno 0.02 --allow-no-sex --allow-extra-chr --make-bed --out 1kG_PCA
+
+# Remove individuals based on missing genotype data.
+plink --bfile 1kG_PCA --mind 0.02 --allow-no-sex --allow-extra-chr --make-bed --out 1kG_PCA2
+
+# Remove variants based on MAF.
+plink --bfile 1kG_PCA2 --maf 0.01 --allow-no-sex --allow-extra-chr --make-bed --out 1kG_PCA3
+
+# Extract the variants present in the imputed dataset from the 1000 genomes dataset.
+awk '{print$2}' combined_4.bim > combined_SNPs.txt
+awk '{print$2}' combined_4.bim | sort |uniq -d > combined.dups.txt
+awk '{print$2}' 1kG_PCA3.bim | sort |uniq -d > 1kg.dups.txt
+cat combined.dups.txt 1kg.dups.txt | sort -u > dups2.txt
+plink --bfile 1kG_PCA3 --extract combined_SNPs.txt --exclude dups2.txt --make-bed --allow-no-sex --allow-extra-chr --out 1kG_PCA4
+
+# Extract the variants present in 1000 Genomes dataset from the combined dataset.
+awk '{print$2}' 1kG_PCA4.bim > 1kG_PCA4_SNPs.txt
+plink --bfile combined_4 --extract 1kG_PCA4_SNPs.txt --recode --make-bed --out combined_4_PCA
+# The datasets now contain the exact same variants.
+```
+
+Now, let's merge the 1k genome data with our GSA+ROSMAP genotyping data
+
+```{bash,eval=FALSE,results=FALSE}
+cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+# 1) Make sure the reference genome is similar
+# 2) Resolve strand issues.
+# 3) Remove the SNPs which after the previous two steps still differ between datasets.
+
+# 1) set reference genome 
+awk '{print$2,$5}' 1kG_PCA4.bim > 1kg_ref-list.txt
+plink --bfile combined_4_PCA --reference-allele 1kg_ref-list.txt --make-bed --out combined_4_PCA2
+
+# 2) Resolve strand issues.
+# Check for potential strand issues.
+awk '{print$2,$5,$6}' 1kG_PCA4.bim > 1kG_PCA4_tmp
+awk '{print$2,$5,$6}' combined_4_PCA2.bim > combined_4_PCA2_tmp
+sort 1kG_PCA4_tmp combined_4_PCA2_tmp |uniq -u > all_differences.txt
+# 11508 differences between the files, some of these might be due to strand issues.
+
+## Flip SNPs for resolving strand issues.
+# Print SNP-identifier and remove duplicates.
+awk '{print$1}' all_differences.txt | sort -u > flip_list.txt
+# Generates a file of 5754 SNPs. These are the non-corresponding SNPs between the two files. 
+# Flip the 5754 non-corresponding SNPs. 
+plink --bfile combined_4_PCA2 --flip flip_list.txt --reference-allele 1kg_ref-list.txt --make-bed --out corrected_Combined
+
+# Check for SNPs which are still problematic after they have been flipped.
+awk '{print$2,$5,$6}' corrected_Combined.bim > corrected_Combined_tmp
+sort 1kG_PCA4_tmp corrected_Combined_tmp |uniq -u  > uncorresponding_SNPs.txt
+# This file demonstrates that there are 80 differences between the files.
+
+# 3) Remove problematic SNPs
+awk '{print$1}' uncorresponding_SNPs.txt | sort -u > SNPs_for_exlusion.txt
+# The command above generates a list of the 40 SNPs which caused the 80 differences after flipping and setting of the reference genome.
+
+# Remove the 14 problematic SNPs from both datasets.
+plink --bfile corrected_Combined --exclude SNPs_for_exlusion.txt --make-bed --out corrected_Combined2
+plink --bfile 1kG_PCA4 --exclude SNPs_for_exlusion.txt --make-bed --out 1kG_PCA5
+
+# Merge 1kg and GSA+Rosmap genotypes
+plink --bfile corrected_Combined2 --bmerge 1kG_PCA5.bed 1kG_PCA5.bim 1kG_PCA5.fam --allow-no-sex --allow-extra-chr --make-bed --out Combined_with1kg
+
+## Perform MDS
+# Using a set of pruned SNPs
+
+plink --bfile Combined_with1kg --extract indepSNP.prune.in --genome --out Combined_with1kg
+plink --bfile Combined_with1kg --read-genome Combined_with1kg.genome --cluster --mds-plot 10 --out Combined_with1kg
+```
+
+Get population outliers
+
+```{r,eval=FALSE}
+data <- read.table("data_sensitive/genotypes/Combined_with1kg.mds",header=TRUE) %>% dplyr::select(-FID) %>% dplyr::select(IID,C1,C2)
+ancestry <- read.table("data_sensitive/genotypes/integrated_call_samples_v3.20130502.ALL.panel",header=TRUE) %>% dplyr::rename(IID=sample)
+d <- left_join(data,ancestry,by="IID")
+d <- mutate(d,super_pop=ifelse(is.na(super_pop),'This study',super_pop))
+
+threshold <- d %>% filter(super_pop=='EUR') %>% summarise(meanC1=mean(C1),sdC1=sd(C1),meanC2=mean(C2),sdC2=sd(C2)) %>% 
+  mutate(x1=meanC1-3*sdC1,x2=meanC1+3*sdC1,y1=meanC2-3*sdC2,y2=meanC2+3*sdC2)
+
+d <- mutate(d,outlier=ifelse(C1>threshold$x1 & C1<threshold$x2 & C2>threshold$y1 & C2<threshold$y2,'keep','outlier'))
+outliers <- dplyr::filter(d,super_pop=='This study',outlier=='outlier')
+
+```
+
+8 individuals are ancestry outliers and will be removed
+
+```{r,eval=FALSE}
+dplyr::select(outliers,IID) %>% mutate(IID2=IID) %>% write_tsv('data_sensitive/genotypes/pop_outliers.txt',col_names = FALSE)
+```
+
+Remove pop outliers
+
+```{bash,eval=FALSE,results=FALSE}
+cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+plink --bfile combined_4 --remove pop_outliers.txt --make-bed --out combined_5
+```
+
+# Update names
+
+```{r,eval=FALSE}
+fam <- read.table('data_sensitive/genotypes/combined_5.fam',header=F) %>% as_tibble() %>% dplyr::select(V1,V2) %>% 
+  mutate(newFID=gsub('RES0103_|_GSAv3\\+|-B','',V1)) %>% 
+  mutate(newIID=gsub('RES0103_|_GSAv3\\+|-B','',V2)) %>% 
+  dplyr::rename(WGSID=V1)
+```
+
+```{r,eval=FALSE}
+write_tsv(fam,'data_sensitive/genotypes/updated_names.txt',col_names = F)
+```
+
+```{bash,eval=FALSE,results=FALSE}
+cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+plink --bfile combined_5 --update-ids updated_names.txt --make-bed --out combined_6
+```
+
+# Get individuals with both genotype and single cell data
+
+Some samples from the scRNA-seq need to be removed as their genotype does not match the GSA array or WGS genotypes
+
+Here they are:
+
+MS data:
+
+- EU015 (MS100) does not match its genotype --> drop EU015 sample from scRNA-seq
+- EU004 (SD029/17) matches the wrong genotype and is bad quality --> drop EU004 sample from scRNA-seq
+- WM115 (MS636) matches the wrong genotype and is bad quality --> drop WM115 sample from scRNA-seq
+- WM155 (S04-158) matches the wrong genotype --> drop WM155 sample from scRNA-seq
+- WM185 matches the wrong genotype --> drop WM185 sample from scRNA-seq
+
+AD: 
+
+- DWM-B3-23-Cog4-Path1-F and MFC-B3-23-Cog4-Path1-F (SM-CTEGE) match to another genotype --> drop both
+- AD2 does not match any genotype --> drop AD2
+
+```{r}
+fam <- read.table('data_sensitive/genotypes/combined_6.fam',header=F) %>% as_tibble()
+```
+
+Load sce object for MS dataset
+
+```{r}
+sce_ms <- readRDS('data_sensitive/sce/ms_sce_3.rds')
+```
+
+```{r}
+meta_ms <- colData(sce_ms) %>% as_tibble() %>% 
+  dplyr::select(sample_id=library_id,individual_id=patient_id) %>% 
+  unique() %>% 
+  filter(!sample_id%in%c('EU015','EU005','WM115','WM155','WM185')) %>% 
+  mutate(dataset='ms')
+```
+
+Load sce object for Alzheimer's data sets to get sample - individual_id relationship
+
+```{r}
+sce_ad <- readRDS('data_sensitive/sce/sce.annotated8.rds')
+```
+
+```{r}
+meta_ad <- colData(sce_ad) %>% as_tibble() %>% 
+  dplyr::select(sample_id,individual_id) %>% 
+  unique() %>% 
+  filter(!sample_id%in%c('DWM-B3-23-Cog4-Path1-F','MFC-B3-23-Cog4-Path1-F','AD2'))%>% 
+  mutate(dataset='ad')
+```
+
+```{r}
+meta <- rbind(meta_ms,meta_ad)
+```
+
+```{r}
+table(fam$V2%in%unique(meta$individual_id))
+table(unique(meta$individual_id)%in%fam$V2)
+#192 individuals in common
+```
+
+```{r}
+#genotype not in scrna-seq
+fam$V2[!fam$V2%in%unique(meta$individual_id)] %>% sort()
+#scrna-seq not in genotype
+unique(meta$individual_id)[!unique(meta$individual_id)%in%fam$V2] %>% sort()
+#All good
+```
+
+```{r}
+fam$ms <- ifelse(fam$V2%in%meta_ms$individual_id,TRUE,FALSE)
+fam$ad <- ifelse(fam$V2%in%meta_ad$individual_id,TRUE,FALSE)
+```
+
+```{r}
+dplyr::count(fam,ad,ms)
+```
+
+192 individuals in total
+
+```{r}
+filter(fam,ms,ad)
+#Need to keep only one S03-009 for the eQTL analysis
+```
+
+```{r}
+individuals_to_keep <- filter(fam,ms|ad) %>% dplyr::select(V1,V2)
+```
+
+```{r}
+write_tsv(individuals_to_keep,'data_sensitive/genotypes/individuals_with_genotype_scRNA.txt',col_names = FALSE)
+write_tsv(fam,'data_sensitive/genotypes/fam_with_ms_ad_info.txt',col_names = FALSE)
+```
+
+# Get Final genotypes
+
+## Final filters
+
+1. Keep only individuals with both genotype and scRNA-seq
+2. Remove all SNPs outside of HWE
+3. Remove all SNPs with MAF < 5%
+
+```{bash,eval=FALSE,results=FALSE}
+cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+plink --bfile combined_6 --keep individuals_with_genotype_scRNA.txt --hwe 1e-6 --maf 0.05 --make-bed --out combined_7
+```
+
+## PCA
+
+We will perform PCA for the individuals with both genotype info and scRNA-seq
+
+```{bash,eval=FALSE,results=FALSE}
+cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+plink --bfile combined_7 --extract indepSNP.prune.in --pca --out combined_7
+```
+
+Check variance explained pca
+
+```{r}
+d <- read_tsv('data_sensitive/genotypes/combined_7.eigenval',col_names = F) %>% 
+  mutate(var_explained=X1/sum(X1)) %>% 
+  mutate(PC=1:nrow(.))
+```
+
+```{r}
+ggplot(d,aes(PC,var_explained)) + geom_point() + scale_y_continuous(label=scales::percent) + ylab('Variance explained') + theme_bw()
+```
+
+```{r}
+pcs <- read.table('data_sensitive/genotypes/combined_7.eigenvec') %>% dplyr::select(V2,V3,V4,V5) %>% column_to_rownames('V2') %>% 
+setNames(c('PC1','PC2','PC3')) %>% t() %>% as.data.frame() %>% rownames_to_column('id')
+```
+
+```{r}
+write_tsv(pcs,'data_sensitive/genotypes/pca_covariate_fastqtl.txt')
+```
+
+# Write VCF
+
+```{bash,eval=FALSE,results=FALSE}
+cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+ml tabix/0.2.6-goolf-1.7.20
+
+mkdir -p processed
+plink --bfile combined_7 --recode vcf-iid --out processed/combined_final
+
+bgzip processed/combined_final.vcf
+tabix -p vcf processed/combined_final.vcf.gz
+```
+
+Genotypes are ready for the eQTL analysis!
