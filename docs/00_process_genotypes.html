@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Julien Bryois" />
+
+<meta name="date" content="2021-11-26" />
+
+<title>Process genotypes</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">snRNA_eqtl</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Process genotypes</h1>
+<h4 class="author">Julien Bryois</h4>
+<h4 class="date">November 26, 2021</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2021-11-26
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>snRNA_eqtl/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20211124code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20211124)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20211124code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20211124)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong0ab5840"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 0ab5840 </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrong0ab5840" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version 0ab5840. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rproj.user/
+    Ignored:    data_sensitive/
+
+Untracked files:
+    Untracked:  output/Figures/
+    Untracked:  related_ind_to_remove.txt
+
+Unstaged changes:
+    Modified:   .gitignore
+    Modified:   analysis/_site.yml
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/00_process_genotypes.Rmd</code>) and HTML (<code>docs/00_process_genotypes.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+0ab5840
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-11-26
+</td>
+<td>
+Publish genotype processing + initial files
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="setup" class="section level1">
+<h1>Setup</h1>
+<p>Load libraries</p>
+<pre class="r"><code>library(tidyverse)
+library(SingleCellExperiment)</code></pre>
+<p>Set path for genotype data</p>
+<pre class="r"><code>Sys.setenv(geno_path=&#39;data_sensitive/genotypes&#39;)</code></pre>
+</div>
+<div id="merge-genotypes" class="section level1">
+<h1>Merge genotypes</h1>
+<p>We need to merge the genotypes coming from the genotyping array (AD + MS Roche Cohort) with the whole genome genotypes from the ROSMAP cohort.</p>
+<div id="gsa-array-qc" class="section level2">
+<h2>GSA array QC</h2>
+<p>Samples from the AD and MS Roche dataset were genotyped using a GSA array and imputed with the HRC reference panel.</p>
+<p>We remove SNPs with more than 5% missing genotypes, as well as individuals with more than 2% missing genotypes.</p>
+<p>Finally, we remove any SNP with MAF&lt;0.01.</p>
+<pre class="bash"><code>cd $geno_path
+module load PLINK/1.90-goolf-1.7.20
+
+#remove SNPs with more than 5% missing genotypes
+plink --bfile RES0103_GSAv3+_imputed_HRC --geno 0.05 --allow-no-sex --allow-extra-chr --make-bed --out RES0103_GSAv3+_imputed_HRC_1
+
+#remove individuals with more than 2% missing genotypes
+plink --bfile RES0103_GSAv3+_imputed_HRC_1 --mind 0.02 --maf 0.01 --allow-no-sex --allow-extra-chr --make-bed --out RES0103_GSAv3+_imputed_HRC_2</code></pre>
+</div>
+<div id="rosmap-dataset-qc" class="section level2">
+<h2>ROSMAP dataset QC</h2>
+<p>Set SNP position as name if the SNP name is ‘.’</p>
+<pre class="bash"><code>cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+awk &#39;{if($2 == &quot;.&quot;) {OFS = &quot;\t &quot;; print $1,&quot;chr&quot;$1&quot;:&quot;$4&quot;_&quot;$5&quot;_&quot;$6,$3,$4,$5,$6} else {print $0}}&#39; ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all.bim &gt; tmp
+mv tmp ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all.bim</code></pre>
+<p>We remove SNPs with more than 5% missing genotypes, as well as individuals with more than 2% missing genotypes.</p>
+<p>Finally, we remove any SNP with MAF&lt;0.01.</p>
+<pre class="bash"><code>cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+#remove SNPs with more than 5% missing genotypes
+plink --bfile ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all --geno 0.05 --allow-no-sex --allow-extra-chr --make-bed --out ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_1
+
+#remove individuals with more than 2% missing genotypes
+plink --bfile ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_1 --mind 0.02 --maf 0.01 --allow-no-sex --allow-extra-chr --make-bed --out ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_2</code></pre>
+<div id="update-snp-names-of-rosmap-according-to-hrc-imputed-genotype-file" class="section level3">
+<h3>Update SNP names of ROSMAP according to HRC imputed genotype file</h3>
+<pre class="r"><code>#load rosmap bim file
+rosmap &lt;- data.table::fread(&#39;data_sensitive/genotypes/ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_2.bim&#39;,header = FALSE,data.table=FALSE) %&gt;% setNames(c(&#39;chr&#39;,&#39;snp_rosmap&#39;,&#39;unclear_rosmap&#39;,&#39;pos&#39;,&#39;A1_rosmap&#39;,&#39;A2_rosmap&#39;))
+
+#load gsa bim file
+gsa &lt;- data.table::fread(&#39;data_sensitive/genotypes/RES0103_GSAv3+_imputed_HRC_2.bim&#39;,header = F,data.table = FALSE) %&gt;% setNames(c(&#39;chr&#39;,&#39;snp_gsa&#39;,&#39;unclear_gsa&#39;,&#39;pos&#39;,&#39;A1_gsa&#39;,&#39;A2_gsa&#39;))</code></pre>
+<p>Add gsa genotype data for same chromosome and same position</p>
+<pre class="r"><code>rosmap_merged &lt;- rosmap %&gt;% 
+  left_join(.,gsa,by=c(&#39;chr&#39;,&#39;pos&#39;))</code></pre>
+<p>Get allele combination possibilities</p>
+<pre class="r"><code>rosmap_merged &lt;- mutate(rosmap_merged,
+  allele_combination_gsa=paste0(A1_gsa,A2_gsa),
+  allele_combination_gsa_rev=paste0(A2_gsa,A1_gsa),
+  allele_combination_rosmap=paste0(A1_rosmap,A2_rosmap))</code></pre>
+<p>Get opposite strand alleles</p>
+<pre class="r"><code>rosmap_merged &lt;- rosmap_merged %&gt;% mutate(allele_combination_gsa_opposite_strand=case_when(
+  allele_combination_gsa==&#39;AT&#39; ~ &#39;TA&#39;,
+  allele_combination_gsa==&#39;AC&#39; ~ &#39;TG&#39;,
+  allele_combination_gsa==&#39;AG&#39; ~ &#39;TC&#39;,
+  allele_combination_gsa==&#39;CA&#39; ~ &#39;GT&#39;,
+  allele_combination_gsa==&#39;CT&#39; ~ &#39;GA&#39;,
+  allele_combination_gsa==&#39;CG&#39; ~ &#39;GC&#39;,
+  allele_combination_gsa==&#39;TA&#39; ~ &#39;AT&#39;,
+  allele_combination_gsa==&#39;TC&#39; ~ &#39;AG&#39;,
+  allele_combination_gsa==&#39;TG&#39; ~ &#39;AC&#39;,
+  allele_combination_gsa==&#39;GA&#39; ~ &#39;CT&#39;,
+  allele_combination_gsa==&#39;GT&#39; ~ &#39;CA&#39;,
+  allele_combination_gsa==&#39;GC&#39; ~ &#39;CG&#39;,
+  TRUE ~ &#39;unknown&#39;
+))</code></pre>
+<pre class="r"><code>rosmap_merged &lt;- rosmap_merged %&gt;% mutate(allele_combination_gsa_opposite_strand_rev=case_when(
+  allele_combination_gsa==&#39;AT&#39; ~ &#39;AT&#39;,
+  allele_combination_gsa==&#39;AC&#39; ~ &#39;GT&#39;,
+  allele_combination_gsa==&#39;AG&#39; ~ &#39;CT&#39;,
+  allele_combination_gsa==&#39;CA&#39; ~ &#39;TG&#39;,
+  allele_combination_gsa==&#39;CT&#39; ~ &#39;AG&#39;,
+  allele_combination_gsa==&#39;CG&#39; ~ &#39;CG&#39;,
+  allele_combination_gsa==&#39;TA&#39; ~ &#39;TA&#39;,
+  allele_combination_gsa==&#39;TC&#39; ~ &#39;GA&#39;,
+  allele_combination_gsa==&#39;TG&#39; ~ &#39;CA&#39;,
+  allele_combination_gsa==&#39;GA&#39; ~ &#39;TC&#39;,
+  allele_combination_gsa==&#39;GT&#39; ~ &#39;AC&#39;,
+  allele_combination_gsa==&#39;GC&#39; ~ &#39;GC&#39;,
+  TRUE ~ &#39;unknown&#39;
+))</code></pre>
+<p>If the alleles of ROSMAP data match the one from the gsa genotype (on any strand), set the name of the position to the GSA genotype name for the ROSMAP data, otherwise, keep the ROSMAP SNP name</p>
+<pre class="r"><code>rosmap_merged &lt;- rosmap_merged %&gt;% mutate(SNP_name_rosmap=case_when(
+  (allele_combination_rosmap == allele_combination_gsa) | 
+  (allele_combination_rosmap == allele_combination_gsa_rev)  |
+  (allele_combination_rosmap == allele_combination_gsa_opposite_strand) | 
+  (allele_combination_rosmap == allele_combination_gsa_opposite_strand_rev) ~ snp_gsa,
+  TRUE ~ snp_rosmap
+))</code></pre>
+<pre class="r"><code>rosmap_bim_new_name &lt;- rosmap_merged %&gt;% 
+  dplyr::select(snp_rosmap,SNP_name_rosmap) %&gt;%
+  unique() %&gt;% 
+  as_tibble()</code></pre>
+<p>Remove SNPs with the same name</p>
+<pre class="r"><code>duplicated_original_name &lt;- rosmap_bim_new_name$snp_rosmap[duplicated(rosmap_bim_new_name$snp_rosmap)]
+duplicated_new_name &lt;- rosmap_bim_new_name$SNP_name_rosmap[duplicated(rosmap_bim_new_name$SNP_name_rosmap)]</code></pre>
+<pre class="r"><code>rosmap_bim_new_name &lt;- rosmap_bim_new_name %&gt;% filter(!snp_rosmap%in%duplicated_original_name,!SNP_name_rosmap%in%duplicated_new_name)</code></pre>
+<pre class="r"><code>write_tsv(rosmap_bim_new_name,&#39;data_sensitive/genotypes/rosmap_snp_names_to_update.txt&#39;,col_names=FALSE)</code></pre>
+<p>Now update names for the ROSMAP data</p>
+<pre class="bash"><code>cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+#Get duplicated ids (same pos, same alleles)
+awk &#39;{print$2}&#39; ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_2.bim | sort |uniq -d &gt; rosmap_SNPs.dups.txt
+awk &#39;{print$2}&#39; RES0103_GSAv3+_imputed_HRC_2.bim | sort |uniq -d &gt; gsa_SNPs.dups.txt
+cat rosmap_SNPs.dups.txt gsa_SNPs.dups.txt | sort -u &gt; dups.txt
+
+#Remove duplicated SNPs
+plink --bfile ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_2 --exclude dups.txt --allow-no-sex --allow-extra-chr --make-bed --out ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_3
+
+#update names of ROSMAP data with GSA genotype name when position and allele match
+plink --bfile ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_3  --update-name rosmap_snp_names_to_update.txt --allow-no-sex --allow-extra-chr --make-bed --out ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_4</code></pre>
+</div>
+</div>
+<div id="keep-common-snps-only" class="section level2">
+<h2>Keep common SNPs only</h2>
+<p>Keep SNP on chromosome 1-22 that are present in both datasets, and not duplicated in any datasets</p>
+<pre class="r"><code>dups &lt;- read_tsv(&#39;data_sensitive/genotypes/dups.txt&#39;,col_names = F)</code></pre>
+<pre class="r"><code>rosmap &lt;- data.table::fread(&#39;data_sensitive/genotypes/ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_4.bim&#39;,header = FALSE,data.table=FALSE) %&gt;% setNames(c(&#39;chr&#39;,&#39;snp_rosmap&#39;,&#39;unclear_rosmap&#39;,&#39;pos&#39;,&#39;A1_rosmap&#39;,&#39;A2_rosmap&#39;)) %&gt;% 
+  filter(chr%in%c(1:22))
+gsa &lt;- data.table::fread(&#39;data_sensitive/genotypes/RES0103_GSAv3+_imputed_HRC_2.bim&#39;,header = F,data.table = FALSE) %&gt;% setNames(c(&#39;chr&#39;,&#39;snp_gsa&#39;,&#39;unclear_gsa&#39;,&#39;pos&#39;,&#39;A1_gsa&#39;,&#39;A2_gsa&#39;)) %&gt;% 
+  filter(chr%in%c(1:22))</code></pre>
+<pre class="r"><code>common_snp &lt;- intersect(rosmap$snp_rosmap,gsa$snp_gsa) %&gt;% unique()</code></pre>
+<pre class="r"><code>common_snp_no_dups &lt;- common_snp[!common_snp%in%dups$X1]</code></pre>
+<pre class="r"><code>write_tsv(as.data.frame(common_snp_no_dups),&#39;data_sensitive/genotypes/snps_1_22_common_no_dups.txt&#39;,col_names = FALSE)</code></pre>
+<p>Filter ROSMAP and GSA data set to only keep common SNPs</p>
+<pre class="bash"><code>cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+#ROSMAP
+plink --bfile ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_4 --extract snps_1_22_common_no_dups.txt --allow-no-sex --allow-extra-chr --make-bed --out ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_5
+
+#GSA
+plink --bfile RES0103_GSAv3+_imputed_HRC_2 --extract snps_1_22_common_no_dups.txt --allow-no-sex --allow-extra-chr --make-bed --out RES0103_GSAv3+_imputed_HRC_3</code></pre>
+</div>
+<div id="resolving-merging-issues" class="section level2">
+<h2>Resolving merging issues</h2>
+<p>Here we will merge the genotype datasets and check for potential issues</p>
+<pre class="bash"><code>cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+# Prior to merging, we want to make sure that the files are mergeable, for this we conduct 3 steps:
+# 1) Make sure the reference genome is similar
+# 2) Resolve strand issues.
+# 3) Remove the SNPs which after the previous two steps still differ between datasets.
+
+# The following steps are maybe quite technical in terms of commands, but we just compare the two data sets and make sure they correspond.
+
+# 1) set reference genome 
+awk &#39;{print$2,$5}&#39; RES0103_GSAv3+_imputed_HRC_3.bim  &gt; ref-list.txt
+plink --bfile ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_5 --reference-allele ref-list.txt --make-bed --out ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_6
+
+# The files now have the same reference genome for all SNPs.
+# This command will generate some warnings for impossible A1 allele assignment.
+
+# 2) Resolve strand issues.
+# Check for potential strand issues.
+awk &#39;{print$2,$5,$6}&#39; RES0103_GSAv3+_imputed_HRC_3.bim &gt; gsa_tmp
+awk &#39;{print$2,$5,$6}&#39; ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_6.bim &gt; rosmap_tmp
+sort gsa_tmp rosmap_tmp | uniq -u &gt; all_differences.txt
+
+#No differences, we can merge
+
+# Merge
+plink --bfile RES0103_GSAv3+_imputed_HRC_3 --bmerge ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_6.bed ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_6.bim ROSMAP_DLPFC_snRNAseq_GRCh38_liftedover_sorted_all_6.fam --allow-no-sex --allow-extra-chr --make-bed --out combined</code></pre>
+<p>Finally, we will delete low MAF SNPs (MAF&lt;0.01) from the combined dataset (if any remains).</p>
+<pre class="bash"><code>cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+plink --bfile combined --maf 0.01 --make-bed --out combined_2</code></pre>
+</div>
+</div>
+<div id="genotype-checks" class="section level1">
+<h1>Genotype checks</h1>
+<div id="heterozygocity-check" class="section level2">
+<h2>Heterozygocity check</h2>
+<pre class="bash"><code>cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+# Checks for heterozygosity are performed on a set of SNPs which are not highly correlated.
+# Therefore, to generate a list of non-(highly)correlated SNPs, we exclude high inversion regions (inversion.txt [High LD regions]) and prune the SNPs using the command --indep-pairwise.
+# The parameters 50 5 0.2 stand respectively for: the window size, the number of SNPs to shift the window at each step, and the multiple correlation coefficient for a SNP being regressed on all other SNPs simultaneously.
+plink --bfile combined_2 --exclude inversion.txt --indep-pairwise 50 5 0.2 --out indepSNP
+plink --bfile combined_2 --extract indepSNP.prune.in --het --out R_check</code></pre>
+<p>All samples look good</p>
+<p>##Relatedness check</p>
+<pre class="bash"><code>cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+plink --bfile combined_2 --extract indepSNP.prune.in --genome --min 0.2 --out pihat_min0.2</code></pre>
+<p>S03-009-A, S03-009-B are duplicated (one from MS, other from AD)</p>
+<p>11-091, S11-091 are same sample (keep only S11 as it matches)</p>
+<p>07-122 is the sister of S08-153 (a control AD sample)</p>
+<p>For each pair of ‘related’ individuals with a pihat &gt; 0.2, we remove the individual with the lowest call rate.</p>
+<pre class="bash"><code>cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+plink --bfile combined_2 --missing</code></pre>
+<p>To be removed: S03-009-A because it has lower genotyping rate than S03-009-B (name to be modified to S03-009) S08-230-A and S08-230-B because they were genotyped twice and have discrepency 07-122 because it’s the sister of S08-153 (pihat=0.5) and lower genotyping rate. 11-091 because of lower genotype calls (and wrong name).</p>
+<pre class="bash"><code>cd $geno_path
+
+echo &quot;RES0103_S03-009-A_GSAv3+        RES0103_S03-009-A_GSAv3+
+RES0103_S08-230-A_GSAv3+        RES0103_S08-230-A_GSAv3+
+RES0103_S08-230-B_GSAv3+        RES0103_S08-230-B_GSAv3+
+RES0103_07-122_GSAv3+   RES0103_07-122_GSAv3+
+RES0103_11-091_GSAv3+   RES0103_11-091_GSAv3+
+&quot; &gt; related_ind_to_remove.txt</code></pre>
+<pre class="bash"><code>cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+plink --bfile combined_2 --remove related_ind_to_remove.txt --make-bed --out combined_3</code></pre>
+</div>
+<div id="imputation-check" class="section level2">
+<h2>Imputation check</h2>
+<p>Check info score of selected SNP</p>
+<p>Load selected SNPs</p>
+<pre class="r"><code>snps &lt;- read_tsv(&#39;data_sensitive/genotypes/combined_3.bim&#39;,col_names=F) %&gt;% mutate(ID=paste0(&#39;chr&#39;,X1,&#39;:&#39;,X4))</code></pre>
+<p>Load info scores</p>
+<pre class="r"><code>info &lt;- data.table::fread(&#39;data_sensitive/genotypes/info_score.tsv&#39;,data.table=F) %&gt;% mutate(chr_pos=gsub(&#39;_.+&#39;,&#39;&#39;,ID))</code></pre>
+<p>Check SNPs not in info scores</p>
+<pre class="r"><code>not_in_info &lt;- snps[!snps$ID%in%info$chr_pos,]</code></pre>
+<p>471689 SNPs not in info score (I assume they were genotyped)</p>
+<p>Select SNPs that have info score</p>
+<pre class="r"><code>info_selected_snps &lt;- info[info$chr_pos%in%snps$ID,]</code></pre>
+<p>Remove SNPs with INFO score &lt;0.4</p>
+<pre class="r"><code>to_remove &lt;- filter(info_selected_snps,INFO&lt;0.4)</code></pre>
+<pre class="r"><code>to_remove_original_id &lt;- filter(snps,ID%in%to_remove$chr_pos) %&gt;% dplyr::select(X2)</code></pre>
+<pre class="r"><code>write_tsv(to_remove_original_id,&#39;data_sensitive/genotypes/snps_info_below_0.4.txt&#39;)</code></pre>
+<pre class="bash"><code>cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+plink --bfile combined_3 --exclude snps_info_below_0.4.txt --make-bed --out combined_4</code></pre>
+</div>
+</div>
+<div id="population-stratification" class="section level1">
+<h1>Population stratification</h1>
+<p>See: <a href="https://cran.r-project.org/web/packages/plinkQC/vignettes/Genomes1000.pdf" class="uri">https://cran.r-project.org/web/packages/plinkQC/vignettes/Genomes1000.pdf</a> See also: <a href="https://github.com/MareesAT/GWA_tutorial/blob/master/2_Population_stratification.zip" class="uri">https://github.com/MareesAT/GWA_tutorial/blob/master/2_Population_stratification.zip</a></p>
+<p>Download 1000 genomes data</p>
+<pre class="bash"><code>#commented as we don&#39;t want to download the data again
+#cd $geno_path
+#wget https://www.dropbox.com/s/afvvf1e15gqzsqo/all_phase3.pgen.zst
+#wget https://www.dropbox.com/s/yozrzsdrwqej63q/phase3_corrected.psam
+#wget https://www.dropbox.com/s/op9osq6luy3pjg8/all_phase3.pvar.zst</code></pre>
+<pre class="bash"><code>#cd $geno_path
+#ml PLINK/2.0
+#
+#plink2 --zst-decompress all_phase3.pgen.zst &gt; all_phase3.pgen
+#mv phase3_corrected.psam all_phase3.psam
+#
+#plink2 --pfile all_phase3 vzs \
+#--max-alleles 2 \
+#--make-bed \
+#--out out/all_phase3</code></pre>
+<p>Perform standard QC on 1000 genome data</p>
+<pre class="bash"><code>cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+# Remove variants based on missing genotype data.
+plink --bfile all_phase3 --geno 0.02 --allow-no-sex --allow-extra-chr --make-bed --out 1kG_PCA
+
+# Remove individuals based on missing genotype data.
+plink --bfile 1kG_PCA --mind 0.02 --allow-no-sex --allow-extra-chr --make-bed --out 1kG_PCA2
+
+# Remove variants based on MAF.
+plink --bfile 1kG_PCA2 --maf 0.01 --allow-no-sex --allow-extra-chr --make-bed --out 1kG_PCA3
+
+# Extract the variants present in the imputed dataset from the 1000 genomes dataset.
+awk &#39;{print$2}&#39; combined_4.bim &gt; combined_SNPs.txt
+awk &#39;{print$2}&#39; combined_4.bim | sort |uniq -d &gt; combined.dups.txt
+awk &#39;{print$2}&#39; 1kG_PCA3.bim | sort |uniq -d &gt; 1kg.dups.txt
+cat combined.dups.txt 1kg.dups.txt | sort -u &gt; dups2.txt
+plink --bfile 1kG_PCA3 --extract combined_SNPs.txt --exclude dups2.txt --make-bed --allow-no-sex --allow-extra-chr --out 1kG_PCA4
+
+# Extract the variants present in 1000 Genomes dataset from the combined dataset.
+awk &#39;{print$2}&#39; 1kG_PCA4.bim &gt; 1kG_PCA4_SNPs.txt
+plink --bfile combined_4 --extract 1kG_PCA4_SNPs.txt --recode --make-bed --out combined_4_PCA
+# The datasets now contain the exact same variants.</code></pre>
+<p>Now, let’s merge the 1k genome data with our GSA+ROSMAP genotyping data</p>
+<pre class="bash"><code>cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+# 1) Make sure the reference genome is similar
+# 2) Resolve strand issues.
+# 3) Remove the SNPs which after the previous two steps still differ between datasets.
+
+# 1) set reference genome 
+awk &#39;{print$2,$5}&#39; 1kG_PCA4.bim &gt; 1kg_ref-list.txt
+plink --bfile combined_4_PCA --reference-allele 1kg_ref-list.txt --make-bed --out combined_4_PCA2
+
+# 2) Resolve strand issues.
+# Check for potential strand issues.
+awk &#39;{print$2,$5,$6}&#39; 1kG_PCA4.bim &gt; 1kG_PCA4_tmp
+awk &#39;{print$2,$5,$6}&#39; combined_4_PCA2.bim &gt; combined_4_PCA2_tmp
+sort 1kG_PCA4_tmp combined_4_PCA2_tmp |uniq -u &gt; all_differences.txt
+# 11508 differences between the files, some of these might be due to strand issues.
+
+## Flip SNPs for resolving strand issues.
+# Print SNP-identifier and remove duplicates.
+awk &#39;{print$1}&#39; all_differences.txt | sort -u &gt; flip_list.txt
+# Generates a file of 5754 SNPs. These are the non-corresponding SNPs between the two files. 
+# Flip the 5754 non-corresponding SNPs. 
+plink --bfile combined_4_PCA2 --flip flip_list.txt --reference-allele 1kg_ref-list.txt --make-bed --out corrected_Combined
+
+# Check for SNPs which are still problematic after they have been flipped.
+awk &#39;{print$2,$5,$6}&#39; corrected_Combined.bim &gt; corrected_Combined_tmp
+sort 1kG_PCA4_tmp corrected_Combined_tmp |uniq -u  &gt; uncorresponding_SNPs.txt
+# This file demonstrates that there are 80 differences between the files.
+
+# 3) Remove problematic SNPs
+awk &#39;{print$1}&#39; uncorresponding_SNPs.txt | sort -u &gt; SNPs_for_exlusion.txt
+# The command above generates a list of the 40 SNPs which caused the 80 differences after flipping and setting of the reference genome.
+
+# Remove the 14 problematic SNPs from both datasets.
+plink --bfile corrected_Combined --exclude SNPs_for_exlusion.txt --make-bed --out corrected_Combined2
+plink --bfile 1kG_PCA4 --exclude SNPs_for_exlusion.txt --make-bed --out 1kG_PCA5
+
+# Merge 1kg and GSA+Rosmap genotypes
+plink --bfile corrected_Combined2 --bmerge 1kG_PCA5.bed 1kG_PCA5.bim 1kG_PCA5.fam --allow-no-sex --allow-extra-chr --make-bed --out Combined_with1kg
+
+## Perform MDS
+# Using a set of pruned SNPs
+
+plink --bfile Combined_with1kg --extract indepSNP.prune.in --genome --out Combined_with1kg
+plink --bfile Combined_with1kg --read-genome Combined_with1kg.genome --cluster --mds-plot 10 --out Combined_with1kg</code></pre>
+<p>Get population outliers</p>
+<pre class="r"><code>data &lt;- read.table(&quot;data_sensitive/genotypes/Combined_with1kg.mds&quot;,header=TRUE) %&gt;% dplyr::select(-FID) %&gt;% dplyr::select(IID,C1,C2)
+ancestry &lt;- read.table(&quot;data_sensitive/genotypes/integrated_call_samples_v3.20130502.ALL.panel&quot;,header=TRUE) %&gt;% dplyr::rename(IID=sample)
+d &lt;- left_join(data,ancestry,by=&quot;IID&quot;)
+d &lt;- mutate(d,super_pop=ifelse(is.na(super_pop),&#39;This study&#39;,super_pop))
+
+threshold &lt;- d %&gt;% filter(super_pop==&#39;EUR&#39;) %&gt;% summarise(meanC1=mean(C1),sdC1=sd(C1),meanC2=mean(C2),sdC2=sd(C2)) %&gt;% 
+  mutate(x1=meanC1-3*sdC1,x2=meanC1+3*sdC1,y1=meanC2-3*sdC2,y2=meanC2+3*sdC2)
+
+d &lt;- mutate(d,outlier=ifelse(C1&gt;threshold$x1 &amp; C1&lt;threshold$x2 &amp; C2&gt;threshold$y1 &amp; C2&lt;threshold$y2,&#39;keep&#39;,&#39;outlier&#39;))
+outliers &lt;- dplyr::filter(d,super_pop==&#39;This study&#39;,outlier==&#39;outlier&#39;)</code></pre>
+<p>8 individuals are ancestry outliers and will be removed</p>
+<pre class="r"><code>dplyr::select(outliers,IID) %&gt;% mutate(IID2=IID) %&gt;% write_tsv(&#39;data_sensitive/genotypes/pop_outliers.txt&#39;,col_names = FALSE)</code></pre>
+<p>Remove pop outliers</p>
+<pre class="bash"><code>cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+plink --bfile combined_4 --remove pop_outliers.txt --make-bed --out combined_5</code></pre>
+</div>
+<div id="update-names" class="section level1">
+<h1>Update names</h1>
+<pre class="r"><code>fam &lt;- read.table(&#39;data_sensitive/genotypes/combined_5.fam&#39;,header=F) %&gt;% as_tibble() %&gt;% dplyr::select(V1,V2) %&gt;% 
+  mutate(newFID=gsub(&#39;RES0103_|_GSAv3\\+|-B&#39;,&#39;&#39;,V1)) %&gt;% 
+  mutate(newIID=gsub(&#39;RES0103_|_GSAv3\\+|-B&#39;,&#39;&#39;,V2)) %&gt;% 
+  dplyr::rename(WGSID=V1)</code></pre>
+<pre class="r"><code>write_tsv(fam,&#39;data_sensitive/genotypes/updated_names.txt&#39;,col_names = F)</code></pre>
+<pre class="bash"><code>cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+plink --bfile combined_5 --update-ids updated_names.txt --make-bed --out combined_6</code></pre>
+</div>
+<div id="get-individuals-with-both-genotype-and-single-cell-data" class="section level1">
+<h1>Get individuals with both genotype and single cell data</h1>
+<p>Some samples from the scRNA-seq need to be removed as their genotype does not match the GSA array or WGS genotypes</p>
+<p>Here they are:</p>
+<p>MS data:</p>
+<ul>
+<li>EU015 (MS100) does not match its genotype –&gt; drop EU015 sample from scRNA-seq</li>
+<li>EU004 (SD029/17) matches the wrong genotype and is bad quality –&gt; drop EU004 sample from scRNA-seq</li>
+<li>WM115 (MS636) matches the wrong genotype and is bad quality –&gt; drop WM115 sample from scRNA-seq</li>
+<li>WM155 (S04-158) matches the wrong genotype –&gt; drop WM155 sample from scRNA-seq</li>
+<li>WM185 matches the wrong genotype –&gt; drop WM185 sample from scRNA-seq</li>
+</ul>
+<p>AD:</p>
+<ul>
+<li>DWM-B3-23-Cog4-Path1-F and MFC-B3-23-Cog4-Path1-F (SM-CTEGE) match to another genotype –&gt; drop both</li>
+<li>AD2 does not match any genotype –&gt; drop AD2</li>
+</ul>
+<pre class="r"><code>fam &lt;- read.table(&#39;data_sensitive/genotypes/combined_6.fam&#39;,header=F) %&gt;% as_tibble()</code></pre>
+<p>Load sce object for MS dataset</p>
+<pre class="r"><code>sce_ms &lt;- readRDS(&#39;data_sensitive/sce/ms_sce_3.rds&#39;)</code></pre>
+<pre class="r"><code>meta_ms &lt;- colData(sce_ms) %&gt;% as_tibble() %&gt;% 
+  dplyr::select(sample_id=library_id,individual_id=patient_id) %&gt;% 
+  unique() %&gt;% 
+  filter(!sample_id%in%c(&#39;EU015&#39;,&#39;EU005&#39;,&#39;WM115&#39;,&#39;WM155&#39;,&#39;WM185&#39;)) %&gt;% 
+  mutate(dataset=&#39;ms&#39;)</code></pre>
+<p>Load sce object for Alzheimer’s data sets to get sample - individual_id relationship</p>
+<pre class="r"><code>sce_ad &lt;- readRDS(&#39;data_sensitive/sce/sce.annotated8.rds&#39;)</code></pre>
+<pre class="r"><code>meta_ad &lt;- colData(sce_ad) %&gt;% as_tibble() %&gt;% 
+  dplyr::select(sample_id,individual_id) %&gt;% 
+  unique() %&gt;% 
+  filter(!sample_id%in%c(&#39;DWM-B3-23-Cog4-Path1-F&#39;,&#39;MFC-B3-23-Cog4-Path1-F&#39;,&#39;AD2&#39;))%&gt;% 
+  mutate(dataset=&#39;ad&#39;)</code></pre>
+<pre class="r"><code>meta &lt;- rbind(meta_ms,meta_ad)</code></pre>
+<pre class="r"><code>table(fam$V2%in%unique(meta$individual_id))</code></pre>
+<pre><code>
+FALSE  TRUE 
+   19   192 </code></pre>
+<pre class="r"><code>table(unique(meta$individual_id)%in%fam$V2)</code></pre>
+<pre><code>
+FALSE  TRUE 
+   38   192 </code></pre>
+<pre class="r"><code>#192 individuals in common</code></pre>
+<pre class="r"><code>#genotype not in scrna-seq
+fam$V2[!fam$V2%in%unique(meta$individual_id)] %&gt;% sort()</code></pre>
+<pre><code> [1] &quot;01-124&quot;   &quot;02-202&quot;   &quot;07-054&quot;   &quot;08-084&quot;   &quot;10-327&quot;   &quot;11-059&quot;  
+ [7] &quot;11-072&quot;   &quot;11-073&quot;   &quot;19-104&quot;   &quot;MS242&quot;    &quot;S04-158&quot;  &quot;SD031/15&quot;
+[13] &quot;SD042/14&quot; &quot;SM-CJEJ9&quot; &quot;SM-CJGH7&quot; &quot;SM-CJGM2&quot; &quot;SM-CTDSO&quot; &quot;SM-CTEGE&quot;
+[19] &quot;SM-CTEMF&quot;</code></pre>
+<pre class="r"><code>#scrna-seq not in genotype
+unique(meta$individual_id)[!unique(meta$individual_id)%in%fam$V2] %&gt;% sort()</code></pre>
+<pre><code> [1] &quot;1&quot;        &quot;10&quot;       &quot;2&quot;        &quot;3&quot;        &quot;4&quot;        &quot;5&quot;       
+ [7] &quot;6&quot;        &quot;7&quot;        &quot;8&quot;        &quot;9&quot;        &quot;AD1&quot;      &quot;AD2&quot;     
+[13] &quot;AD3&quot;      &quot;AD4&quot;      &quot;AD5&quot;      &quot;AD6&quot;      &quot;Ct1&quot;      &quot;Ct2&quot;     
+[19] &quot;Ct3&quot;      &quot;Ct4&quot;      &quot;Ct5&quot;      &quot;Ct6&quot;      &quot;MS057&quot;    &quot;MS060&quot;   
+[25] &quot;MS686&quot;    &quot;S01-041&quot;  &quot;S02-154&quot;  &quot;S04-184&quot;  &quot;S05-044&quot;  &quot;S08-230&quot; 
+[31] &quot;S11-044&quot;  &quot;S12-002&quot;  &quot;S97-283&quot;  &quot;SD026/16&quot; &quot;SD036/18&quot; &quot;SM-CJEGC&quot;
+[37] &quot;SM-CJJ2R&quot;</code></pre>
+<pre class="r"><code>#All good</code></pre>
+<pre class="r"><code>fam$ms &lt;- ifelse(fam$V2%in%meta_ms$individual_id,TRUE,FALSE)
+fam$ad &lt;- ifelse(fam$V2%in%meta_ad$individual_id,TRUE,FALSE)</code></pre>
+<pre class="r"><code>dplyr::count(fam,ad,ms)</code></pre>
+<pre><code># A tibble: 4 x 3
+  ad    ms        n
+  &lt;lgl&gt; &lt;lgl&gt; &lt;int&gt;
+1 FALSE FALSE    19
+2 FALSE TRUE     71
+3 TRUE  FALSE   120
+4 TRUE  TRUE      1</code></pre>
+<p>192 individuals in total</p>
+<pre class="r"><code>filter(fam,ms,ad)</code></pre>
+<pre><code># A tibble: 1 x 8
+  V1      V2         V3    V4    V5    V6 ms    ad   
+  &lt;chr&gt;   &lt;chr&gt;   &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;int&gt; &lt;lgl&gt; &lt;lgl&gt;
+1 S03-009 S03-009     0     0     0    -9 TRUE  TRUE </code></pre>
+<pre class="r"><code>#Need to keep only one S03-009 for the eQTL analysis</code></pre>
+<pre class="r"><code>individuals_to_keep &lt;- filter(fam,ms|ad) %&gt;% dplyr::select(V1,V2)</code></pre>
+<pre class="r"><code>write_tsv(individuals_to_keep,&#39;data_sensitive/genotypes/individuals_with_genotype_scRNA.txt&#39;,col_names = FALSE)
+write_tsv(fam,&#39;data_sensitive/genotypes/fam_with_ms_ad_info.txt&#39;,col_names = FALSE)</code></pre>
+</div>
+<div id="get-final-genotypes" class="section level1">
+<h1>Get Final genotypes</h1>
+<div id="final-filters" class="section level2">
+<h2>Final filters</h2>
+<ol style="list-style-type: decimal">
+<li>Keep only individuals with both genotype and scRNA-seq</li>
+<li>Remove all SNPs outside of HWE</li>
+<li>Remove all SNPs with MAF &lt; 5%</li>
+</ol>
+<pre class="bash"><code>cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+plink --bfile combined_6 --keep individuals_with_genotype_scRNA.txt --hwe 1e-6 --maf 0.05 --make-bed --out combined_7</code></pre>
+</div>
+<div id="pca" class="section level2">
+<h2>PCA</h2>
+<p>We will perform PCA for the individuals with both genotype info and scRNA-seq</p>
+<pre class="bash"><code>cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+
+plink --bfile combined_7 --extract indepSNP.prune.in --pca --out combined_7</code></pre>
+<p>Check variance explained pca</p>
+<pre class="r"><code>d &lt;- read_tsv(&#39;data_sensitive/genotypes/combined_7.eigenval&#39;,col_names = F) %&gt;% 
+  mutate(var_explained=X1/sum(X1)) %&gt;% 
+  mutate(PC=1:nrow(.))</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  X1 = col_double()
+)</code></pre>
+<pre class="r"><code>ggplot(d,aes(PC,var_explained)) + geom_point() + scale_y_continuous(label=scales::percent) + ylab(&#39;Variance explained&#39;) + theme_bw()</code></pre>
+<p><img src="figure/00_process_genotypes.Rmd/unnamed-chunk-66-1.png" width="672" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>pcs &lt;- read.table(&#39;data_sensitive/genotypes/combined_7.eigenvec&#39;) %&gt;% dplyr::select(V2,V3,V4,V5) %&gt;% column_to_rownames(&#39;V2&#39;) %&gt;% 
+setNames(c(&#39;PC1&#39;,&#39;PC2&#39;,&#39;PC3&#39;)) %&gt;% t() %&gt;% as.data.frame() %&gt;% rownames_to_column(&#39;id&#39;)</code></pre>
+<pre class="r"><code>write_tsv(pcs,&#39;data_sensitive/genotypes/pca_covariate_fastqtl.txt&#39;)</code></pre>
+</div>
+</div>
+<div id="write-vcf" class="section level1">
+<h1>Write VCF</h1>
+<pre class="bash"><code>cd $geno_path
+ml PLINK/1.90-goolf-1.7.20
+ml tabix/0.2.6-goolf-1.7.20
+
+mkdir -p processed
+plink --bfile combined_7 --recode vcf-iid --out processed/combined_final
+
+bgzip processed/combined_final.vcf
+tabix -p vcf processed/combined_final.vcf.gz</code></pre>
+<p>Genotypes are ready for the eQTL analysis!</p>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.0.1 (2020-06-06)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 7 (Core)
+
+Matrix products: default
+BLAS/LAPACK: /pstore/apps/OpenBLAS/0.3.1-GCC-7.3.0-2.30/lib/libopenblasp-r0.3.1.so
+
+locale:
+[1] en_US.UTF-8
+
+attached base packages:
+[1] parallel  stats4    stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] SingleCellExperiment_1.10.1 SummarizedExperiment_1.18.1
+ [3] DelayedArray_0.14.0         matrixStats_0.56.0         
+ [5] Biobase_2.48.0              GenomicRanges_1.40.0       
+ [7] GenomeInfoDb_1.24.0         IRanges_2.22.2             
+ [9] S4Vectors_0.26.1            BiocGenerics_0.34.0        
+[11] forcats_0.5.0               stringr_1.4.0              
+[13] dplyr_1.0.0                 purrr_0.3.4                
+[15] readr_1.3.1                 tidyr_1.1.0                
+[17] tibble_3.0.1                ggplot2_3.3.3              
+[19] tidyverse_1.3.0             workflowr_1.6.2            
+
+loaded via a namespace (and not attached):
+ [1] nlme_3.1-148              bitops_1.0-6             
+ [3] fs_1.4.1                  lubridate_1.7.9          
+ [5] httr_1.4.1                rprojroot_1.3-2          
+ [7] tools_4.0.1               backports_1.1.7          
+ [9] utf8_1.1.4                R6_2.4.1                 
+[11] irlba_2.3.3               vipor_0.4.5              
+[13] DBI_1.1.0                 colorspace_1.4-1         
+[15] withr_2.2.0               gridExtra_2.3            
+[17] tidyselect_1.1.0          compiler_4.0.1           
+[19] git2r_0.27.1              cli_2.0.2                
+[21] rvest_0.3.5               BiocNeighbors_1.6.0      
+[23] xml2_1.3.2                labeling_0.3             
+[25] scales_1.1.1              digest_0.6.25            
+[27] rmarkdown_2.2             XVector_0.28.0           
+[29] scater_1.16.2             pkgconfig_2.0.3          
+[31] htmltools_0.5.1.1         dbplyr_1.4.4             
+[33] rlang_0.4.10              readxl_1.3.1             
+[35] rstudioapi_0.11           DelayedMatrixStats_1.10.1
+[37] farver_2.0.3              generics_0.0.2           
+[39] jsonlite_1.6.1            BiocParallel_1.22.0      
+[41] RCurl_1.98-1.2            magrittr_1.5             
+[43] BiocSingular_1.4.0        GenomeInfoDbData_1.2.3   
+[45] Matrix_1.2-18             ggbeeswarm_0.6.0         
+[47] Rcpp_1.0.6                munsell_0.5.0            
+[49] fansi_0.4.1               viridis_0.5.1            
+[51] lifecycle_0.2.0           stringi_1.4.6            
+[53] whisker_0.4               yaml_2.2.1               
+[55] zlibbioc_1.34.0           grid_4.0.1               
+[57] blob_1.2.1                promises_1.1.1           
+[59] crayon_1.3.4              lattice_0.20-41          
+[61] haven_2.3.1               hms_0.5.3                
+[63] knitr_1.28                pillar_1.4.4             
+[65] reprex_0.3.0              glue_1.4.1               
+[67] evaluate_0.14             modelr_0.1.8             
+[69] vctrs_0.3.1               httpuv_1.5.4             
+[71] cellranger_1.1.0          gtable_0.3.0             
+[73] assertthat_0.2.1          xfun_0.14                
+[75] rsvd_1.0.3                broom_0.5.6              
+[77] later_1.1.0.1             viridisLite_0.3.0        
+[79] beeswarm_0.2.3            ellipsis_0.3.1           </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
