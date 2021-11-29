@@ -1,0 +1,1079 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Julien Bryois" />
+
+<meta name="date" content="2021-11-29" />
+
+<title>Process expression</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">snRNA_eqtl</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Process expression</h1>
+<h4 class="author">Julien Bryois</h4>
+<h4 class="date">November 29, 2021</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2021-11-29
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>snRNA_eqtl/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20211124code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20211124)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20211124code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20211124)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong4b8b916"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 4b8b916 </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrong4b8b916" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version 4b8b916. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rproj.user/
+    Ignored:    data_sensitive/
+
+Untracked files:
+    Untracked:  analysis/01_process_expression.Rscript
+    Untracked:  analysis/01_process_expression.sbatch
+    Untracked:  analysis/log_01_exp_stderr
+    Untracked:  analysis/log_01_exp_stdout
+    Untracked:  analysis/log_run_slurm_out
+    Untracked:  analysis/log_run_slurm_stderr
+    Untracked:  analysis/run_slurm.Rscript
+    Untracked:  analysis/run_slurm.sbatch
+    Untracked:  data/gencode/
+    Untracked:  output/Figures/
+
+Unstaged changes:
+    Modified:   .gitignore
+    Modified:   analysis/_site.yml
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/01_process_expression.Rmd</code>) and HTML (<code>docs/01_process_expression.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+4b8b916
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-11-29
+</td>
+<td>
+expression code added
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>library(tidyverse)
+library(SingleCellExperiment)
+library(parallel)</code></pre>
+<p>Set path for genotype data</p>
+<pre class="r"><code>Sys.setenv(eqtl_path=&#39;data_sensitive/eqtl&#39;)</code></pre>
+<div id="files" class="section level1">
+<h1>Files</h1>
+<p>Get individuals with both scRNA-seq and genotype information</p>
+<pre class="r"><code>individidual_genotype_scRNA &lt;- read_tsv(&#39;data_sensitive/genotypes/individuals_with_genotype_scRNA.txt&#39;,col_names = FALSE)</code></pre>
+</div>
+<div id="ms-expression" class="section level1">
+<h1>MS expression</h1>
+<pre class="r"><code>sce_ms &lt;- readRDS(&#39;data_sensitive/sce/ms_sce_3.rds&#39;)</code></pre>
+<p>get annotation</p>
+<pre class="r"><code>annot &lt;- read_csv(&#39;data_sensitive/sce/conos_labelled_2021-05-31.txt&#39;)</code></pre>
+<p>Only keep cells that were annotated</p>
+<pre class="r"><code>sce_ms &lt;- sce_ms[,colnames(sce_ms)%in%annot$cell_id]</code></pre>
+<pre class="r"><code>m &lt;- match(colnames(sce_ms),annot$cell_id)
+sce_ms$broad_annot &lt;- annot$type_broad[m]</code></pre>
+<p>Some scRNA-seq were swapped and not corrected in the loaded sce object.</p>
+<p>EU017 and EU018 –&gt; swap WM189 and WM190 –&gt; swap</p>
+<p>Swap them here</p>
+<pre class="r"><code>sce_ms$library_id[sce_ms$library_id==&#39;EU017&#39;] &lt;- &#39;tmp&#39;
+sce_ms$library_id[sce_ms$library_id==&#39;EU018&#39;] &lt;- &#39;EU017&#39;
+sce_ms$library_id[sce_ms$library_id==&#39;tmp&#39;] &lt;- &#39;EU018&#39;
+
+colnames(sce_ms) &lt;- gsub(&#39;EU017&#39;,&#39;tmp&#39;,colnames(sce_ms))
+colnames(sce_ms) &lt;- gsub(&#39;EU018&#39;,&#39;EU017&#39;,colnames(sce_ms))
+colnames(sce_ms) &lt;- gsub(&#39;tmp&#39;,&#39;EU018&#39;,colnames(sce_ms))</code></pre>
+<pre class="r"><code>sce_ms$library_id[sce_ms$library_id==&#39;WM189&#39;] &lt;- &#39;tmp&#39;
+sce_ms$library_id[sce_ms$library_id==&#39;WM190&#39;] &lt;- &#39;WM189&#39;
+sce_ms$library_id[sce_ms$library_id==&#39;tmp&#39;] &lt;- &#39;WM190&#39;
+
+colnames(sce_ms) &lt;- gsub(&#39;WM189&#39;,&#39;tmp&#39;,colnames(sce_ms))
+colnames(sce_ms) &lt;- gsub(&#39;WM190&#39;,&#39;WM189&#39;,colnames(sce_ms))
+colnames(sce_ms) &lt;- gsub(&#39;tmp&#39;,&#39;WM190&#39;,colnames(sce_ms))</code></pre>
+<p>Keep only individuals for which we have both scRNA-seq and expression</p>
+<pre class="r"><code>sce_ms &lt;- sce_ms[,sce_ms$patient_id%in%individidual_genotype_scRNA$X1]</code></pre>
+<p>add individual_id column to the sce object</p>
+<pre class="r"><code>sce_ms$individual_id &lt;- sce_ms$patient_id</code></pre>
+<p>Let’s remove the individual which is also in the AD dataset (less cells than the AD dataset)</p>
+<pre class="r"><code>sce_ms &lt;- sce_ms[,sce_ms$individual_id!=&#39;S03-009&#39;]</code></pre>
+<p>And finally let’s remove samples that don’t match their genotype</p>
+<pre class="r"><code>sce_ms &lt;- sce_ms[,!sce_ms$library_id%in%c(&#39;EU015&#39;,&#39;EU004&#39;,&#39;WM115&#39;,&#39;WM155&#39;,&#39;WM185&#39;)]</code></pre>
+</div>
+<div id="ad-expression" class="section level1">
+<h1>AD expression</h1>
+<pre class="r"><code>sce_ad &lt;- readRDS(&#39;data_sensitive/sce/sce.annotated8.rds&#39;)</code></pre>
+<p>Keep only individuals for which we have both scRNA-seq and expression</p>
+<pre class="r"><code>sce_ad &lt;- sce_ad[,sce_ad$individual_id%in%individidual_genotype_scRNA$X1]</code></pre>
+<p>Some individuals are present in multiple AD studies</p>
+<pre class="r"><code>(individuals_multiple_studies &lt;- colData(sce_ad) %&gt;% as_tibble() %&gt;% 
+  dplyr::select(individual_id,study,diagnosis) %&gt;% 
+  unique() %&gt;% 
+  add_count(individual_id) %&gt;% 
+  filter(n&gt;1) %&gt;% 
+  arrange(individual_id))</code></pre>
+<p>count number of cells for these individuals</p>
+<pre class="r"><code> (n_cells_per_id &lt;- colData(sce_ad) %&gt;% as_tibble() %&gt;% 
+  filter(individual_id%in%individuals_multiple_studies$individual_id) %&gt;% 
+  dplyr::count(individual_id,study) %&gt;% 
+    group_by(individual_id) %&gt;% 
+    mutate(keep=ifelse(n==max(n),TRUE,FALSE)))</code></pre>
+<pre class="r"><code>to_remove &lt;- filter(n_cells_per_id,!keep) %&gt;% 
+  mutate(lab=paste0(individual_id,&#39;_&#39;,study))</code></pre>
+<pre class="r"><code>sce_ad$lab &lt;- paste0(sce_ad$individual_id,&#39;_&#39;,sce_ad$study)</code></pre>
+<p>Remove the sample with the least amount of cells (when two samples from the same individual are observed in two datasets)</p>
+<pre class="r"><code>sce_ad &lt;- sce_ad[,!sce_ad$lab%in%to_remove$lab]</code></pre>
+</div>
+<div id="get-covariates" class="section level1">
+<h1>Get covariates</h1>
+<p>For all samples, get:</p>
+<ol style="list-style-type: decimal">
+<li>Original dataset (Roche_AD,Columbia_AD,Mathys_AD,Zhou,MS)</li>
+<li>Case-control status</li>
+</ol>
+<pre class="r"><code>ad_cov &lt;- colData(sce_ad) %&gt;% as_tibble() %&gt;% 
+  dplyr::select(individual_id,study,diagnosis) %&gt;% 
+  unique() %&gt;% 
+  mutate(study=paste0(study,&#39;_AD&#39;))</code></pre>
+<pre class="r"><code>ms_cov &lt;- colData(sce_ms) %&gt;% as_tibble() %&gt;% 
+dplyr::select(individual_id,diagnosis=disease_status) %&gt;% 
+  mutate(study=&#39;MS&#39;) %&gt;% 
+  unique() %&gt;% 
+  mutate(diagnosis=case_when(
+    diagnosis==&#39;CTR&#39; ~ &#39;Ctrl&#39;,
+    TRUE ~ &#39;MS&#39;
+  )) %&gt;% unique()</code></pre>
+<pre class="r"><code>cov_all &lt;- rbind(ad_cov,ms_cov)</code></pre>
+<pre class="r"><code>cov_all_t &lt;- cov_all %&gt;% column_to_rownames(&#39;individual_id&#39;) %&gt;% t() %&gt;% as.data.frame() %&gt;% rownames_to_column(&#39;id&#39;)</code></pre>
+<p>Load genotype PCs</p>
+<pre class="r"><code>cov_genotype_pcs &lt;- read_tsv(&#39;data_sensitive/genotypes/pca_covariate_fastqtl.txt&#39;)</code></pre>
+<pre class="r"><code>cov_all_t &lt;- cov_all_t[,colnames(cov_genotype_pcs)]</code></pre>
+<p>Add covariates from metadata (study, case-control) to genotype PCs.</p>
+<pre class="r"><code>cov &lt;- rbind(cov_genotype_pcs,cov_all_t) %&gt;% as_tibble()</code></pre>
+<pre class="r"><code>write_tsv(cov,&#39;data_sensitive/eqtl/covariate_pca_meta_fastqtl.txt&#39;)</code></pre>
+</div>
+<div id="get-pseudo-bulk-expression-function" class="section level1">
+<h1>Get Pseudo-bulk expression function</h1>
+<pre class="r"><code>count_per_cluster &lt;- function(sce,i){
+  cnt_matrix &lt;- sce[,sce$broad_annot==cell_type_id$V1[i] &amp; sce$individual_id==cell_type_id$V2[i]]
+  tot_counts &lt;- Matrix::rowSums(counts(cnt_matrix))
+  n_expressed &lt;- Matrix::rowSums(counts(cnt_matrix)&gt;0)
+  n_cells &lt;- ncol(cnt_matrix)
+  cnt_df &lt;- data.frame(counts=tot_counts,n_expressed=n_expressed,n_cells=n_cells) %&gt;% rownames_to_column(&#39;gene&#39;)
+  cnt_df &lt;- mutate(cnt_df,perc_expressed=round(n_expressed*100/n_cells,digits=2))
+  cnt_df &lt;- mutate(cnt_df,cell_type=cell_type_id$V1[i],individual_id=cell_type_id$V2[i])
+  cnt_df &lt;- dplyr::select(cnt_df,cell_type,individual_id,gene,counts,n_expressed,n_cells,perc_expressed)
+  return(cnt_df)
+}</code></pre>
+<div id="ms" class="section level2">
+<h2>MS</h2>
+<pre class="r"><code>if(!file.exists(&#39;data_sensitive/expression/ms_sum_expression.rds&#39;)){
+  
+  cell_type_id &lt;- cbind(as.character(sce_ms$broad_annot),sce_ms$individual_id) %&gt;% unique() %&gt;% as.data.frame()
+  
+  sum_expression_ms &lt;- mclapply(1:nrow(cell_type_id),count_per_cluster,sce=sce_ms,mc.cores = 36,mc.preschedule = FALSE) %&gt;% 
+    bind_rows() %&gt;% 
+    separate(gene,into=c(&#39;symbol&#39;,&#39;ensembl&#39;),sep=&quot;_&quot;)
+  
+  saveRDS(sum_expression_ms,&#39;data_sensitive/expression/ms_sum_expression.rds&#39;)
+  rm(sce_ms)
+}</code></pre>
+</div>
+<div id="ad" class="section level2">
+<h2>AD</h2>
+<pre class="r"><code>if(!file.exists(&#39;data_sensitive/expression/ad_sum_expression.rds&#39;)){
+  
+  cell_type_id &lt;- cbind(as.character(sce_ad$broad_annot),sce_ad$individual_id) %&gt;% unique() %&gt;% as.data.frame()
+  
+  sum_expression_ad &lt;- mclapply(1:nrow(cell_type_id),count_per_cluster,sce=sce_ad,mc.cores = 36,mc.preschedule = FALSE) %&gt;% 
+    bind_rows() %&gt;% 
+    mutate(symbol=gsub(&#39;ENSG[0-9]+\\.&#39;,&#39;&#39;,gene)) %&gt;% 
+    mutate(ensembl=gsub(&#39;\\..+&#39;,&#39;&#39;,gene)) %&gt;% 
+    dplyr::select(cell_type,individual_id,symbol,ensembl,counts,n_expressed,n_cells,perc_expressed)
+  
+  saveRDS(sum_expression_ad,&#39;data_sensitive/expression/ad_sum_expression.rds&#39;)
+  rm(sce_ad)
+}</code></pre>
+</div>
+</div>
+<div id="load-pseudo-bulk" class="section level1">
+<h1>Load Pseudo-bulk</h1>
+<pre class="r"><code>sum_expression_ms &lt;- readRDS(&#39;data_sensitive/expression/ms_sum_expression.rds&#39;) %&gt;% mutate(dataset=&#39;ms&#39;)
+sum_expression_ad &lt;- readRDS(&#39;data_sensitive/expression/ad_sum_expression.rds&#39;) %&gt;% mutate(dataset=&#39;ad&#39;)</code></pre>
+<div id="aggregate-datasets" class="section level2">
+<h2>Aggregate datasets</h2>
+<p>Get genes quantified in both datasets</p>
+<pre class="r"><code>common_genes &lt;- intersect(unique(sum_expression_ad$ensembl),unique(sum_expression_ms$ensembl))</code></pre>
+<pre class="r"><code>length(common_genes)</code></pre>
+<pre><code>[1] 25938</code></pre>
+<pre class="r"><code>sum_expression_ms &lt;- sum_expression_ms %&gt;% filter(ensembl%in%common_genes)
+sum_expression_ad &lt;- sum_expression_ad %&gt;% filter(ensembl%in%common_genes)</code></pre>
+<p>Get same cell type label</p>
+<pre class="r"><code>sum_expression_ad &lt;- sum_expression_ad %&gt;% mutate(cell_type=case_when(
+  cell_type==&#39;Glutamatergic&#39; ~ &#39;Excitatory neurons&#39;,
+  cell_type==&#39;GABAergic&#39; ~ &#39;Inhibitory neurons&#39;,
+  cell_type==&#39;OPCs&#39; ~ &#39;OPCs / COPs&#39;,
+  cell_type==&#39;Endothelial&#39; ~ &#39;Endothelial cells&#39;,
+  TRUE ~ cell_type))</code></pre>
+<p>Let’s merge the MS and AD dataset. Let’s then remove Immune cells which were not seen in the AD dataset.</p>
+<pre class="r"><code>sum_expression &lt;- rbind(sum_expression_ms,sum_expression_ad) %&gt;% 
+  filter(cell_type !=&quot;Immune&quot;)</code></pre>
+<p>Get counts per million (CPM)</p>
+<pre class="r"><code>sum_expression &lt;- sum_expression %&gt;% group_by(cell_type,individual_id) %&gt;% mutate(counts_scaled_1M=counts*10^6/sum(counts)) %&gt;% ungroup() %&gt;% as_tibble()</code></pre>
+</div>
+<div id="get-number-of-samples-expressing-genes-and-average-expression" class="section level2">
+<h2>Get number of samples expressing genes and average expression</h2>
+<pre class="r"><code>sumstats_gene &lt;- sum_expression %&gt;% group_by(cell_type,ensembl) %&gt;% 
+  summarise(counts_per_celltype=sum(counts),
+         n_expressed_per_celltype=sum(n_expressed),
+         n_cells_per_celltype=sum(n_cells),
+         perc_expressed_per_celltype=round(n_expressed_per_celltype*100/n_cells_per_celltype,digits=2),
+         n_samples_expressed=sum(counts&gt;0),
+         perc_samples_expressed=round(n_samples_expressed*100/length(counts),digits=2)) %&gt;% 
+  ungroup()</code></pre>
+<pre><code>`summarise()` regrouping output by &#39;cell_type&#39; (override with `.groups` argument)</code></pre>
+</div>
+<div id="filter-genes" class="section level2">
+<h2>Filter genes</h2>
+<p>Keep genes expressed in:</p>
+<ol style="list-style-type: decimal">
+<li>at least 5% of the cells (per cell type)</li>
+<li>at least 10 individuals</li>
+</ol>
+<pre class="r"><code>gene_to_keep_per_cell_type &lt;- sumstats_gene %&gt;% filter(perc_expressed_per_celltype&gt;5,n_samples_expressed&gt;10) %&gt;% dplyr::select(cell_type,ensembl) %&gt;% unique()</code></pre>
+<pre class="r"><code>sum_expression &lt;- sum_expression %&gt;% inner_join(.,gene_to_keep_per_cell_type,by=c(&#39;cell_type&#39;,&#39;ensembl&#39;))</code></pre>
+<p>Number of genes tested per cell type</p>
+<pre class="r"><code>dplyr::count(sum_expression,cell_type,individual_id) %&gt;% select(-individual_id) %&gt;% unique() %&gt;% arrange(-n)</code></pre>
+<pre><code># A tibble: 8 x 2
+  cell_type              n
+  &lt;chr&gt;              &lt;int&gt;
+1 Excitatory neurons 11307
+2 Inhibitory neurons 10635
+3 Astrocytes          9241
+4 OPCs / COPs         9180
+5 Endothelial cells   8981
+6 Pericytes           8806
+7 Oligodendrocytes    7792
+8 Microglia           7418</code></pre>
+</div>
+<div id="filter-individuals" class="section level2">
+<h2>Filter individuals</h2>
+<p>Remove individuals-cell type with less than 10 cells for the given cell type.</p>
+<pre class="r"><code>(n_cells_ind_cell_type &lt;- sum_expression %&gt;% 
+  dplyr::select(cell_type,individual_id,n_cells) %&gt;% 
+  unique() %&gt;% arrange(n_cells))</code></pre>
+<pre><code># A tibble: 1,514 x 3
+   cell_type          individual_id n_cells
+   &lt;chr&gt;              &lt;chr&gt;           &lt;int&gt;
+ 1 Astrocytes         SD030/18            1
+ 2 Endothelial cells  SD015/18            1
+ 3 Pericytes          SD015/18            1
+ 4 Inhibitory neurons S13-096             1
+ 5 Pericytes          SM-CJGIM            1
+ 6 Endothelial cells  SM-CJGIM            1
+ 7 Endothelial cells  SM-CTEGO            1
+ 8 Endothelial cells  SM-CJFOL            1
+ 9 Endothelial cells  SM-CTECO            1
+10 Inhibitory neurons SM-CJFOC            1
+# … with 1,504 more rows</code></pre>
+<pre class="r"><code>keep &lt;- filter(n_cells_ind_cell_type,n_cells&gt;=10)</code></pre>
+<p>Number of unique individuals per cell types for eQTL analysis</p>
+<pre class="r"><code>dplyr::count(keep,cell_type) %&gt;% arrange(-n)</code></pre>
+<pre><code># A tibble: 8 x 2
+  cell_type              n
+  &lt;chr&gt;              &lt;int&gt;
+1 Oligodendrocytes     192
+2 Astrocytes           189
+3 Excitatory neurons   187
+4 Microglia            187
+5 OPCs / COPs          187
+6 Inhibitory neurons   178
+7 Pericytes            150
+8 Endothelial cells    144</code></pre>
+<pre class="r"><code>sum_expression &lt;- inner_join(sum_expression,keep,by=c(&#39;cell_type&#39;,&#39;individual_id&#39;,&#39;n_cells&#39;))</code></pre>
+</div>
+<div id="get-gene-coordinates" class="section level2">
+<h2>Get gene coordinates</h2>
+<p>Get TSS coordinate for all genes.</p>
+<pre class="r"><code>gtf &lt;- rtracklayer::import(&#39;data/gencode/Homo_sapiens.GRCh38.96.filtered.gtf&#39;) %&gt;% 
+  as.data.frame() %&gt;% 
+  dplyr::filter(type==&#39;gene&#39;) %&gt;% 
+  mutate(TSS_start=ifelse(strand==&#39;+&#39;,start,end),
+         TSS_end=ifelse(strand==&#39;+&#39;,start+1,end+1)) %&gt;% 
+  mutate(gene=paste0(gene_name,&#39;_&#39;,gene_id)) %&gt;% 
+  dplyr::select(seqnames,TSS_start,TSS_end,gene) %&gt;% 
+  filter(seqnames%in%c(1:22))
+gtf$seqnames &lt;- droplevels(gtf$seqnames)</code></pre>
+<p>Set all samples to the same set of symbol and gene ID (like MS dataset)</p>
+<pre class="r"><code>gene_id_common &lt;- sum_expression %&gt;% filter(dataset==&#39;ms&#39;) %&gt;% dplyr::select(symbol,ensembl) %&gt;% unique() %&gt;% mutate(gene=paste0(symbol,&#39;_&#39;,ensembl)) %&gt;% dplyr::select(-symbol)</code></pre>
+<pre class="r"><code>sum_expression &lt;- sum_expression %&gt;% 
+  inner_join(.,gene_id_common,by=&#39;ensembl&#39;)</code></pre>
+<pre class="r"><code>saveRDS(sum_expression,&#39;data_sensitive/expression/all_sum_expression.rds&#39;)</code></pre>
+</div>
+<div id="get-fastqtl-format" class="section level2">
+<h2>Get fastQTL format</h2>
+<pre class="r"><code>get_fastqtl_pheno &lt;- function(cell){
+  #keep all expression for the cell type and patient that have genotype
+  bed &lt;- sum_expression %&gt;% dplyr::filter(cell_type==cell) %&gt;% 
+    dplyr::select(individual_id,gene,counts_scaled_1M) %&gt;% 
+    spread(individual_id,counts_scaled_1M)
+
+    bed &lt;- bed %&gt;% inner_join(.,gtf,by=&#39;gene&#39;)
+    
+    bed &lt;- bed %&gt;% dplyr::select(seqnames,TSS_start,TSS_end,gene,everything())
+    
+    bed &lt;- bed %&gt;% arrange(seqnames,TSS_start)
+    
+    colnames(bed)[c(1,2,3,4)] &lt;- c(&#39;#Chr&#39;,&#39;start&#39;,&#39;end&#39;,&#39;ID&#39;)
+    
+    write_tsv(bed,path = paste0(&#39;data_sensitive/eqtl/&#39;,make.names(cell),&#39;.bed&#39;))
+}    </code></pre>
+<pre class="r"><code>cells &lt;- unique(sum_expression$cell_type)</code></pre>
+<pre class="r"><code>mclapply(cells,get_fastqtl_pheno,mc.cores=8)</code></pre>
+<pre class="bash"><code>cd $eqtl_path
+ml tabix/0.2.6-goolf-1.7.20
+
+for f in *.bed
+do
+bgzip $f &amp;&amp; tabix -p bed $f.gz
+done</code></pre>
+</div>
+<div id="generate-expression-pca" class="section level2">
+<h2>Generate expression pca</h2>
+<pre class="r"><code>geno_cov &lt;- read_tsv(&#39;data_sensitive/eqtl/covariate_pca_meta_fastqtl.txt&#39;)</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  .default = col_character()
+)</code></pre>
+<pre><code>See spec(...) for full column specifications.</code></pre>
+<pre class="r"><code>pheno_files &lt;- list.files(&#39;data_sensitive/eqtl/&#39;,pattern=&#39;*.bed.gz$&#39;,full.names = T)</code></pre>
+<pre class="r"><code>get_covariates &lt;- function(i){
+  
+  out_name &lt;- basename(pheno_files[i]) %&gt;% gsub(&#39;\\.bed\\.gz&#39;,&#39;&#39;,.) %&gt;% paste0(&#39;.cov.txt&#39;)
+  
+  #load expression data
+  d &lt;- data.table::fread(pheno_files[i],data.table=FALSE)
+  #perform pca
+  pca &lt;- d[-c(1,2,3,4)] %&gt;% t() %&gt;% prcomp(.,scale.=T)
+  
+  #Create directories with different number of expression pcs
+  #Add the n first pcs to the covariate file and write the covariate file in fastqtl format
+  number_of_pcs &lt;- c(10,20,30,40,50,60,70,80,90,100,110,120)
+  
+  lapply(number_of_pcs,function(i){
+    
+      top_pcs &lt;- pca$x[,1:i] %&gt;% t()
+      rownames(top_pcs) &lt;- paste0(rownames(top_pcs),&#39;_exp&#39;)
+      top_pcs &lt;- top_pcs %&gt;% as.data.frame() %&gt;% rownames_to_column(&#39;id&#39;)
+  
+      shared_samples &lt;- intersect(colnames(geno_cov),colnames(top_pcs))
+  
+      cov &lt;- rbind(geno_cov[,shared_samples],top_pcs[,shared_samples])
+      dir.create(paste0(&#39;data_sensitive/eqtl/PC&#39;,i),showWarnings = FALSE)
+      write_tsv(cov,paste0(&#39;data_sensitive/eqtl/PC&#39;,i,&#39;/&#39;,out_name))
+  })
+}</code></pre>
+<pre class="r"><code>mclapply(1:length(pheno_files),get_covariates,mc.cores=8)</code></pre>
+<pre class="bash"><code>cd $eqtl_path
+for f in PC*
+do
+cd $f
+gzip *
+ln -s ../*.bed.gz .
+ln -s ../*.bed.gz.tbi .
+ln -s ../../genotypes/processed/combined_final.vcf.gz .
+ln -s ../../genotypes/processed/combined_final.vcf.gz.tbi .
+cd ..
+done</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.0.1 (2020-06-06)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 7 (Core)
+
+Matrix products: default
+BLAS/LAPACK: /pstore/apps/OpenBLAS/0.3.1-GCC-7.3.0-2.30/lib/libopenblasp-r0.3.1.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] parallel  stats4    stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] SingleCellExperiment_1.10.1 SummarizedExperiment_1.18.1
+ [3] DelayedArray_0.14.0         matrixStats_0.56.0         
+ [5] Biobase_2.48.0              GenomicRanges_1.40.0       
+ [7] GenomeInfoDb_1.24.0         IRanges_2.22.2             
+ [9] S4Vectors_0.26.1            BiocGenerics_0.34.0        
+[11] forcats_0.5.0               stringr_1.4.0              
+[13] dplyr_1.0.0                 purrr_0.3.4                
+[15] readr_1.3.1                 tidyr_1.1.0                
+[17] tibble_3.0.1                ggplot2_3.3.3              
+[19] tidyverse_1.3.0             workflowr_1.6.2            
+
+loaded via a namespace (and not attached):
+ [1] nlme_3.1-148             bitops_1.0-6             fs_1.4.1                
+ [4] lubridate_1.7.9          httr_1.4.1               rprojroot_1.3-2         
+ [7] tools_4.0.1              backports_1.1.7          utf8_1.1.4              
+[10] R6_2.4.1                 DBI_1.1.0                colorspace_1.4-1        
+[13] withr_2.2.0              tidyselect_1.1.0         compiler_4.0.1          
+[16] git2r_0.27.1             cli_2.0.2                rvest_0.3.5             
+[19] xml2_1.3.2               rtracklayer_1.48.0       scales_1.1.1            
+[22] digest_0.6.25            Rsamtools_2.4.0          rmarkdown_2.2           
+[25] XVector_0.28.0           pkgconfig_2.0.3          htmltools_0.5.1.1       
+[28] dbplyr_1.4.4             rlang_0.4.10             readxl_1.3.1            
+[31] rstudioapi_0.11          generics_0.0.2           jsonlite_1.6.1          
+[34] BiocParallel_1.22.0      RCurl_1.98-1.2           magrittr_1.5            
+[37] GenomeInfoDbData_1.2.3   Matrix_1.2-18            Rcpp_1.0.6              
+[40] munsell_0.5.0            fansi_0.4.1              lifecycle_0.2.0         
+[43] stringi_1.4.6            whisker_0.4              yaml_2.2.1              
+[46] zlibbioc_1.34.0          grid_4.0.1               blob_1.2.1              
+[49] promises_1.1.1           crayon_1.3.4             lattice_0.20-41         
+[52] Biostrings_2.56.0        haven_2.3.1              hms_0.5.3               
+[55] knitr_1.28               pillar_1.4.4             reprex_0.3.0            
+[58] XML_3.99-0.3             glue_1.4.1               evaluate_0.14           
+[61] modelr_0.1.8             vctrs_0.3.1              httpuv_1.5.4            
+[64] cellranger_1.1.0         gtable_0.3.0             assertthat_0.2.1        
+[67] xfun_0.14                broom_0.5.6              later_1.1.0.1           
+[70] GenomicAlignments_1.24.0 ellipsis_0.3.1          </code></pre>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
