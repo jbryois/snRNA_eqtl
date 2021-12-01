@@ -17,3 +17,5 @@ editor_options:
 [Process genotypes](00_process_genotypes.html)
 
 [Process expression](01_process_expression.html)
+
+[Run eQTL](02_run_eQTL.html)

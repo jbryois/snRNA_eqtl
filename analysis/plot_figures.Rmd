@@ -17,11 +17,178 @@ library(tidyverse)
 
 # Main figures
 
+## Figure 2A
+
+```{r,message=FALSE}
+d <- read_tsv('output/eqtl/eqtl.PC80.txt') %>% 
+  filter(adj_p<0.05) %>% 
+  mutate(cell_type=gsub('OPCs   COPs','OPCs / COPs',cell_type)) 
+
+p <- d %>% 
+  dplyr::count(cell_type) %>% 
+  ggplot(.,aes(reorder(cell_type,n),n,fill=cell_type)) + 
+  geom_col() + 
+  coord_flip() + 
+  theme_classic() + 
+  theme(legend.position = 'none',text=element_text(size=20)) + 
+  ylab('Number of cis-eQTL (5% FDR)') + xlab('')
+ggsave(p,filename='output/Figures/fig2a.pdf',height=5,width=7)
+p
+```
+
+## Figure 2B
+
+```{r,message=FALSE}
+d <- read_tsv('output/eqtl/eqtl.PC80.txt') %>% 
+  filter(adj_p<0.05) %>% 
+  mutate(cell_type=gsub('OPCs   COPs','OPCs / COPs',cell_type)) %>% 
+  dplyr::count(cell_type)
+```
+
+```{r,message=FALSE}
+sum_expression <- readRDS('data_sensitive/expression/all_sum_expression.rds')
+```
+
+```{r,message=FALSE}
+n_cells_tot <- sum_expression %>% 
+  dplyr::select(cell_type,individual_id,n_cells) %>% 
+  unique() %>% 
+  group_by(cell_type) %>% 
+  summarise(`Number of cells`=sum(n_cells))
+```
+
+```{r,message=FALSE}
+d <- left_join(d,n_cells_tot,by='cell_type')
+```
+
+```{r}
+p <- ggplot(d,aes(`Number of cells`,n,col=cell_type)) + 
+  geom_point() + 
+  ggrepel::geom_label_repel(aes(label=cell_type),size=5,box.padding = 0.5) + 
+  theme_classic() + 
+  theme(legend.position = 'none',text=element_text(size=20)) + 
+  scale_x_log10() + 
+  scale_y_log10() + 
+  ylab('Number of cis-eQTL (5%FDR)')
+ggsave(p,filename='output/Figures/fig2b.pdf',height=5,width=7)
+p
+```
+
+## Figure 2C
+
+1. Load eQTLs
+
+```{r,message=FALSE,eval=FALSE}
+d <- read_tsv('output/eqtl/eqtl.PC80.txt') %>% 
+  filter(adj_p<0.05) %>% 
+  mutate(cell_type=gsub('OPCs   COPs','OPCs / COPs',cell_type)) %>% 
+  dplyr::select(cell_type,pid,sid) %>% 
+  dplyr::rename(SNP=sid) %>% 
+  separate(pid,into=c('symbol','ensembl'),sep='_')
+```
+
+2. Get SNPs position
+
+```{bash,eval=FALSE}
+cd data_sensitive/genotypes/processed
+zcat combined_final.vcf.gz | cut -f 1,2,3 | grep -v "^##" > snp_pos_hg38.txt
+```
+
+```{r,eval=FALSE}
+snp_pos <- data.table::fread('data_sensitive/genotypes/processed/snp_pos_hg38.txt',data.table = FALSE) %>% 
+  dplyr::select(chr_hg38=`#CHROM`,pos_hg38=POS,SNP=ID) %>% 
+  as_tibble()
+```
+
+```{r,eval=FALSE}
+d <- left_join(d,snp_pos,by='SNP') %>% 
+  mutate(SNP_id_hg38=paste0('chr',chr_hg38,':',pos_hg38))
+```
+
+3. Get metabrain pvalues
+
+```{r,eval=FALSE}
+get_snp_pvalues_metabrain <- function(chr,tissue='Cortex') {
+
+  d_sig_chr <- filter(d,chr_hg38==chr)
+  
+  matched_pvalues <- 
+    data.table::fread(paste0('data/metabrain/2020-05-26-',tissue,'-EUR-',chr,'-biogenformat.txt.gz'),data.table = FALSE) %>% 
+    dplyr::select(PValue,SNPChr,SNPChrPos,ProbeName,SNPName) %>% 
+    mutate(ensembl=gsub('\\..+','',ProbeName)) %>% 
+    mutate(SNP_id_hg38=paste0('chr',SNPChr,':',SNPChrPos)) %>% 
+    as_tibble() %>% 
+    mutate(tissue=tissue) %>% 
+    dplyr::select(SNP_id_hg38,ensembl,PValue) %>% 
+    inner_join(.,d_sig_chr,by=c('SNP_id_hg38','ensembl'))
+  return(matched_pvalues)
+}
+```
+
+```{r,eval=FALSE}
+matched_snps <- mclapply(1:22,get_snp_pvalues_metabrain,mc.cores=11,mc.preschedule = FALSE) %>% bind_rows()
+```
+
+```{r,eval=FALSE}
+write_tsv(matched_snps,here('output/eqtl/eqtl.PC80.metabrain.matched.txt'))
+```
+
+## Plot
+
+```{r,echo=FALSE}
+matched_snps <- read_tsv('output/eqtl/eqtl.PC80.metabrain.matched.txt')
+```
+
+```{r}
+matched_snps <- matched_snps %>% mutate(glia_neurons=case_when(
+  cell_type %in% c('Excitatory neurons','Inhibitory neurons') ~ 'Neurons',
+  TRUE ~ 'Glia'
+)) 
+```
+
+```{r}
+matched_snps_text_prop <- matched_snps %>% 
+  group_by(glia_neurons) %>% 
+  summarise(prop=paste0('prop = ',round(sum(PValue<0.05)*100/sum(PValue<10),digits=1),'%'),
+            pi1=paste0('pi1 = ',round(1-qvalue::qvalue(PValue)$pi0,digits=2)),
+            label=paste0(prop,'\n',pi1),n_eqtl=sum(PValue<10))
+
+p <- ggplot(matched_snps,aes(PValue,fill=glia_neurons)) + 
+  geom_histogram() + 
+  facet_wrap(~glia_neurons,scales='free_y') + 
+  theme_classic() + 
+  theme(legend.position = 'none',text=element_text(size=20)) +
+  geom_text(data=matched_snps_text_prop,aes(x=0.5,y=Inf,vjust=2.1,label=label),size=8) +
+  ggtitle('Metabrain Cortex matched pvalues')
+ggsave(p,filename='output/Figures/fig2c.pdf',height=5,width=7)
+p
+```
+
+## Figure 2D
+
+```{r,message=FALSE,fig.width=9,fig.height=7}
+d <- read_tsv('output/eqtl/eqtl.PC80.txt') %>% 
+  filter(adj_p<0.05) %>% 
+  mutate(cell_type=gsub('OPCs   COPs','OPCs / COPs',cell_type)) 
+
+p <- d %>% 
+  ggplot(aes(dist,fill=cell_type)) + 
+  geom_histogram(bins = 50) + 
+  facet_wrap(~cell_type,scales = 'free_y',nrow=4,ncol=2) + 
+  theme_classic() + 
+  theme(legend.position = 'none',
+        text=element_text(size=20),
+        plot.margin =unit(c(5.5, 20, 5.5, 5.5), "points")) + 
+  xlab('Distance to TSS')
+ggsave(p,filename='output/Figures/fig2d.pdf',height=6,width=9)
+p
+```
+
 # Suplementary figures
 
 ## Genotype PCA
 
-```{r}
+```{r,message=FALSE}
 data <- read.table("data_sensitive/genotypes/Combined_with1kg.mds",header=TRUE) %>% dplyr::select(-FID) %>% dplyr::select(IID,C1,C2)
 ancestry <- read.table("data_sensitive/genotypes/integrated_call_samples_v3.20130502.ALL.panel",header=TRUE) %>% dplyr::rename(IID=sample)
 d <- left_join(data,ancestry,by="IID")
@@ -35,5 +202,144 @@ d <- mutate(d,outlier=ifelse(C1>threshold$x1 & C1<threshold$x2 & C2>threshold$y1
 p <- ggplot(d) +geom_point(aes(C1,C2,col= super_pop),size=0.5) + theme_bw() + xlab('MDS1') + ylab('MDS2') + geom_rect(data=threshold,aes(xmin=x1,xmax=x2,ymin=y1,ymax=y2),alpha=0.1,color='red') + theme(text=element_text(size=18))
 ggsave(p,filename='output/Figures/mds_genotype.pdf',width=7,height=5)
 p
+```
+
+## Number of eQTL discoveries vs number of expression PCs
+
+```{r,message=FALSE}
+d <- read_tsv('output/eqtl/eqtl.allPCs.txt') %>% 
+  filter(adj_p<0.05) %>% 
+  dplyr::count(cell_type,PCs) %>% 
+  mutate(PCs=gsub('PC','',PCs) %>% as.numeric()) %>% 
+  mutate(cell_type=gsub('OPCs   COPs','OPCs / COPs',cell_type))
+```
+
+```{r,message=FALSE}
+p <- d %>% ggplot(.,aes(PCs,n,col=cell_type)) + geom_point() + geom_line(aes(group=cell_type)) + theme_classic() + xlab('Number of expression PCs used as covariate') + guides(fill = guide_legend(reverse=T)) + ylab('Number of cis-eQTL (5%FDR)') + scale_x_continuous(breaks=seq(20, 120, 20)) + guides(col=guide_legend(title="Cell type")) + theme(text=element_text(size=18))
+ggsave(p,filename='output/Figures/n_eqtl_5FDR_cpm_vs_exp_PCs.pdf',width=8)
+p
+```
+
+## Pi1 plots all
+
+```{r,message=FALSE}
+d <- read_tsv('output/eqtl/eqtl.PC80.txt') %>% 
+  mutate(cell_type=gsub('OPCs   COPs','OPCs / COPs',cell_type))
+
+pi1 <- d %>% group_by(cell_type) %>% summarise(pi1=1-qvalue::qvalue(bpval)$pi0) %>% mutate(pi1_label=paste0('pi1 = ',round(pi1,digits=2)))
+
+p <- d %>% ggplot(.,aes(bpval,fill=cell_type)) + geom_histogram(bins=30, breaks = seq(0, 1, by=1/30)) + facet_wrap(~cell_type) + theme_classic() + theme(legend.position = 'none') + geom_text(data=pi1,aes(x=0.5,y=700,label=pi1_label))
+
+ggsave(p,filename='output/Figures/pi1_eqtl_all.pdf',width=8)
+p
+```
+
+## Metabrain
+
+### Shared eQTL per cell type
+
+```{r,message=FALSE}
+matched_snps <- read_tsv('output/eqtl/eqtl.PC80.metabrain.matched.txt')
+```
+
+```{r}
+matched_snps_text_prop <- matched_snps %>% 
+  add_count(cell_type) %>%
+  group_by(cell_type) %>% 
+  summarise(n_eqtl=unique(n),
+            prop=paste0('prop = ',round(sum(PValue<0.05)*100/sum(PValue<10),digits=1),'%'),
+            pi1=paste0('pi1 = ',ifelse(n_eqtl<100,'NA',
+                                       round(1-qvalue::qvalue(PValue,)$pi0,digits=2))),
+            label=paste0(prop,'\n',pi1))
+```
+
+```{r,message=FALSE}
+p <- ggplot(matched_snps,aes(PValue,fill=cell_type)) + 
+  geom_histogram() + 
+  facet_wrap(~cell_type,scales='free_y',nrow=2) + 
+  theme_classic() + 
+  theme(legend.position = 'none') + 
+  ggtitle('Metabrain Cortex matched pvalues') + 
+  geom_text(data=matched_snps_text_prop,aes(x=0.5,y=Inf,vjust=1.5,label=label))
+
+ggsave(p,filename='output/Figures/shared_prop_metabrain_cortex.pdf',width=12,height=3)
+p
+```
+
+### non-replicating eQTL
+
+Extract non replcating eQTL
+
+```{r}
+matched_snp_short <- matched_snps %>% 
+  mutate(replication_status=
+           factor(ifelse(PValue<0.05,'Replication p<0.05','Replication p>0.05'))) %>% 
+  dplyr::select(ensembl,cell_type,SNP,replication_status)
+```
+
+```{r,message=FALSE}
+d <- read_tsv('output/eqtl/eqtl.PC80.txt') %>% 
+  filter(adj_p<0.05) %>% 
+  mutate(cell_type=gsub('OPCs   COPs','OPCs / COPs',cell_type)) %>% 
+  dplyr::rename(SNP=sid) %>% 
+  separate(pid,into=c('symbol','ensembl'),sep='_')
+```
+
+```{r,message=FALSE}
+d_sig <- inner_join(d,matched_snp_short,by=c('ensembl','cell_type','SNP'))
+```
+
+```{r}
+p <- ggplot(d_sig,aes(replication_status,abs(dist),col=replication_status)) + 
+  ggbeeswarm::geom_quasirandom(size=0.1) + 
+  geom_boxplot(alpha=0.1,outlier.shape = NA,col='black',width=0.25) + 
+  facet_wrap(~cell_type,nrow=2) + 
+  scale_y_log10(expand=c(0.4,0)) +
+  ggpubr::stat_compare_means(vjust = -0.5) +
+  theme_classic() + 
+  theme(legend.position='none')  + 
+  ylab('Absolute distance to TSS (log10)') + 
+  xlab('')
+
+ggsave(p,filename='output/Figures/shared_prop_metabrain_cortex.replication.TSS.dist.pdf',width=12,height=3)
+p
+```
+
+### Loeuf
+
+```{r,message=FALSE}
+loeuf <- read_tsv('data/gnomad_loeuf/supplementary_dataset_11_full_constraint_metrics.tsv') %>% 
+  filter(canonical==TRUE) %>% 
+  dplyr::select(gene,gene_id,transcript,oe_lof_upper,p) %>% 
+  mutate(oe_lof_upper_bin = ntile(oe_lof_upper, 10)) %>% 
+  dplyr::rename(ensembl=gene_id) %>% 
+  dplyr::select(-gene,-transcript)
+```
+
+```{r}
+d_sig <- inner_join(d_sig,loeuf,by='ensembl')
+```
+
+```{r}
+p <- ggplot(d_sig,aes(replication_status,oe_lof_upper,col=replication_status)) +
+  ggbeeswarm::geom_quasirandom(size=0.1) + 
+  geom_boxplot(alpha=0.1,outlier.shape = NA,col='black',width=0.25) + 
+  facet_wrap(~cell_type,nrow=2) +
+  scale_y_log10(expand=c(0.4,0)) + 
+  ggpubr::stat_compare_means(vjust = -0.5) +
+  theme_classic() + 
+  theme(legend.position='none')  + 
+  ylab("LoF observed/expected upper bound \nfraction (LOEUF)") + 
+  xlab('')
+
+ggsave(p,filename='output/Figures/shared_prop_metabrain_cortex.replication.LOEUF.dist.pdf',width=12,height=3)
+p
+```
+
+## Tmp
+
+```{r}
+#tables2 <- d %>% separate(pid,into=c('symbol','ensembl'),sep='_') %>% #dplyr::select(cell_type,symbol,ensembl,SNP=sid,dist,slope,bpval,adj_p) %>% 
+#  write_csv(.,here(paste0('output/fastql/',param,'.TableS2.csv')))
 ```
 
