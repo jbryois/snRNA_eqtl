@@ -7,6 +7,7 @@ output:
   workflowr::wflow_html:
    toc: true
    toc_float: true
+   code_folding: hide
 editor_options:
   chunk_output_type: console
 ---
@@ -317,7 +318,7 @@ d <- read_tsv('output/eqtl/eqtl.PC80.txt') %>%
 d_sig <- inner_join(d,matched_snp_short,by=c('ensembl','cell_type','SNP'))
 ```
 
-```{r,message=FALSE,warning=FALSE,fig.width=8}
+```{r,message=FALSE,warning=FALSE,fig.width=10}
 p <- ggplot(d_sig,aes(replication_status,abs(dist),col=replication_status)) + 
   ggbeeswarm::geom_quasirandom(size=0.1) + 
   geom_boxplot(alpha=0.1,outlier.shape = NA,col='black',width=0.25) + 
@@ -348,7 +349,7 @@ loeuf <- read_tsv('data/gnomad_loeuf/supplementary_dataset_11_full_constraint_me
 d_sig <- inner_join(d_sig,loeuf,by='ensembl')
 ```
 
-```{r,warning=FALSE,message=FALSE,fig.width=8}
+```{r,warning=FALSE,message=FALSE,fig.width=10}
 p <- ggplot(d_sig,aes(replication_status,oe_lof_upper,col=replication_status)) +
   ggbeeswarm::geom_quasirandom(size=0.1) + 
   geom_boxplot(alpha=0.1,outlier.shape = NA,col='black',width=0.25) + 
