@@ -135,7 +135,7 @@ write_tsv(matched_snps,here('output/eqtl/eqtl.PC80.metabrain.matched.txt'))
 
 ## Plot
 
-```{r,echo=FALSE}
+```{r,echo=FALSE,results=FALSE}
 matched_snps <- read_tsv('output/eqtl/eqtl.PC80.metabrain.matched.txt')
 ```
 
@@ -146,7 +146,7 @@ matched_snps <- matched_snps %>% mutate(glia_neurons=case_when(
 )) 
 ```
 
-```{r}
+```{r,results=FALSE}
 matched_snps_text_prop <- matched_snps %>% 
   group_by(glia_neurons) %>% 
   summarise(prop=paste0('prop = ',round(sum(PValue<0.05)*100/sum(PValue<10),digits=1),'%'),
@@ -209,6 +209,11 @@ m <- m[c('AQP4','CLDN5','SLC17A7','GAD2','C1QA','MOG','PDGFRA','RGS5'),]
 ```{r}
 pheatmap::pheatmap(t(m),scale='row',cluster_cols = FALSE,cluster_rows = FALSE,angle_col = 0,filename = 'output/Figures/marker_mean_cpm_row_scale.pdf',height = 2,width=7)
 ```
+
+```{r}
+pheatmap::pheatmap(t(m),scale='row',cluster_cols = FALSE,cluster_rows = FALSE,angle_col = 0)
+```
+
 
 ## Genotype PCA
 
@@ -313,7 +318,7 @@ d <- read_tsv('output/eqtl/eqtl.PC80.txt') %>%
 d_sig <- inner_join(d,matched_snp_short,by=c('ensembl','cell_type','SNP'))
 ```
 
-```{r}
+```{r,message=FALSE}
 p <- ggplot(d_sig,aes(replication_status,abs(dist),col=replication_status)) + 
   ggbeeswarm::geom_quasirandom(size=0.1) + 
   geom_boxplot(alpha=0.1,outlier.shape = NA,col='black',width=0.25) + 
