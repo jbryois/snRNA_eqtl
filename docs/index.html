@@ -325,7 +325,7 @@ $(document).ready(function () {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-11-29
+<strong>Last updated:</strong> 2021-12-01
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 2 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -356,16 +356,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong4b8b916"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 4b8b916 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongb1d314e"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> b1d314e </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong4b8b916" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongb1d314e" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 4b8b916. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version b1d314e. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -374,6 +374,7 @@ Note that you need to be careful to ensure that all relevant files for the analy
 Ignored files:
     Ignored:    .Rproj.user/
     Ignored:    data_sensitive/
+    Ignored:    output/tables/
 
 Untracked files:
     Untracked:  analysis/01_process_expression.Rscript
@@ -385,7 +386,10 @@ Untracked files:
     Untracked:  analysis/run_slurm.Rscript
     Untracked:  analysis/run_slurm.sbatch
     Untracked:  data/gencode/
+    Untracked:  data/gnomad_loeuf/
+    Untracked:  data/metabrain/
     Untracked:  output/Figures/
+    Untracked:  output/eqtl/
 
 Unstaged changes:
     Modified:   .gitignore
@@ -428,6 +432,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+b1d314e
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
+</td>
+<td>
+eqtl_code_added, figures added
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+67ca055
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-11-29
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -545,6 +583,7 @@ Start workflowr project.
 <h1>Processing code</h1>
 <p><a href="00_process_genotypes.html">Process genotypes</a></p>
 <p><a href="01_process_expression.html">Process expression</a></p>
+<p><a href="02_run_eQTL.html">Run eQTL</a></p>
 </div>
 
 

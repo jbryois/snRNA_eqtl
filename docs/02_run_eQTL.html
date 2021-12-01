@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Julien Bryois" />
+
+<meta name="date" content="2021-12-01" />
+
+<title>Run eQTL analysis</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">snRNA_eqtl</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Run eQTL analysis</h1>
+<h4 class="author">Julien Bryois</h4>
+<h4 class="date">December 01, 2021</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2021-12-01
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>snRNA_eqtl/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20211124code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20211124)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20211124code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20211124)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongb1d314e"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> b1d314e </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrongb1d314e" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version b1d314e. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rproj.user/
+    Ignored:    data_sensitive/
+    Ignored:    output/tables/
+
+Untracked files:
+    Untracked:  analysis/01_process_expression.Rscript
+    Untracked:  analysis/01_process_expression.sbatch
+    Untracked:  analysis/log_01_exp_stderr
+    Untracked:  analysis/log_01_exp_stdout
+    Untracked:  analysis/log_run_slurm_out
+    Untracked:  analysis/log_run_slurm_stderr
+    Untracked:  analysis/run_slurm.Rscript
+    Untracked:  analysis/run_slurm.sbatch
+    Untracked:  data/gencode/
+    Untracked:  data/gnomad_loeuf/
+    Untracked:  data/metabrain/
+    Untracked:  output/Figures/
+    Untracked:  output/eqtl/
+
+Unstaged changes:
+    Modified:   .gitignore
+    Modified:   analysis/_site.yml
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/02_run_eQTL.Rmd</code>) and HTML (<code>docs/02_run_eQTL.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+b1d314e
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
+</td>
+<td>
+eqtl_code_added, figures added
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<pre class="r"><code>library(tidyverse)
+library(qvalue)
+library(parallel)</code></pre>
+<p>Set path for genotype data</p>
+<pre class="r"><code>Sys.setenv(eqtl_path=&#39;data_sensitive/eqtl&#39;)</code></pre>
+<div id="generate-commands-for-fastqtl" class="section level1">
+<h1>Generate commands for fastQTL</h1>
+<pre class="bash"><code>cd $eqtl_path
+source ~/.bashrc
+
+ml foss/2018b
+ml Rmath/3.6.1-GCCcore-7.3.0
+ml GSL/2.5-GCCcore-7.3.0
+ml Eigen/3.3.7
+ml Boost/1.67.0-foss-2018b
+
+for f in PC*
+do
+cd $f
+for bed in *.bed.gz
+do
+cell=`echo $bed | sed &#39;s/.bed.gz//&#39;`
+echo $cell
+fastQTL --vcf combined_final.vcf.gz --bed $bed --permute 1000 --out $cell.quantile.txt.gz --normal --cov $cell.cov.txt.gz --commands 22 $cell.commands.22.tmp
+sed &#39;s/^ /sbatch --wrap=&quot;/; s/$/&quot;/&#39; $cell.commands.22.tmp &gt; $cell.commands.22.txt
+rm $cell.commands.22.tmp
+done
+cd ..
+done</code></pre>
+</div>
+<div id="permutation-pass" class="section level1">
+<h1>Permutation pass</h1>
+<pre class="bash"><code>cd $eqtl_path
+source ~/.bashrc
+
+ml foss/2018b
+ml Rmath/3.6.1-GCCcore-7.3.0
+ml GSL/2.5-GCCcore-7.3.0
+ml Eigen/3.3.7
+ml Boost/1.67.0-foss-2018b
+
+for d in PC*
+do
+cd $d
+rm *quantile.txt.gz
+for f in *.commands.22.txt
+do
+sh $f
+done
+cd ..
+done</code></pre>
+<p>Check that all eQTL jobs ran successfully</p>
+<pre class="bash"><code>cd $eqtl_path
+
+for d in PC{10,20,30,40,50,60,70,80,90,100,110,120}
+do
+cd $d
+echo $d
+grep &#39;Running time&#39; slurm-* | wc -l
+cd ..
+done</code></pre>
+<pre><code>PC10
+176
+PC20
+176
+PC30
+176
+PC40
+176
+PC50
+176
+PC60
+176
+PC70
+176
+PC80
+176
+PC90
+176
+PC100
+176
+PC110
+176
+PC120
+176</code></pre>
+<p>All good (176)</p>
+<pre class="r"><code>fastqtl_out_files &lt;- list.files(&#39;data_sensitive/eqtl/&#39;,pattern=&#39;.gz.[0-9]&#39;,full.names = T,recursive = TRUE)</code></pre>
+<pre class="r"><code>d &lt;- tibble(files=fastqtl_out_files,
+            cell_type=basename(files) %&gt;% 
+              gsub(&#39;.quantile.txt.gz..+&#39;,&#39;&#39;,.) %&gt;% gsub(&#39;\\.&#39;,&#39; &#39;,.)) %&gt;% 
+  mutate(PCs=dirname(files) %&gt;% basename(.)) %&gt;% 
+  mutate(file_content=map(files,read.table,header=F)) %&gt;% 
+  unnest(file_content) %&gt;% 
+  filter(!is.na(V11)) %&gt;% 
+  select(-files) %&gt;% 
+  setNames(c(&quot;cell_type&quot;,&quot;PCs&quot;,&quot;pid&quot;, &quot;nvar&quot;, &quot;shape1&quot;, &quot;shape2&quot;, &quot;dummy&quot;, &quot;sid&quot;, &quot;dist&quot;, &quot;npval&quot;, &quot;slope&quot;,&quot;ppval&quot;, &quot;bpval&quot;)) %&gt;% 
+  group_by(cell_type,PCs) %&gt;% 
+  mutate(adj_p=qvalue(bpval)$qvalues) %&gt;% 
+  ungroup() %&gt;% 
+  arrange(cell_type,bpval)</code></pre>
+<div id="write" class="section level2">
+<h2>Write</h2>
+<p>Write eQTL results with different number of expression principal components</p>
+<pre class="r"><code>write_tsv(d,&#39;output/eqtl/eqtl.allPCs.txt&#39;)</code></pre>
+<p>Get number of PCs maximising the number of eQTL discoveries</p>
+<pre class="r"><code>selected_pcs &lt;- d %&gt;% 
+  filter(adj_p&lt;0.05) %&gt;% 
+  dplyr::count(PCs) %&gt;% filter(n==max(n))</code></pre>
+<p>Write eQTL results with selected number of PCs</p>
+<pre class="r"><code>d %&gt;% filter(PCs==selected_pcs$PCs) %&gt;% dplyr::select(-PCs) %&gt;% write_tsv(.,paste0(&#39;output/eqtl/eqtl.&#39;,selected_pcs$PCs,&#39;.txt&#39;))</code></pre>
+</div>
+<div id="clean" class="section level2">
+<h2>Clean</h2>
+<p>Removing tmp files</p>
+<pre class="bash"><code>cd $eqtl_path
+
+for d in PC*
+do
+cd $d
+rm *quantile*
+cd ..
+done</code></pre>
+</div>
+</div>
+<div id="nominal-pass" class="section level1">
+<h1>Nominal pass</h1>
+<p>We now run a nominal pass to get pvalues for all SNPs (necessary for colocalization analysis).</p>
+<p>We will use 80 PCs as this maximised the number of eQTL discoveries using permutations.</p>
+<pre class="bash"><code>source ~/.bashrc
+cd $eqtl_path
+
+ml foss/2018b
+ml Rmath/3.6.1-GCCcore-7.3.0
+ml GSL/2.5-GCCcore-7.3.0
+ml Eigen/3.3.7
+ml Boost/1.67.0-foss-2018b
+
+
+mkdir -p &#39;PC80_nominal&#39;
+cd PC80_nominal
+ln -s ../PC80/*.bed.gz .
+ln -s ../PC80/*.bed.gz.tbi .
+ln -s ../PC80/*.cov.txt.gz .
+ln -s ../PC80/combined_final.vcf.gz .
+ln -s ../PC80/combined_final.vcf.gz.tbi .
+
+for bed in *.bed.gz
+do
+cell=`echo $bed | sed &#39;s/.bed.gz//&#39;`
+fastQTL --vcf combined_final.vcf.gz --bed $bed --out $cell.quantile.txt.gz --normal --cov $cell.cov.txt.gz --commands 22 $cell.commands.22.tmp
+sed &#39;s/^ /sbatch --wrap=&quot;/; s/$/&quot;/&#39; $cell.commands.22.tmp &gt; $cell.commands.22.txt
+sh $cell.commands.22.txt
+rm $cell.commands.22.tmp
+done</code></pre>
+<pre class="bash"><code>cd $eqtl_path&#39;/PC80_nominal&#39;
+grep &#39;Running time&#39; slurm-* | wc -l</code></pre>
+<pre><code>176</code></pre>
+<p>176 files successfully completed. All good!</p>
+<p>Now let’s gzip the association files and give them a nice name.</p>
+<pre class="bash"><code>cd $eqtl_path&#39;/PC80_nominal&#39;
+rm *quantile.txt.gz
+rm *.bed.gz
+rm *.bed.gz.tbi  
+rm *cov.txt.gz
+rm *.commands.22.txt
+rm *.vcf.gz
+rm *.vcf.gz.tbi
+
+for f in *.quantile.txt.gz.*
+do
+gzip $f
+x=`echo $f | sed &#39;s/:.\+$/.gz/&#39; | sed &#39;s/.quantile.txt.gz//&#39;`
+mv $f.gz $x
+done</code></pre>
+</div>
+<div id="independent-pass" class="section level1">
+<h1>Independent pass</h1>
+<p>We will use QTL tools to find independent cis-eQTLs.</p>
+<ol style="list-style-type: decimal">
+<li>Get QTL tools files format from fastQTL files.</li>
+</ol>
+<pre class="r"><code>bed_files_fastqtl &lt;- list.files(&#39;data_sensitive/eqtl&#39;,pattern=&#39;.bed.gz$&#39;,full.names = T)</code></pre>
+<pre class="r"><code>read_fastQTL_write_QTLtools &lt;- function(i){
+  output_file_name &lt;- gsub(&#39;bed.gz&#39;,&#39;qtltools.bed&#39;,bed_files_fastqtl[i]) %&gt;% 
+    gsub(&#39;data_sensitive/eqtl/&#39;,&#39;data_sensitive/eqtl/PC80_indep/&#39;,.)
+  
+  fasqtl &lt;- read_tsv(bed_files_fastqtl[i]) %&gt;% 
+    mutate(pid=&#39;.&#39;,strand=&#39;+&#39;) %&gt;% 
+    dplyr::select(`#Chr`:ID,pid,strand,everything())
+ 
+  dir.create(&#39;data_sensitive/eqtl/PC80_indep&#39;,recursive = TRUE,showWarnings = FALSE)
+  write_tsv(fasqtl,output_file_name) 
+}</code></pre>
+<pre class="r"><code>mclapply(1:length(bed_files_fastqtl),read_fastQTL_write_QTLtools,mc.cores = 8)</code></pre>
+<pre class="bash"><code>cd $eqtl_path&#39;/PC80_indep&#39;
+ml tabix/0.2.6-goolf-1.7.20
+
+for f in *.qtltools.bed
+do
+bgzip $f &amp;&amp; tabix -p bed $f.gz
+done</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Perform permutation pass on all phenotypes</li>
+</ol>
+<pre class="bash"><code>cd $eqtl_path&#39;/PC80_indep&#39;
+source ~/.bashrc
+
+ml foss/2018b
+ml Rmath/3.6.1-GCCcore-7.3.0
+ml GSL/2.5-GCCcore-7.3.0
+ml Eigen/3.3.7
+ml Boost/1.67.0-foss-2018b
+ml HTSlib/1.9-GCCcore-7.3.0
+ml zlib/1.2.11-GCCcore-7.3.0
+ml lzma/4.32.7-GCCcore-7.3.0
+ml cURL/7.60.0-GCCcore-7.3.0
+
+for bed in *qtltools.bed.gz
+do
+cell=`echo $bed | sed &#39;s/.qtltools.bed.gz//&#39;`
+for i in {0..22}
+do
+echo &#39;sbatch --mem=4000MB --wrap=&quot;QTLtools cis --vcf combined_final.vcf.gz --bed &#39;$bed&#39; --cov &#39;$cell&#39;.cov.txt.gz --permute 1000 --normal --chunk &#39;$i&#39; 22 --out &#39;$cell&#39;.conditional_permute_&#39;$i&#39;_22&quot;&#39; &gt;&gt; $cell.commands.cond.permutation.22.txt
+done
+done</code></pre>
+<pre class="bash"><code>cd $eqtl_path&#39;/PC80_indep&#39;
+source ~/.bashrc
+
+ml foss/2018b
+ml Rmath/3.6.1-GCCcore-7.3.0
+ml GSL/2.5-GCCcore-7.3.0
+ml Eigen/3.3.7
+ml Boost/1.67.0-foss-2018b
+ml HTSlib/1.9-GCCcore-7.3.0
+ml zlib/1.2.11-GCCcore-7.3.0
+ml lzma/4.32.7-GCCcore-7.3.0
+ml cURL/7.60.0-GCCcore-7.3.0
+
+ln -s ../PC80/combined_final.vcf.gz .
+ln -s ../PC80/combined_final.vcf.gz.tbi .
+ln -s ../PC80/*.cov.txt.gz  .
+
+for f in *.commands.cond.permutation.22.txt
+do
+sh $f
+done</code></pre>
+<pre class="bash"><code>cd $eqtl_path&#39;/PC80_indep&#39;
+grep &#39;Running time&#39; slurm-* | wc -l</code></pre>
+<pre><code>8</code></pre>
+<p>All good!</p>
+<p>Gather all output</p>
+<pre class="bash"><code>cd $eqtl_path&#39;/PC80_indep&#39;
+
+for bed in *.qtltools.bed.gz
+do
+cell=`echo $bed | sed &#39;s/.qtltools.bed.gz//&#39;`
+cat $cell.conditional_permute_* &gt;&gt; $cell.conditional.permute.txt
+done
+rm *.conditional_permute_*</code></pre>
+<ol start="3" style="list-style-type: decimal">
+<li>Extract significant phenotypes</li>
+</ol>
+<pre class="bash"><code>cd $eqtl_path&#39;/PC80_indep&#39;
+ml  R/4.0.1-foss-2018b
+wget https://raw.githubusercontent.com/qtltools/qtltools/master/scripts/qtltools_runFDR_cis.R .
+for f in *.conditional.permute.txt
+do
+cell=`echo $f | sed &#39;s/.conditional.permute.txt//&#39;`
+Rscript qtltools_runFDR_cis.R $f 0.05 $cell.permutations_all
+done</code></pre>
+<p>Read bed files and only retain significant genes.</p>
+<pre class="r"><code>bed_files &lt;- list.files(&#39;data_sensitive/eqtl/PC80_indep&#39;,pattern=&#39;.qtltools.bed.gz$&#39;,full.names = T)</code></pre>
+<pre class="r"><code>read_fastQTL_write_QTLtools_conditional &lt;- function(i){
+  output_file_name &lt;- gsub(&#39;qtltools.bed.gz&#39;,&#39;qtltools.conditional.bed&#39;,bed_files[i])
+  
+  significant_hits &lt;- read_delim(gsub(&#39;qtltools.bed.gz&#39;,&#39;permutations_all.significant.txt&#39;,bed_files[i]),delim = &#39; &#39;,col_names=FALSE)
+  
+  fasqtl &lt;- read_tsv(bed_files[i]) %&gt;% 
+    filter(ID%in%significant_hits$X1)
+  
+  threshold &lt;- read_delim(gsub(&#39;qtltools.bed.gz&#39;,&#39;permutations_all.thresholds.txt&#39;,bed_files[i]),
+                                 delim = &#39; &#39;,col_names=FALSE) %&gt;% 
+    filter(X1%in%significant_hits$X1)
+
+  write_tsv(fasqtl,output_file_name) 
+  write_delim(threshold,gsub(&#39;qtltools.bed.gz&#39;,&#39;permutations_all.thresholds.txt&#39;,bed_files[i]),col_names=FALSE,delim = &#39; &#39;) 
+}</code></pre>
+<pre class="r"><code>mclapply(1:length(bed_files),read_fastQTL_write_QTLtools_conditional,mc.cores=8)</code></pre>
+<pre class="bash"><code>cd $eqtl_path&#39;/PC80_indep&#39;
+ml tabix/0.2.6-goolf-1.7.20
+
+for f in *.qtltools.conditional.bed
+do
+bgzip $f &amp;&amp; tabix -p bed $f.gz
+done</code></pre>
+<ol start="4" style="list-style-type: decimal">
+<li>Run conditional analysis</li>
+</ol>
+<pre class="bash"><code>cd $eqtl_path&#39;/PC80_indep&#39;
+source ~/.bashrc
+
+ml foss/2018b
+ml Rmath/3.6.1-GCCcore-7.3.0
+ml GSL/2.5-GCCcore-7.3.0
+ml Eigen/3.3.7
+ml Boost/1.67.0-foss-2018b
+ml HTSlib/1.9-GCCcore-7.3.0
+ml zlib/1.2.11-GCCcore-7.3.0
+ml lzma/4.32.7-GCCcore-7.3.0
+ml cURL/7.60.0-GCCcore-7.3.0
+
+rm slurm*
+
+for bed in *.qtltools.conditional.bed.gz
+do
+cell=`echo $bed | sed &#39;s/.qtltools.conditional.bed.gz//&#39;`
+echo &#39;sbatch --mem=8000MB --wrap=&quot;QTLtools cis --vcf combined_final.vcf.gz --bed &#39;$bed&#39; --cov &#39;$cell&#39;.cov.txt.gz --mapping &#39;$cell&#39;.permutations_all.thresholds.txt --normal --out &#39;$cell&#39;.conditional.txt&quot;&#39; &gt; $cell.commands.cond.txt
+done
+
+for f in *.commands.cond.txt
+do
+sh $f
+done</code></pre>
+<pre class="bash"><code>cd $eqtl_path&#39;/PC80_indep&#39;
+grep &#39;Running time&#39; slurm-* | wc -l</code></pre>
+<pre><code>8</code></pre>
+<p>8 cell types successfully ran. All good!</p>
+<div id="write-1" class="section level2">
+<h2>Write</h2>
+<p>Get conditional results</p>
+<pre class="r"><code>conditional_files &lt;- list.files(&#39;data_sensitive/eqtl/PC80_indep&#39;,pattern=&#39;*conditional.txt&#39;,full.names = T)</code></pre>
+<pre class="r"><code>header &lt;- c(&#39;phe_id&#39;,&#39;phe_chr&#39;,&#39;phe_from&#39;,&#39;phe_to&#39;,&#39;phe_strd&#39;,&#39;n_var_in_cis&#39;,&#39;dist_phe_var&#39;,&#39;var_id&#39;, &#39;var_chr&#39;,&#39;var_from&#39;,&#39;var_to&#39;,&#39;rank&#39;,&#39;fwd_pval&#39;,&#39;fwd_r_squared&#39;,&#39;fwd_slope&#39;,&#39;fwd_best_hit&#39;,&#39;fwd_sig&#39;, &#39;bwd_pval&#39;,&#39;bwd_r_squared&#39;,&#39;bwd_slope&#39;,&#39;bwd_best_hit&#39;,&#39;bwd_sig&#39;)</code></pre>
+<pre class="r"><code>d &lt;- tibble(files=conditional_files,
+            cell_type=gsub(&#39;.conditional.txt&#39;,&#39;&#39;,basename(conditional_files)) %&gt;% 
+              gsub(&#39;\\.&#39;,&#39; &#39;,.) %&gt;% 
+              gsub(&#39;OPCs   COPs&#39;,&#39;OPCs / COPs&#39;,.),
+            file_content=map(files,read_delim,delim=&#39; &#39;,col_names=FALSE) 
+            ) %&gt;% 
+  dplyr::select(-files) %&gt;%
+  unnest(file_content) %&gt;% 
+  setNames(c(&#39;cell_type&#39;,header)) %&gt;% 
+  filter(bwd_best_hit==1)</code></pre>
+<pre class="r"><code>write_tsv(d,&#39;output/eqtl/eqtl.80PCs.indep.txt&#39;)</code></pre>
+</div>
+</div>
+<div id="fine-mapping" class="section level1">
+<h1>Fine-mapping</h1>
+<p>We will use CaVEMan for fine-mapping</p>
+<ol style="list-style-type: decimal">
+<li>Get bed files for significant cis-eQTL</li>
+</ol>
+<pre class="r"><code>d &lt;- read_tsv(&#39;output/eqtl/eqtl.PC80.txt&#39;) %&gt;% 
+  mutate(cell_type=make.names(cell_type)) %&gt;% 
+  filter(adj_p&lt;0.05)</code></pre>
+<pre class="r"><code>bed_files_fastqtl &lt;- list.files(&#39;data_sensitive/eqtl&#39;,pattern=&#39;.bed.gz$&#39;,full.names = T)</code></pre>
+<pre class="r"><code>read_fastQTL_write_caveman &lt;- function(i){
+  output_file_name &lt;- gsub(&#39;bed.gz&#39;,&#39;caveman.bed&#39;,bed_files_fastqtl[i]) %&gt;% gsub(&#39;eqtl&#39;,&#39;eqtl/PC80_caveman&#39;,.)
+  cell_type_file &lt;- basename(bed_files_fastqtl[i]) %&gt;% gsub(&#39;.bed.gz&#39;,&#39;&#39;,.)
+
+  genes_to_keep &lt;- filter(d,cell_type==cell_type_file) %&gt;% pull(pid)
+  
+  fasqtl &lt;- read_tsv(bed_files_fastqtl[i]) %&gt;% 
+    filter(ID%in%genes_to_keep)
+ 
+  dir.create(&#39;data_sensitive/eqtl/PC80_caveman&#39;,showWarnings = FALSE)
+  write_tsv(fasqtl,output_file_name) 
+}</code></pre>
+<pre class="r"><code>mclapply(1:length(bed_files_fastqtl),read_fastQTL_write_caveman,mc.cores=8)</code></pre>
+<ol start="2" style="list-style-type: decimal">
+<li>Get bed files adjusted for covariates</li>
+</ol>
+<pre class="r"><code>write_tsv(d[,&#39;sid&#39;,drop=FALSE],&#39;data_sensitive/eqtl/PC80_caveman/sig_eQTL_snps.txt&#39;,col_names = FALSE)</code></pre>
+<pre class="bash"><code>cd $eqtl_path&#39;/PC80_caveman&#39;
+ln -s ../PC80/combined_final.vcf.gz .
+ln -s ../PC80/combined_final.vcf.gz.tbi .
+
+zgrep -Fw -f sig_eQTL_snps.txt combined_final.vcf.gz | grep -v &#39;#&#39; | cut -f 1,2,3,4,5 &gt; sig_eQTL_snps_alleles.txt</code></pre>
+<pre class="r"><code>genotypes_selected &lt;- read_tsv(&#39;data_sensitive/eqtl/PC80_caveman/sig_eQTL_snps_alleles.txt&#39;,col_names = FALSE) %&gt;% 
+  setNames(c(&#39;chr&#39;,&#39;pos&#39;,&#39;sid&#39;,&#39;A1&#39;,&#39;A2&#39;))</code></pre>
+<pre class="r"><code>cell_types &lt;- unique(d$cell_type)</code></pre>
+<pre class="r"><code>get_eqtl_cov &lt;- function(i){
+  eqtl_cell_type &lt;- filter(d,cell_type==cell_types[i]) %&gt;% 
+    dplyr::select(pid,sid) %&gt;% 
+    left_join(.,genotypes_selected,by=&#39;sid&#39;) %&gt;% 
+    dplyr::select(pid,chr,pos,A1,A2)
+  
+  write_tsv(eqtl_cell_type,paste0(&#39;data_sensitive/eqtl/PC80_caveman/&#39;,make.names(cell_types[i]),&#39;.eqtl.list&#39;),col_names = FALSE)
+}</code></pre>
+<pre class="r"><code>lapply(1:length(cell_types),get_eqtl_cov)</code></pre>
+<p>Now get covariates</p>
+<pre class="r"><code>cov_files &lt;- list.files(&#39;data_sensitive/eqtl/PC80&#39;,pattern = &#39;cov.txt.gz&#39;,full.names = TRUE) </code></pre>
+<pre class="r"><code>read_cov_write &lt;- function(i){
+  cov &lt;- read_tsv(cov_files[i])
+  out &lt;- gsub(&#39;.txt.gz&#39;,&#39;.caveman.txt&#39;,cov_files[i]) %&gt;% gsub(&#39;PC80&#39;,&#39;PC80_caveman&#39;,.)
+  
+  study &lt;- cov[4,][,-1] %&gt;% t() %&gt;% as.data.frame()
+  study_model_matrix &lt;-  model.matrix(~0+V1,data=study) %&gt;% as.data.frame() %&gt;% t() %&gt;%
+    as.data.frame() %&gt;% rownames_to_column(&#39;id&#39;) %&gt;% mutate(id=gsub(&#39;V1&#39;,&#39;&#39;,id))
+
+  disease &lt;- cov[5,][,-1] %&gt;% t() %&gt;% as.data.frame()
+  disease_model_matrix &lt;-  model.matrix(~0+V1,data=disease) %&gt;% as.data.frame() %&gt;% t() %&gt;% 
+    as.data.frame() %&gt;% rownames_to_column(&#39;id&#39;) %&gt;% mutate(id=gsub(&#39;V1&#39;,&#39;&#39;,id))
+
+  cov_out &lt;- rbind(cov[c(1:3),],study_model_matrix,disease_model_matrix,cov[c(6:nrow(cov)),])
+  cov_out &lt;- cov_out[,-1]
+  write_tsv(cov_out,out)
+}</code></pre>
+<pre class="r"><code>lapply(1:length(cov_files),read_cov_write)</code></pre>
+<pre class="bash"><code>cd $eqtl_path&#39;/PC80_caveman&#39;
+source ~/.bashrc
+
+ml tabix/0.2.6-goolf-1.7.20
+
+for f in *.caveman.bed
+do
+cell=`echo $f | sed &#39;s/.caveman.bed//&#39;`
+CaVEMaN --single-signal --eqtl &quot;$cell&quot;.eqtl.list --bed &quot;$f&quot; --vcf combined_final.vcf.gz \
+     --out &quot;$cell&quot;.caveman.corrected.expression.bed --cov &quot;$cell&quot;.cov.caveman.txt
+done</code></pre>
+<pre class="bash"><code>cd $eqtl_path&#39;/PC80_caveman&#39;
+source ~/.bashrc
+mkdir -p results
+
+ml tabix/0.2.6-goolf-1.7.20
+
+for f in *.caveman.corrected.expression.bed
+do
+cell=`echo $f | sed &#39;s/.caveman.corrected.expression.bed//&#39;`
+n_eqtl=`wc -l $f |cut -d &#39; &#39; -f 1`
+echo $n_eqtl
+n_jobs=$(($n_eqtl/50))
+n_jobs=$(($n_jobs+1))
+for i in $( eval echo {1..$n_jobs} )
+do
+sbatch --wrap=&quot;CaVEMaN --bed &#39;$f&#39; --vcf combined_final.vcf.gz --genes 50 \
+     --job-number &#39;$i&#39; --normal --out results/&#39;$cell&#39;_&#39;$i&#39; --verbose&quot;
+done 
+done</code></pre>
+<pre class="bash"><code>cd $eqtl_path&#39;/PC80_caveman&#39;/results
+
+awk &#39;FNR&gt;1||NR==1&#39; Astrocytes_* &gt; Astrocytes.all
+awk &#39;FNR&gt;1||NR==1&#39; Endothelial.cells_* &gt; Endothelial.cells.all
+awk &#39;FNR&gt;1||NR==1&#39; Excitatory.neurons_* &gt; Excitatory.neurons.all
+awk &#39;FNR&gt;1||NR==1&#39; Inhibitory.neurons_* &gt; Inhibitory.neurons.all
+awk &#39;FNR&gt;1||NR==1&#39; Microglia_* &gt; Microglia.all
+awk &#39;FNR&gt;1||NR==1&#39; Oligodendrocytes_* &gt; Oligodendrocytes.all
+awk &#39;FNR&gt;1||NR==1&#39; OPCs...COPs_* &gt; OPCs...COPs.all
+awk &#39;FNR&gt;1||NR==1&#39; Pericytes_* &gt; Pericytes.all</code></pre>
+<pre class="bash"><code>cd $eqtl_path&#39;/PC80_caveman&#39;/results
+source ~/.bashrc
+
+ml tabix/0.2.6-goolf-1.7.20
+
+for f in *.all
+do
+CaVEMaN --best $f --out $f.best --verbose
+done
+rm *_*</code></pre>
+<pre class="r"><code>files &lt;- list.files(&#39;data_sensitive/eqtl/PC80_caveman/results&#39;,pattern=&#39;.best&#39;,full.names = TRUE)</code></pre>
+<pre class="r"><code>d &lt;- tibble(files) %&gt;% mutate(file_content=map(files,read_tsv)) %&gt;% 
+  unnest(file_content) %&gt;% 
+  mutate(cell_type=basename(files) %&gt;% gsub(&#39;\\.all.best&#39;,&#39;&#39;,.)) %&gt;% 
+  select(cell_type,everything()) %&gt;% select(-files) %&gt;% 
+  mutate(cell_type=gsub(&#39;\\.&#39;,&#39; &#39;,cell_type)) %&gt;% 
+  mutate(cell_type=gsub(&#39;OPCs   COPs&#39;,&#39;OPCs / COPs&#39;,cell_type)) %&gt;% 
+  arrange(-Probability)</code></pre>
+<pre class="r"><code>write_tsv(d,&#39;output/eqtl/eqtl.80PCs.caveman.txt&#39;)</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.0.1 (2020-06-06)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 7 (Core)
+
+Matrix products: default
+BLAS/LAPACK: /pstore/apps/OpenBLAS/0.3.1-GCC-7.3.0-2.30/lib/libopenblasp-r0.3.1.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] parallel  stats     graphics  grDevices utils     datasets  methods  
+[8] base     
+
+other attached packages:
+ [1] qvalue_2.20.0   forcats_0.5.0   stringr_1.4.0   dplyr_1.0.0    
+ [5] purrr_0.3.4     readr_1.3.1     tidyr_1.1.0     tibble_3.0.1   
+ [9] ggplot2_3.3.3   tidyverse_1.3.0 workflowr_1.6.2
+
+loaded via a namespace (and not attached):
+ [1] tidyselect_1.1.0  xfun_0.14         reshape2_1.4.4    splines_4.0.1    
+ [5] haven_2.3.1       lattice_0.20-41   colorspace_1.4-1  vctrs_0.3.1      
+ [9] generics_0.0.2    htmltools_0.5.1.1 yaml_2.2.1        blob_1.2.1       
+[13] rlang_0.4.10      later_1.1.0.1     pillar_1.4.4      withr_2.2.0      
+[17] glue_1.4.1        DBI_1.1.0         dbplyr_1.4.4      modelr_0.1.8     
+[21] readxl_1.3.1      plyr_1.8.6        lifecycle_0.2.0   munsell_0.5.0    
+[25] gtable_0.3.0      cellranger_1.1.0  rvest_0.3.5       evaluate_0.14    
+[29] knitr_1.28        httpuv_1.5.4      fansi_0.4.1       broom_0.5.6      
+[33] Rcpp_1.0.6        promises_1.1.1    backports_1.1.7   scales_1.1.1     
+[37] jsonlite_1.6.1    fs_1.4.1          hms_0.5.3         digest_0.6.25    
+[41] stringi_1.4.6     grid_4.0.1        rprojroot_1.3-2   cli_2.0.2        
+[45] tools_4.0.1       magrittr_1.5      crayon_1.3.4      whisker_0.4      
+[49] pkgconfig_2.0.3   ellipsis_0.3.1    xml2_1.3.2        reprex_0.3.0     
+[53] lubridate_1.7.9   rstudioapi_0.11   assertthat_0.2.1  rmarkdown_2.2    
+[57] httr_1.4.1        R6_2.4.1          nlme_3.1-148      git2r_0.27.1     
+[61] compiler_4.0.1   </code></pre>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
