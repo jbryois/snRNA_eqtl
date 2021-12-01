@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstronga14eee2"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> a14eee2 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong3d23918"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 3d23918 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstronga14eee2" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong3d23918" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version a14eee2. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 3d23918. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -572,6 +572,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+3d23918
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
+</td>
+<td>
+added_marker_figures - small modif
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+811141f
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1016,41 +1050,14 @@ Julien Bryois
 <pre><code>`summarise()` regrouping output by &#39;cell_type&#39; (override with `.groups` argument)</code></pre>
 <pre class="r"><code>m &lt;- m[c(&#39;AQP4&#39;,&#39;CLDN5&#39;,&#39;SLC17A7&#39;,&#39;GAD2&#39;,&#39;C1QA&#39;,&#39;MOG&#39;,&#39;PDGFRA&#39;,&#39;RGS5&#39;),]</code></pre>
 <pre class="r"><code>pheatmap::pheatmap(t(m),scale=&#39;row&#39;,cluster_cols = FALSE,cluster_rows = FALSE,angle_col = 0,filename = &#39;output/Figures/marker_mean_cpm_row_scale.pdf&#39;,height = 2,width=7)</code></pre>
-</div>
-<div id="genotype-pca" class="section level2">
-<h2>Genotype PCA</h2>
-<pre class="r"><code>data &lt;- read.table(&quot;data_sensitive/genotypes/Combined_with1kg.mds&quot;,header=TRUE) %&gt;% dplyr::select(-FID) %&gt;% dplyr::select(IID,C1,C2)
-ancestry &lt;- read.table(&quot;data_sensitive/genotypes/integrated_call_samples_v3.20130502.ALL.panel&quot;,header=TRUE) %&gt;% dplyr::rename(IID=sample)
-d &lt;- left_join(data,ancestry,by=&quot;IID&quot;)
-d &lt;- mutate(d,super_pop=ifelse(is.na(super_pop),&#39;This study&#39;,super_pop))
-
-threshold &lt;- d %&gt;% filter(super_pop==&#39;EUR&#39;) %&gt;% summarise(meanC1=mean(C1),sdC1=sd(C1),meanC2=mean(C2),sdC2=sd(C2)) %&gt;% 
-  mutate(x1=meanC1-3*sdC1,x2=meanC1+3*sdC1,y1=meanC2-3*sdC2,y2=meanC2+3*sdC2)
-
-d &lt;- mutate(d,outlier=ifelse(C1&gt;threshold$x1 &amp; C1&lt;threshold$x2 &amp; C2&gt;threshold$y1 &amp; C2&lt;threshold$y2,&#39;keep&#39;,&#39;outlier&#39;))
-
-p &lt;- ggplot(d) +geom_point(aes(C1,C2,col= super_pop),size=0.5) + theme_bw() + xlab(&#39;MDS1&#39;) + ylab(&#39;MDS2&#39;) + geom_rect(data=threshold,aes(xmin=x1,xmax=x2,ymin=y1,ymax=y2),alpha=0.1,color=&#39;red&#39;) + theme(text=element_text(size=18))
-ggsave(p,filename=&#39;output/Figures/mds_genotype.pdf&#39;,width=7,height=5)
-p</code></pre>
+<pre class="r"><code>pheatmap::pheatmap(t(m),scale=&#39;row&#39;,cluster_cols = FALSE,cluster_rows = FALSE,angle_col = 0)</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-23-1.png" width="672" style="display: block; margin: auto;" /></p>
-</div>
-<div id="number-of-eqtl-discoveries-vs-number-of-expression-pcs" class="section level2">
-<h2>Number of eQTL discoveries vs number of expression PCs</h2>
-<pre class="r"><code>d &lt;- read_tsv(&#39;output/eqtl/eqtl.allPCs.txt&#39;) %&gt;% 
-  filter(adj_p&lt;0.05) %&gt;% 
-  dplyr::count(cell_type,PCs) %&gt;% 
-  mutate(PCs=gsub(&#39;PC&#39;,&#39;&#39;,PCs) %&gt;% as.numeric()) %&gt;% 
-  mutate(cell_type=gsub(&#39;OPCs   COPs&#39;,&#39;OPCs / COPs&#39;,cell_type))</code></pre>
-<pre class="r"><code>p &lt;- d %&gt;% ggplot(.,aes(PCs,n,col=cell_type)) + geom_point() + geom_line(aes(group=cell_type)) + theme_classic() + xlab(&#39;Number of expression PCs used as covariate&#39;) + guides(fill = guide_legend(reverse=T)) + ylab(&#39;Number of cis-eQTL (5%FDR)&#39;) + scale_x_continuous(breaks=seq(20, 120, 20)) + guides(col=guide_legend(title=&quot;Cell type&quot;)) + theme(text=element_text(size=18))
-ggsave(p,filename=&#39;output/Figures/n_eqtl_5FDR_cpm_vs_exp_PCs.pdf&#39;,width=8)
-p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-25-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-25-1">
-Past versions of unnamed-chunk-25-1.png
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-23-1">
+Past versions of unnamed-chunk-23-1.png
 </button>
 </p>
-<div id="fig-unnamed-chunk-25-1" class="collapse">
+<div id="fig-unnamed-chunk-23-1" class="collapse">
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
 <thead>
@@ -1069,7 +1076,73 @@ Date
 <tbody>
 <tr>
 <td>
-d2896af
+811141f
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="genotype-pca" class="section level2">
+<h2>Genotype PCA</h2>
+<pre class="r"><code>data &lt;- read.table(&quot;data_sensitive/genotypes/Combined_with1kg.mds&quot;,header=TRUE) %&gt;% dplyr::select(-FID) %&gt;% dplyr::select(IID,C1,C2)
+ancestry &lt;- read.table(&quot;data_sensitive/genotypes/integrated_call_samples_v3.20130502.ALL.panel&quot;,header=TRUE) %&gt;% dplyr::rename(IID=sample)
+d &lt;- left_join(data,ancestry,by=&quot;IID&quot;)
+d &lt;- mutate(d,super_pop=ifelse(is.na(super_pop),&#39;This study&#39;,super_pop))
+
+threshold &lt;- d %&gt;% filter(super_pop==&#39;EUR&#39;) %&gt;% summarise(meanC1=mean(C1),sdC1=sd(C1),meanC2=mean(C2),sdC2=sd(C2)) %&gt;% 
+  mutate(x1=meanC1-3*sdC1,x2=meanC1+3*sdC1,y1=meanC2-3*sdC2,y2=meanC2+3*sdC2)
+
+d &lt;- mutate(d,outlier=ifelse(C1&gt;threshold$x1 &amp; C1&lt;threshold$x2 &amp; C2&gt;threshold$y1 &amp; C2&lt;threshold$y2,&#39;keep&#39;,&#39;outlier&#39;))
+
+p &lt;- ggplot(d) +geom_point(aes(C1,C2,col= super_pop),size=0.5) + theme_bw() + xlab(&#39;MDS1&#39;) + ylab(&#39;MDS2&#39;) + geom_rect(data=threshold,aes(xmin=x1,xmax=x2,ymin=y1,ymax=y2),alpha=0.1,color=&#39;red&#39;) + theme(text=element_text(size=18))
+ggsave(p,filename=&#39;output/Figures/mds_genotype.pdf&#39;,width=7,height=5)
+p</code></pre>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-24-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="number-of-eqtl-discoveries-vs-number-of-expression-pcs" class="section level2">
+<h2>Number of eQTL discoveries vs number of expression PCs</h2>
+<pre class="r"><code>d &lt;- read_tsv(&#39;output/eqtl/eqtl.allPCs.txt&#39;) %&gt;% 
+  filter(adj_p&lt;0.05) %&gt;% 
+  dplyr::count(cell_type,PCs) %&gt;% 
+  mutate(PCs=gsub(&#39;PC&#39;,&#39;&#39;,PCs) %&gt;% as.numeric()) %&gt;% 
+  mutate(cell_type=gsub(&#39;OPCs   COPs&#39;,&#39;OPCs / COPs&#39;,cell_type))</code></pre>
+<pre class="r"><code>p &lt;- d %&gt;% ggplot(.,aes(PCs,n,col=cell_type)) + geom_point() + geom_line(aes(group=cell_type)) + theme_classic() + xlab(&#39;Number of expression PCs used as covariate&#39;) + guides(fill = guide_legend(reverse=T)) + ylab(&#39;Number of cis-eQTL (5%FDR)&#39;) + scale_x_continuous(breaks=seq(20, 120, 20)) + guides(col=guide_legend(title=&quot;Cell type&quot;)) + theme(text=element_text(size=18))
+ggsave(p,filename=&#39;output/Figures/n_eqtl_5FDR_cpm_vs_exp_PCs.pdf&#39;,width=8)
+p</code></pre>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-26-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-26-1">
+Past versions of unnamed-chunk-26-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-26-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+811141f
 </td>
 <td>
 Julien Bryois
@@ -1094,7 +1167,7 @@ p &lt;- d %&gt;% ggplot(.,aes(bpval,fill=cell_type)) + geom_histogram(bins=30, b
 
 ggsave(p,filename=&#39;output/Figures/pi1_eqtl_all.pdf&#39;,width=8)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-26-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-27-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="metabrain" class="section level2">
 <h2>Metabrain</h2>
@@ -1120,44 +1193,7 @@ p</code></pre>
 
 ggsave(p,filename=&#39;output/Figures/shared_prop_metabrain_cortex.pdf&#39;,width=12,height=3)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-29-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-29-1">
-Past versions of unnamed-chunk-29-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-29-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-d2896af
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2021-12-01
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-30-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="non-replicating-eqtl" class="section level3">
 <h3>non-replicating eQTL</h3>
@@ -1200,7 +1236,7 @@ Warning: Transformation introduced infinite values in continuous y-axis</code></
 <pre><code>Warning: Removed 1 rows containing non-finite values (stat_boxplot).</code></pre>
 <pre><code>Warning: Removed 1 rows containing non-finite values (stat_compare_means).</code></pre>
 <pre><code>Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-33-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-34-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="loeuf" class="section level3">
 <h3>Loeuf</h3>
@@ -1242,7 +1278,7 @@ Warning: Removed 2 rows containing missing values (position_quasirandom).</code>
 Warning: Removed 2 rows containing missing values (position_quasirandom).</code></pre>
 <pre><code>Warning: Removed 4 rows containing missing values (position_quasirandom).</code></pre>
 <pre><code>Warning: Removed 2 rows containing missing values (position_quasirandom).</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-36-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-37-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="tmp" class="section level2">
