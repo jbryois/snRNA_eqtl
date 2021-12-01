@@ -135,7 +135,7 @@ write_tsv(matched_snps,here('output/eqtl/eqtl.PC80.metabrain.matched.txt'))
 
 ## Plot
 
-```{r,echo=FALSE,results=FALSE}
+```{r,echo=FALSE,message=FALSE}
 matched_snps <- read_tsv('output/eqtl/eqtl.PC80.metabrain.matched.txt')
 ```
 
@@ -146,7 +146,7 @@ matched_snps <- matched_snps %>% mutate(glia_neurons=case_when(
 )) 
 ```
 
-```{r,results=FALSE}
+```{r,message=FALSE}
 matched_snps_text_prop <- matched_snps %>% 
   group_by(glia_neurons) %>% 
   summarise(prop=paste0('prop = ',round(sum(PValue<0.05)*100/sum(PValue<10),digits=1),'%'),
@@ -192,7 +192,7 @@ p
 sum_expression <- readRDS('data_sensitive/expression/cell_marker_expression.rds')
 ```
 
-```{r}
+```{r,message=FALSE}
 m <- sum_expression %>% 
   group_by(cell_type,symbol) %>% 
   summarise(mean_cpm=mean(counts_scaled_1M,na.rm=TRUE)) %>% 
@@ -213,7 +213,6 @@ pheatmap::pheatmap(t(m),scale='row',cluster_cols = FALSE,cluster_rows = FALSE,an
 ```{r}
 pheatmap::pheatmap(t(m),scale='row',cluster_cols = FALSE,cluster_rows = FALSE,angle_col = 0)
 ```
-
 
 ## Genotype PCA
 
@@ -271,7 +270,7 @@ p
 matched_snps <- read_tsv('output/eqtl/eqtl.PC80.metabrain.matched.txt')
 ```
 
-```{r}
+```{r,message=FALSE}
 matched_snps_text_prop <- matched_snps %>% 
   add_count(cell_type) %>%
   group_by(cell_type) %>% 
@@ -318,7 +317,7 @@ d <- read_tsv('output/eqtl/eqtl.PC80.txt') %>%
 d_sig <- inner_join(d,matched_snp_short,by=c('ensembl','cell_type','SNP'))
 ```
 
-```{r,message=FALSE}
+```{r,message=FALSE,warning=FALSE,fig.width=8}
 p <- ggplot(d_sig,aes(replication_status,abs(dist),col=replication_status)) + 
   ggbeeswarm::geom_quasirandom(size=0.1) + 
   geom_boxplot(alpha=0.1,outlier.shape = NA,col='black',width=0.25) + 
@@ -349,7 +348,7 @@ loeuf <- read_tsv('data/gnomad_loeuf/supplementary_dataset_11_full_constraint_me
 d_sig <- inner_join(d_sig,loeuf,by='ensembl')
 ```
 
-```{r}
+```{r,warning=FALSE,message=FALSE,fig.width=8}
 p <- ggplot(d_sig,aes(replication_status,oe_lof_upper,col=replication_status)) +
   ggbeeswarm::geom_quasirandom(size=0.1) + 
   geom_boxplot(alpha=0.1,outlier.shape = NA,col='black',width=0.25) + 
