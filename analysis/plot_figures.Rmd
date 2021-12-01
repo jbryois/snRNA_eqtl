@@ -186,6 +186,30 @@ p
 
 # Suplementary figures
 
+## Mean expression markers
+
+```{r,message=FALSE}
+sum_expression <- readRDS('data_sensitive/expression/cell_marker_expression.rds')
+```
+
+```{r}
+m <- sum_expression %>% 
+  group_by(cell_type,symbol) %>% 
+  summarise(mean_cpm=mean(counts_scaled_1M,na.rm=TRUE)) %>% 
+  ungroup() %>% 
+  spread(cell_type,mean_cpm) %>% 
+  column_to_rownames('symbol') %>% 
+  as.matrix() 
+```
+
+```{r}
+m <- m[c('AQP4','CLDN5','SLC17A7','GAD2','C1QA','MOG','PDGFRA','RGS5'),]
+```
+
+```{r}
+pheatmap::pheatmap(t(m),scale='row',cluster_cols = FALSE,cluster_rows = FALSE,angle_col = 0,filename = 'output/Figures/marker_mean_cpm_row_scale.pdf',height = 2,width=7)
+```
+
 ## Genotype PCA
 
 ```{r,message=FALSE}
