@@ -25,6 +25,7 @@
 <link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
 <script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
+<script src="site_libs/navigation-1.1/codefolding.js"></script>
 <link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 
@@ -258,6 +259,9 @@ $(document).ready(function () {
 </style>
 
 <!-- code folding -->
+<style type="text/css">
+.code-folding-btn { margin-bottom: 4px; }
+</style>
 
 
 
@@ -375,6 +379,14 @@ div.tocify {
 </div><!--/.navbar -->
 
 <div class="fluid-row" id="header">
+
+<div class="btn-group pull-right">
+<button type="button" class="btn btn-default btn-xs dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span>Code</span> <span class="caret"></span></button>
+<ul class="dropdown-menu" style="min-width: 50px;">
+<li><a id="rmd-show-all-code" href="#">Show All Code</a></li>
+<li><a id="rmd-hide-all-code" href="#">Hide All Code</a></li>
+</ul>
+</div>
 
 
 
@@ -496,16 +508,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong5719848"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 5719848 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong254b41e"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 254b41e </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong5719848" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong254b41e" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 5719848. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 254b41e. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -572,6 +584,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+254b41e
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
+</td>
+<td>
+added_marker_figures - added code folding
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+19a5db5
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1373,7 +1419,7 @@ Julien Bryois
 
 ggsave(p,filename=&#39;output/Figures/shared_prop_metabrain_cortex.replication.TSS.dist.pdf&#39;,width=12,height=3)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-34-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-34-1.png" width="960" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-34-1">
 Past versions of unnamed-chunk-34-1.png
@@ -1396,6 +1442,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+19a5db5
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
+</td>
+</tr>
 <tr>
 <td>
 056f5c7
@@ -1434,7 +1491,7 @@ Julien Bryois
 
 ggsave(p,filename=&#39;output/Figures/shared_prop_metabrain_cortex.replication.LOEUF.dist.pdf&#39;,width=12,height=3)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-37-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-37-1.png" width="960" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-37-1">
 Past versions of unnamed-chunk-37-1.png
@@ -1457,6 +1514,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+19a5db5
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
+</td>
+</tr>
 <tr>
 <td>
 056f5c7
@@ -1577,6 +1645,11 @@ $(document).ready(function () {
 </script>
 
 <!-- code folding -->
+<script>
+$(document).ready(function () {
+  window.initializeCodeFolding("hide" === "show");
+});
+</script>
 
 <script>
 $(document).ready(function ()  {
