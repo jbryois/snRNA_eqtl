@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong3d23918"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 3d23918 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong5719848"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 5719848 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong3d23918" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong5719848" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 3d23918. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 5719848. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -572,6 +572,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+5719848
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
+</td>
+<td>
+added_marker_figures - small modif2
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+056f5c7
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -907,17 +941,6 @@ zcat combined_final.vcf.gz | cut -f 1,2,3 | grep -v &quot;^##&quot; &gt; snp_pos
 </div>
 <div id="plot" class="section level2">
 <h2>Plot</h2>
-<pre><code>Parsed with column specification:
-cols(
-  SNP_id_hg38 = col_character(),
-  ensembl = col_character(),
-  PValue = col_double(),
-  cell_type = col_character(),
-  symbol = col_character(),
-  SNP = col_character(),
-  chr_hg38 = col_double(),
-  pos_hg38 = col_double()
-)</code></pre>
 <pre class="r"><code>matched_snps &lt;- matched_snps %&gt;% mutate(glia_neurons=case_when(
   cell_type %in% c(&#39;Excitatory neurons&#39;,&#39;Inhibitory neurons&#39;) ~ &#39;Neurons&#39;,
   TRUE ~ &#39;Glia&#39;
@@ -926,19 +949,17 @@ cols(
   group_by(glia_neurons) %&gt;% 
   summarise(prop=paste0(&#39;prop = &#39;,round(sum(PValue&lt;0.05)*100/sum(PValue&lt;10),digits=1),&#39;%&#39;),
             pi1=paste0(&#39;pi1 = &#39;,round(1-qvalue::qvalue(PValue)$pi0,digits=2)),
-            label=paste0(prop,&#39;\n&#39;,pi1),n_eqtl=sum(PValue&lt;10))</code></pre>
-<pre><code>`summarise()` ungrouping output (override with `.groups` argument)</code></pre>
-<pre class="r"><code>p &lt;- ggplot(matched_snps,aes(PValue,fill=glia_neurons)) + 
+            label=paste0(prop,&#39;\n&#39;,pi1),n_eqtl=sum(PValue&lt;10))
+
+p &lt;- ggplot(matched_snps,aes(PValue,fill=glia_neurons)) + 
   geom_histogram() + 
   facet_wrap(~glia_neurons,scales=&#39;free_y&#39;) + 
   theme_classic() + 
   theme(legend.position = &#39;none&#39;,text=element_text(size=20)) +
   geom_text(data=matched_snps_text_prop,aes(x=0.5,y=Inf,vjust=2.1,label=label),size=8) +
   ggtitle(&#39;Metabrain Cortex matched pvalues&#39;)
-ggsave(p,filename=&#39;output/Figures/fig2c.pdf&#39;,height=5,width=7)</code></pre>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
-<pre class="r"><code>p</code></pre>
-<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+ggsave(p,filename=&#39;output/Figures/fig2c.pdf&#39;,height=5,width=7)
+p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-17-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-17-1">
@@ -1047,7 +1068,6 @@ Julien Bryois
   spread(cell_type,mean_cpm) %&gt;% 
   column_to_rownames(&#39;symbol&#39;) %&gt;% 
   as.matrix() </code></pre>
-<pre><code>`summarise()` regrouping output by &#39;cell_type&#39; (override with `.groups` argument)</code></pre>
 <pre class="r"><code>m &lt;- m[c(&#39;AQP4&#39;,&#39;CLDN5&#39;,&#39;SLC17A7&#39;,&#39;GAD2&#39;,&#39;C1QA&#39;,&#39;MOG&#39;,&#39;PDGFRA&#39;,&#39;RGS5&#39;),]</code></pre>
 <pre class="r"><code>pheatmap::pheatmap(t(m),scale=&#39;row&#39;,cluster_cols = FALSE,cluster_rows = FALSE,angle_col = 0,filename = &#39;output/Figures/marker_mean_cpm_row_scale.pdf&#39;,height = 2,width=7)</code></pre>
 <pre class="r"><code>pheatmap::pheatmap(t(m),scale=&#39;row&#39;,cluster_cols = FALSE,cluster_rows = FALSE,angle_col = 0)</code></pre>
@@ -1074,6 +1094,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+056f5c7
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
+</td>
+</tr>
 <tr>
 <td>
 811141f
@@ -1106,6 +1137,43 @@ p &lt;- ggplot(d) +geom_point(aes(C1,C2,col= super_pop),size=0.5) + theme_bw() +
 ggsave(p,filename=&#39;output/Figures/mds_genotype.pdf&#39;,width=7,height=5)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-24-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-24-1">
+Past versions of unnamed-chunk-24-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-24-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+056f5c7
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="number-of-eqtl-discoveries-vs-number-of-expression-pcs" class="section level2">
 <h2>Number of eQTL discoveries vs number of expression PCs</h2>
@@ -1142,6 +1210,17 @@ Date
 <tbody>
 <tr>
 <td>
+056f5c7
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
+</td>
+</tr>
+<tr>
+<td>
 811141f
 </td>
 <td>
@@ -1168,6 +1247,43 @@ p &lt;- d %&gt;% ggplot(.,aes(bpval,fill=cell_type)) + geom_histogram(bins=30, b
 ggsave(p,filename=&#39;output/Figures/pi1_eqtl_all.pdf&#39;,width=8)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-27-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-27-1">
+Past versions of unnamed-chunk-27-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-27-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+056f5c7
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="metabrain" class="section level2">
 <h2>Metabrain</h2>
@@ -1182,7 +1298,6 @@ p</code></pre>
             pi1=paste0(&#39;pi1 = &#39;,ifelse(n_eqtl&lt;100,&#39;NA&#39;,
                                        round(1-qvalue::qvalue(PValue,)$pi0,digits=2))),
             label=paste0(prop,&#39;\n&#39;,pi1))</code></pre>
-<pre><code>`summarise()` ungrouping output (override with `.groups` argument)</code></pre>
 <pre class="r"><code>p &lt;- ggplot(matched_snps,aes(PValue,fill=cell_type)) + 
   geom_histogram() + 
   facet_wrap(~cell_type,scales=&#39;free_y&#39;,nrow=2) + 
@@ -1194,6 +1309,43 @@ p</code></pre>
 ggsave(p,filename=&#39;output/Figures/shared_prop_metabrain_cortex.pdf&#39;,width=12,height=3)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-30-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-30-1">
+Past versions of unnamed-chunk-30-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-30-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+056f5c7
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="non-replicating-eqtl" class="section level3">
 <h3>non-replicating eQTL</h3>
@@ -1219,24 +1371,46 @@ p</code></pre>
   ylab(&#39;Absolute distance to TSS (log10)&#39;) + 
   xlab(&#39;&#39;)
 
-ggsave(p,filename=&#39;output/Figures/shared_prop_metabrain_cortex.replication.TSS.dist.pdf&#39;,width=12,height=3)</code></pre>
-<pre><code>Warning: Transformation introduced infinite values in continuous y-axis
-
-Warning: Transformation introduced infinite values in continuous y-axis
-
-Warning: Transformation introduced infinite values in continuous y-axis</code></pre>
-<pre><code>Warning: Removed 1 rows containing non-finite values (stat_boxplot).</code></pre>
-<pre><code>Warning: Removed 1 rows containing non-finite values (stat_compare_means).</code></pre>
-<pre><code>Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
-<pre class="r"><code>p</code></pre>
-<pre><code>Warning: Transformation introduced infinite values in continuous y-axis</code></pre>
-<pre><code>Warning: Transformation introduced infinite values in continuous y-axis
-
-Warning: Transformation introduced infinite values in continuous y-axis</code></pre>
-<pre><code>Warning: Removed 1 rows containing non-finite values (stat_boxplot).</code></pre>
-<pre><code>Warning: Removed 1 rows containing non-finite values (stat_compare_means).</code></pre>
-<pre><code>Warning: Removed 1 rows containing missing values (geom_point).</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-34-1.png" width="672" style="display: block; margin: auto;" /></p>
+ggsave(p,filename=&#39;output/Figures/shared_prop_metabrain_cortex.replication.TSS.dist.pdf&#39;,width=12,height=3)
+p</code></pre>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-34-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-34-1">
+Past versions of unnamed-chunk-34-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-34-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+056f5c7
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="loeuf" class="section level3">
 <h3>Loeuf</h3>
@@ -1258,27 +1432,46 @@ Warning: Transformation introduced infinite values in continuous y-axis</code></
   ylab(&quot;LoF observed/expected upper bound \nfraction (LOEUF)&quot;) + 
   xlab(&#39;&#39;)
 
-ggsave(p,filename=&#39;output/Figures/shared_prop_metabrain_cortex.replication.LOEUF.dist.pdf&#39;,width=12,height=3)</code></pre>
-<pre><code>Warning: Removed 21 rows containing non-finite values (stat_boxplot).</code></pre>
-<pre><code>Warning: Removed 21 rows containing non-finite values (stat_compare_means).</code></pre>
-<pre><code>Warning: Removed 3 rows containing missing values (position_quasirandom).</code></pre>
-<pre><code>Warning: Removed 8 rows containing missing values (position_quasirandom).</code></pre>
-<pre><code>Warning: Removed 2 rows containing missing values (position_quasirandom).
-
-Warning: Removed 2 rows containing missing values (position_quasirandom).</code></pre>
-<pre><code>Warning: Removed 4 rows containing missing values (position_quasirandom).</code></pre>
-<pre><code>Warning: Removed 2 rows containing missing values (position_quasirandom).</code></pre>
-<pre class="r"><code>p</code></pre>
-<pre><code>Warning: Removed 21 rows containing non-finite values (stat_boxplot).</code></pre>
-<pre><code>Warning: Removed 21 rows containing non-finite values (stat_compare_means).</code></pre>
-<pre><code>Warning: Removed 3 rows containing missing values (position_quasirandom).</code></pre>
-<pre><code>Warning: Removed 8 rows containing missing values (position_quasirandom).</code></pre>
-<pre><code>Warning: Removed 2 rows containing missing values (position_quasirandom).
-
-Warning: Removed 2 rows containing missing values (position_quasirandom).</code></pre>
-<pre><code>Warning: Removed 4 rows containing missing values (position_quasirandom).</code></pre>
-<pre><code>Warning: Removed 2 rows containing missing values (position_quasirandom).</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-37-1.png" width="672" style="display: block; margin: auto;" /></p>
+ggsave(p,filename=&#39;output/Figures/shared_prop_metabrain_cortex.replication.LOEUF.dist.pdf&#39;,width=12,height=3)
+p</code></pre>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-37-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-37-1">
+Past versions of unnamed-chunk-37-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-37-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+056f5c7
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="tmp" class="section level2">
