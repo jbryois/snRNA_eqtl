@@ -264,7 +264,7 @@ if(!file.exists('data_sensitive/expression/ad_sum_expression.rds')){
 
 # Load Pseudo-bulk
 
-```{r}
+```{r,eval=FALSE}
 sum_expression_ms <- readRDS('data_sensitive/expression/ms_sum_expression.rds') %>% mutate(dataset='ms')
 sum_expression_ad <- readRDS('data_sensitive/expression/ad_sum_expression.rds') %>% mutate(dataset='ad')
 ```
@@ -273,22 +273,22 @@ sum_expression_ad <- readRDS('data_sensitive/expression/ad_sum_expression.rds') 
 
 Get genes quantified in both datasets
 
-```{r}
+```{r,eval=FALSE}
 common_genes <- intersect(unique(sum_expression_ad$ensembl),unique(sum_expression_ms$ensembl))
 ```
 
-```{r}
+```{r,eval=FALSE}
 length(common_genes)
 ```
 
-```{r}
+```{r,eval=FALSE}
 sum_expression_ms <- sum_expression_ms %>% filter(ensembl%in%common_genes)
 sum_expression_ad <- sum_expression_ad %>% filter(ensembl%in%common_genes)
 ```
 
 Get same cell type label
 
-```{r}
+```{r,eval=FALSE}
 sum_expression_ad <- sum_expression_ad %>% mutate(cell_type=case_when(
   cell_type=='Glutamatergic' ~ 'Excitatory neurons',
   cell_type=='GABAergic' ~ 'Inhibitory neurons',
@@ -299,14 +299,14 @@ sum_expression_ad <- sum_expression_ad %>% mutate(cell_type=case_when(
 
 Let's merge the MS and AD dataset. Let's then remove Immune cells which were not seen in the AD dataset.
 
-```{r}
+```{r,eval=FALSE}
 sum_expression <- rbind(sum_expression_ms,sum_expression_ad) %>% 
   filter(cell_type !="Immune")
 ```
 
 Get counts per million (CPM)
 
-```{r}
+```{r,eval=FALSE}
 sum_expression <- sum_expression %>% 
   group_by(cell_type,individual_id) %>% 
   mutate(counts_scaled_1M=counts*10^6/sum(counts)) %>% 
@@ -314,9 +314,16 @@ sum_expression <- sum_expression %>%
   as_tibble()
 ```
 
+Save expression of cell type marker genes
+
+```{r,eval=FALSE}
+markers <- sum_expression %>% filter(symbol%in%c('SLC17A7','GAD2','AQP4','MOG','PDGFRA','C1QA','CLDN5','RGS5'))
+saveRDS(markers,'data_sensitive/expression/cell_marker_expression.rds')
+```
+
 ## Get number of samples expressing genes and average expression
 
-```{r}
+```{r,eval=FALSE}
 sumstats_gene <- sum_expression %>% group_by(cell_type,ensembl) %>% 
   summarise(counts_per_celltype=sum(counts),
          n_expressed_per_celltype=sum(n_expressed),
@@ -334,21 +341,21 @@ Keep genes expressed in:
 1) at least 5% of the cells (per cell type)
 2) at least 10 individuals 
 
-```{r}
+```{r,eval=FALSE}
 gene_to_keep_per_cell_type <- sumstats_gene %>% 
   filter(perc_expressed_per_celltype>5,n_samples_expressed>10) %>% 
   dplyr::select(cell_type,ensembl) %>% 
   unique()
 ```
 
-```{r}
+```{r,eval=FALSE}
 sum_expression <- sum_expression %>% 
   inner_join(.,gene_to_keep_per_cell_type,by=c('cell_type','ensembl'))
 ```
 
 Number of genes tested per cell type
 
-```{r}
+```{r,eval=FALSE}
 dplyr::count(sum_expression,cell_type,individual_id) %>% 
   select(-individual_id) %>% 
   unique() %>% 
@@ -359,23 +366,23 @@ dplyr::count(sum_expression,cell_type,individual_id) %>%
 
 Remove individuals-cell type with less than 10 cells for a given cell type.
 
-```{r}
+```{r,eval=FALSE}
 (n_cells_ind_cell_type <- sum_expression %>% 
   dplyr::select(cell_type,individual_id,n_cells) %>% 
   unique() %>% arrange(n_cells))
 ```
 
-```{r}
+```{r,eval=FALSE}
 keep <- filter(n_cells_ind_cell_type,n_cells>=10)
 ```
 
 Number of unique individuals per cell types for eQTL analysis
 
-```{r}
+```{r,eval=FALSE}
 dplyr::count(keep,cell_type) %>% arrange(-n)
 ```
 
-```{r}
+```{r,eval=FALSE}
 sum_expression <- inner_join(sum_expression,keep,by=c('cell_type','individual_id','n_cells'))
 ```
 
@@ -383,7 +390,7 @@ sum_expression <- inner_join(sum_expression,keep,by=c('cell_type','individual_id
 
 Get TSS coordinate for all genes.
 
-```{r}
+```{r,eval=FALSE}
 gtf <- rtracklayer::import('data/gencode/Homo_sapiens.GRCh38.96.filtered.gtf') %>% 
   as.data.frame() %>% 
   dplyr::filter(type=='gene') %>% 
@@ -397,7 +404,7 @@ gtf$seqnames <- droplevels(gtf$seqnames)
 
 Set all samples to the same set of symbol and gene ID (like MS dataset).
 
-```{r}
+```{r,eval=FALSE}
 gene_id_common <- sum_expression %>% 
   filter(dataset=='ms') %>% 
   dplyr::select(symbol,ensembl) %>% 
@@ -405,13 +412,13 @@ gene_id_common <- sum_expression %>%
   mutate(gene=paste0(symbol,'_',ensembl)) %>% dplyr::select(-symbol)
 ```
 
-```{r}
+```{r,eval=FALSE}
 sum_expression <- sum_expression %>% 
   inner_join(.,gene_id_common,by='ensembl') %>% 
   dplyr::select(cell_type,individual_id,gene,counts,n_expressed,n_cells,perc_expressed,counts_scaled_1M)
 ```
 
-```{r}
+```{r,eval=FALSE}
 saveRDS(sum_expression,'data_sensitive/expression/all_sum_expression.rds')
 ```
 
@@ -419,7 +426,7 @@ saveRDS(sum_expression,'data_sensitive/expression/all_sum_expression.rds')
 
 Perform TMM normalization and get fastQTL format
 
-```{r}
+```{r,eval=FALSE}
 get_fastqtl_pheno <- function(cell){
   #keep all expression for the cell type and patient that have genotype
   bed <- sum_expression %>% dplyr::filter(cell_type==cell) %>% 
@@ -442,15 +449,15 @@ get_fastqtl_pheno <- function(cell){
 }    
 ```
 
-```{r}
+```{r,eval=FALSE}
 cells <- unique(sum_expression$cell_type)
 ```
 
-```{r,results=FALSE}
+```{r,results=FALSE,eval=FALSE}
 mclapply(cells,get_fastqtl_pheno,mc.cores=8)
 ```
 
-```{bash}
+```{bash,eval=FALSE}
 cd $eqtl_path
 ml tabix/0.2.6-goolf-1.7.20
 
@@ -462,15 +469,15 @@ done
 
 ## Generate expression pca
 
-```{r}
+```{r,eval=FALSE}
 geno_cov <- read_tsv('data_sensitive/eqtl/covariate_pca_meta_fastqtl.txt')
 ``` 
 
-```{r}
+```{r,eval=FALSE}
 pheno_files <- list.files('data_sensitive/eqtl/',pattern='*.bed.gz$',full.names = T)
 ```
 
-```{r}
+```{r,eval=FALSE}
 get_covariates <- function(i){
   
   out_name <- basename(pheno_files[i]) %>% gsub('\\.bed\\.gz','',.) %>% paste0('.cov.txt')
@@ -499,11 +506,11 @@ get_covariates <- function(i){
 }
 ```
 
-```{r,results=FALSE}
+```{r,results=FALSE,eval=FALSE}
 mclapply(1:length(pheno_files),get_covariates,mc.cores=8)
 ```
 
-```{bash}
+```{bash,eval=FALSE}
 cd $eqtl_path
 for f in PC*
 do
