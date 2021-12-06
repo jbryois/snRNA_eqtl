@@ -32,32 +32,33 @@ Sys.setenv(eqtl_path='data_sensitive/eqtl')
 
 Get individuals with both scRNA-seq and genotype information
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 individidual_genotype_scRNA <- read_tsv('data_sensitive/genotypes/individuals_with_genotype_scRNA.txt',
                                         col_names = FALSE)
 ```
 
 # MS expression
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 sce_ms <- readRDS('data_sensitive/sce/ms_sce_3.rds')
 ```
 
 get annotation
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 annot <- read_csv('data_sensitive/sce/conos_labelled_2021-05-31.txt')
 ```
 
 Only keep cells that were annotated
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 sce_ms <- sce_ms[,colnames(sce_ms)%in%annot$cell_id]
 ```
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 m <- match(colnames(sce_ms),annot$cell_id)
 sce_ms$broad_annot <- annot$type_broad[m]
+sce_ms$sample_id <- sce_ms$library_id
 ```
 
 Some scRNA-seq were swapped and not corrected in the loaded sce object.
@@ -67,7 +68,7 @@ WM189 and WM190 --> swap
 
 Swap them here
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 sce_ms$library_id[sce_ms$library_id=='EU017'] <- 'tmp'
 sce_ms$library_id[sce_ms$library_id=='EU018'] <- 'EU017'
 sce_ms$library_id[sce_ms$library_id=='tmp'] <- 'EU018'
@@ -77,7 +78,7 @@ colnames(sce_ms) <- gsub('EU018','EU017',colnames(sce_ms))
 colnames(sce_ms) <- gsub('tmp','EU018',colnames(sce_ms))
 ```
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 sce_ms$library_id[sce_ms$library_id=='WM189'] <- 'tmp'
 sce_ms$library_id[sce_ms$library_id=='WM190'] <- 'WM189'
 sce_ms$library_id[sce_ms$library_id=='tmp'] <- 'WM190'
@@ -89,43 +90,66 @@ colnames(sce_ms) <- gsub('tmp','WM190',colnames(sce_ms))
 
 Keep only individuals for which we have both scRNA-seq and expression
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 sce_ms <- sce_ms[,sce_ms$patient_id%in%individidual_genotype_scRNA$X1]
 ```
 
 add individual_id column to the sce object
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 sce_ms$individual_id <- sce_ms$patient_id
 ```
 
 Let's remove the individual which is also in the AD dataset (less cells than the AD dataset)
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 sce_ms <- sce_ms[,sce_ms$individual_id!='S03-009']
 ```
 
-And finally let's remove samples that don't match their genotype
+Let's remove samples that don't match their genotype
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 sce_ms <- sce_ms[,!sce_ms$library_id%in%c('EU015','EU004','WM115','WM155','WM185')]
+```
+
+Let's remove immune cells from the MS dataset (not observed in the AD dataset)
+
+```{r,eval=TRUE}
+sce_ms <- sce_ms[,!sce_ms$broad_annot=='Immune']
+```
+
+Let's set the gene name to ensembl (to merge with the AD sce dataset)
+
+```{r,eval=TRUE}
+rownames(sce_ms) <- rowData(sce_ms)$ensembl
+```
+
+Finally, let's save info about which sample corresponds to which individual in the filtered data
+
+```{r,eval=TRUE}
+ms_sample_individual <- colData(sce_ms) %>% 
+  as_tibble() %>% 
+  dplyr::select(sample_id=library_id,
+                individual_id) %>% 
+  unique() %>% 
+  write_tsv(.,'data_sensitive/expression/sample_individual_ms.txt',col_names = TRUE)
 ```
 
 # AD expression
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 sce_ad <- readRDS('data_sensitive/sce/sce.annotated8.rds')
 ```
 
 Keep only individuals for which we have both scRNA-seq and expression
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 sce_ad <- sce_ad[,sce_ad$individual_id%in%individidual_genotype_scRNA$X1]
 ```
 
 Some individuals are present in multiple AD studies
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 (individuals_multiple_studies <- colData(sce_ad) %>% as_tibble() %>% 
   dplyr::select(individual_id,study,diagnosis) %>% 
   unique() %>% 
@@ -136,27 +160,79 @@ Some individuals are present in multiple AD studies
 
 count number of cells for these individuals
 
-```{r,eval=FALSE}
- (n_cells_per_id <- colData(sce_ad) %>% as_tibble() %>% 
+```{r,eval=TRUE}
+n_cells_per_id <- colData(sce_ad) %>% as_tibble() %>% 
   filter(individual_id%in%individuals_multiple_studies$individual_id) %>% 
   dplyr::count(individual_id,study) %>% 
     group_by(individual_id) %>% 
-    mutate(keep=ifelse(n==max(n),TRUE,FALSE)))
+    mutate(keep=ifelse(n==max(n),TRUE,FALSE))
 ```
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 to_remove <- filter(n_cells_per_id,!keep) %>% 
   mutate(lab=paste0(individual_id,'_',study))
 ```
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 sce_ad$lab <- paste0(sce_ad$individual_id,'_',sce_ad$study)
 ```
 
 Remove the sample with the least amount of cells (when two samples from the same individual are observed in two datasets)
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 sce_ad <- sce_ad[,!sce_ad$lab%in%to_remove$lab]
+```
+
+Get same cell type label as the MS dataset
+
+```{r,eval=TRUE}
+sce_ad$broad_annot <- case_when(
+  sce_ad$broad_annot=='Glutamatergic' ~ 'Excitatory neurons',
+  sce_ad$broad_annot=='GABAergic' ~ 'Inhibitory neurons',
+  sce_ad$broad_annot=='OPCs' ~ 'OPCs / COPs',
+  sce_ad$broad_annot=='Endothelial' ~ 'Endothelial cells',
+  TRUE ~ sce_ad$broad_annot)
+```
+
+Let's set the gene name to ensembl (to merge with the AD sce dataset)
+
+```{r,eval=TRUE}
+rownames(sce_ad) <- rowData(sce_ad)$ENSEMBL
+```
+
+Finally, let's save info about which sample corresponds to which individual in the filtered data
+
+```{r,eval=TRUE}
+ad_sample_individual <- colData(sce_ad) %>% 
+  as_tibble() %>% 
+  dplyr::select(sample_id,
+                individual_id) %>% 
+  unique() %>% 
+  write_tsv(.,'data_sensitive/expression/sample_individual_ad.txt',col_names = TRUE)
+```
+
+# Get common genes
+
+```{r,eval=TRUE}
+common_genes <-  intersect(rownames(sce_ms),rownames(sce_ad))
+```
+
+```{r,eval=TRUE}
+length(common_genes)
+```
+
+```{r,eval=TRUE}
+sce_ms <- sce_ms[common_genes,]
+sce_ad <- sce_ad[common_genes,]
+```
+
+Save ensembl - symbol names from ms dataset
+
+```{r,eval=TRUE}
+ensembl2symbol <- rowData(sce_ms) %>% 
+  as_tibble() %>% 
+  dplyr::select(-type) %>% 
+  write_tsv('data_sensitive/expression/ensembl2symbol_ms.txt')
 ```
 
 # Get covariates
@@ -166,14 +242,14 @@ For all samples, get:
 1. Original dataset (Roche_AD,Columbia_AD,Mathys_AD,Zhou,MS)
 2. Case-control status
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 ad_cov <- colData(sce_ad) %>% as_tibble() %>% 
   dplyr::select(individual_id,study,diagnosis) %>% 
   unique() %>% 
   mutate(study=paste0(study,'_AD'))
 ```
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 ms_cov <- colData(sce_ms) %>% as_tibble() %>% 
 dplyr::select(individual_id,diagnosis=disease_status) %>% 
   mutate(study='MS') %>% 
@@ -184,129 +260,161 @@ dplyr::select(individual_id,diagnosis=disease_status) %>%
   )) %>% unique()
 ```
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 cov_all <- rbind(ad_cov,ms_cov)
 ```
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 cov_all_t <- cov_all %>% column_to_rownames('individual_id') %>% t() %>% as.data.frame() %>% rownames_to_column('id')
 ```
 
 Load genotype PCs
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 cov_genotype_pcs <- read_tsv('data_sensitive/genotypes/pca_covariate_fastqtl.txt')
 ```
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 cov_all_t <- cov_all_t[,colnames(cov_genotype_pcs)]
 ```
 
 Add covariates from metadata (study, case-control) to genotype PCs.
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 cov <- rbind(cov_genotype_pcs,cov_all_t) %>% as_tibble()
 ```
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 write_tsv(cov,'data_sensitive/eqtl/covariate_pca_meta_fastqtl.txt')
 ```
 
 # Get Pseudo-bulk expression function
 
-```{r,eval=FALSE}
-count_per_cluster <- function(sce,i){
-  cnt_matrix <- sce[,sce$broad_annot==cell_type_id$V1[i] & sce$individual_id==cell_type_id$V2[i]]
+```{r,eval=TRUE}
+count_per_cluster <- function(sce,i,var){
+  cnt_matrix <- sce[,sce$broad_annot==cell_type_id$V1[i] & sce[[var]]==cell_type_id$V2[i]]
   tot_counts <- Matrix::rowSums(counts(cnt_matrix))
   n_expressed <- Matrix::rowSums(counts(cnt_matrix)>0)
   n_cells <- ncol(cnt_matrix)
-  cnt_df <- data.frame(counts=tot_counts,n_expressed=n_expressed,n_cells=n_cells) %>% rownames_to_column('gene')
-  cnt_df <- mutate(cnt_df,perc_expressed=round(n_expressed*100/n_cells,digits=2))
-  cnt_df <- mutate(cnt_df,cell_type=cell_type_id$V1[i],individual_id=cell_type_id$V2[i])
-  cnt_df <- dplyr::select(cnt_df,cell_type,individual_id,gene,counts,n_expressed,n_cells,perc_expressed)
+  cnt_df <- data.frame(counts=tot_counts,
+                       n_expressed=n_expressed,
+                       n_cells=n_cells) %>% 
+    rownames_to_column('ensembl') %>% 
+    mutate(perc_expressed=round(n_expressed*100/n_cells,digits=2),
+           cell_type=cell_type_id$V1[i],
+           individual_id=cell_type_id$V2[i]) %>% 
+    inner_join(.,ensembl2symbol,by='ensembl') %>% 
+  dplyr::select(cell_type,individual_id,ensembl,symbol,counts,n_expressed,n_cells,perc_expressed)
+  
+  if(var=='sample_id'){
+    colnames(cnt_df)[2] <- 'sample_id'
+  }
   return(cnt_df)
 }
 ```
 
 ## MS
 
-```{r,eval=FALSE}
-if(!file.exists('data_sensitive/expression/ms_sum_expression.rds')){
+```{r,eval=TRUE}
+if(!file.exists('data_sensitive/expression/ms_sum_expression.individual_id.rds')){
   
   cell_type_id <- cbind(as.character(sce_ms$broad_annot),sce_ms$individual_id) %>% unique() %>% as.data.frame()
   
-  sum_expression_ms <- mclapply(1:nrow(cell_type_id),count_per_cluster,sce=sce_ms,mc.cores = 36,mc.preschedule = FALSE) %>% 
-    bind_rows() %>% 
-    separate(gene,into=c('symbol','ensembl'),sep="_")
+  sum_expression_ms <- mclapply(1:nrow(cell_type_id),
+                                count_per_cluster,
+                                sce=sce_ms,
+                                var='individual_id',
+                                mc.cores = 36,
+                                mc.preschedule = FALSE) %>% 
+    bind_rows()
   
-  saveRDS(sum_expression_ms,'data_sensitive/expression/ms_sum_expression.rds')
-  rm(sce_ms)
+  saveRDS(sum_expression_ms,'data_sensitive/expression/ms_sum_expression.individual_id.rds')
+  rm(sum_expression_ms)
 }
+```
+
+```{r,eval=TRUE}
+if(!file.exists('data_sensitive/expression/ms_sum_expression.sample_id.rds')){
+  
+  cell_type_id <- cbind(as.character(sce_ms$broad_annot),sce_ms$sample_id) %>% unique() %>% as.data.frame()
+  
+  sum_expression_ms <- mclapply(1:nrow(cell_type_id),
+                                count_per_cluster,
+                                sce=sce_ms,
+                                var='sample_id',
+                                mc.cores = 36,
+                                mc.preschedule = FALSE) %>% 
+    bind_rows()
+  
+  saveRDS(sum_expression_ms,'data_sensitive/expression/ms_sum_expression.sample_id.rds')
+  rm(sum_expression_ms)
+}
+```
+
+```{r,eval=TRUE}
+rm(sce_ms)
 ```
 
 ## AD
 
-```{r,eval=FALSE}
-if(!file.exists('data_sensitive/expression/ad_sum_expression.rds')){
+```{r,eval=TRUE}
+if(!file.exists('data_sensitive/expression/ad_sum_expression.individual_id.rds')){
   
   cell_type_id <- cbind(as.character(sce_ad$broad_annot),sce_ad$individual_id) %>% unique() %>% as.data.frame()
   
-  sum_expression_ad <- mclapply(1:nrow(cell_type_id),count_per_cluster,sce=sce_ad,mc.cores = 36,mc.preschedule = FALSE) %>% 
-    bind_rows() %>% 
-    mutate(symbol=gsub('ENSG[0-9]+\\.','',gene)) %>% 
-    mutate(ensembl=gsub('\\..+','',gene)) %>% 
-    dplyr::select(cell_type,individual_id,symbol,ensembl,counts,n_expressed,n_cells,perc_expressed)
+  sum_expression_ad <- mclapply(1:nrow(cell_type_id),
+                                count_per_cluster,
+                                sce=sce_ad,
+                                var='individual_id',
+                                mc.cores = 36,
+                                mc.preschedule = FALSE) %>% 
+    bind_rows()
   
-  saveRDS(sum_expression_ad,'data_sensitive/expression/ad_sum_expression.rds')
-  rm(sce_ad)
+  saveRDS(sum_expression_ad,'data_sensitive/expression/ad_sum_expression.individual_id.rds')
+  rm(sum_expression_ad)
 }
+```
+
+```{r,eval=TRUE}
+if(!file.exists('data_sensitive/expression/ad_sum_expression.sample_id.rds')){
+  
+  cell_type_id <- cbind(as.character(sce_ad$broad_annot),sce_ad$sample_id) %>% unique() %>% as.data.frame()
+  
+  sum_expression_ad <- mclapply(1:nrow(cell_type_id),
+                                count_per_cluster,
+                                sce=sce_ad,
+                                var='sample_id',
+                                mc.cores = 36,
+                                mc.preschedule = FALSE) %>% 
+    bind_rows()
+  
+  saveRDS(sum_expression_ad,'data_sensitive/expression/ad_sum_expression.sample_id.rds')
+  rm(sum_expression_ad)
+}
+```
+
+```{r,eval=TRUE}
+rm(sce_ad)
 ```
 
 # Load Pseudo-bulk
 
-```{r,eval=FALSE}
-sum_expression_ms <- readRDS('data_sensitive/expression/ms_sum_expression.rds') %>% mutate(dataset='ms')
-sum_expression_ad <- readRDS('data_sensitive/expression/ad_sum_expression.rds') %>% mutate(dataset='ad')
+```{r,eval=TRUE}
+sum_expression_ms <- readRDS('data_sensitive/expression/ms_sum_expression.individual_id.rds') %>% mutate(dataset='ms')
+sum_expression_ad <- readRDS('data_sensitive/expression/ad_sum_expression.individual_id.rds') %>% mutate(dataset='ad')
 ```
 
 ## Aggregate datasets
 
-Get genes quantified in both datasets
+Let's merge the MS and AD dataset.
 
-```{r,eval=FALSE}
-common_genes <- intersect(unique(sum_expression_ad$ensembl),unique(sum_expression_ms$ensembl))
-```
-
-```{r,eval=FALSE}
-length(common_genes)
-```
-
-```{r,eval=FALSE}
-sum_expression_ms <- sum_expression_ms %>% filter(ensembl%in%common_genes)
-sum_expression_ad <- sum_expression_ad %>% filter(ensembl%in%common_genes)
-```
-
-Get same cell type label
-
-```{r,eval=FALSE}
-sum_expression_ad <- sum_expression_ad %>% mutate(cell_type=case_when(
-  cell_type=='Glutamatergic' ~ 'Excitatory neurons',
-  cell_type=='GABAergic' ~ 'Inhibitory neurons',
-  cell_type=='OPCs' ~ 'OPCs / COPs',
-  cell_type=='Endothelial' ~ 'Endothelial cells',
-  TRUE ~ cell_type))
-```
-
-Let's merge the MS and AD dataset. Let's then remove Immune cells which were not seen in the AD dataset.
-
-```{r,eval=FALSE}
-sum_expression <- rbind(sum_expression_ms,sum_expression_ad) %>% 
-  filter(cell_type !="Immune")
+```{r,eval=TRUE}
+sum_expression <- rbind(sum_expression_ms,sum_expression_ad)
 ```
 
 Get counts per million (CPM)
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 sum_expression <- sum_expression %>% 
   group_by(cell_type,individual_id) %>% 
   mutate(counts_scaled_1M=counts*10^6/sum(counts)) %>% 
@@ -316,73 +424,187 @@ sum_expression <- sum_expression %>%
 
 Save expression of cell type marker genes
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 markers <- sum_expression %>% filter(symbol%in%c('SLC17A7','GAD2','AQP4','MOG','PDGFRA','C1QA','CLDN5','RGS5'))
 saveRDS(markers,'data_sensitive/expression/cell_marker_expression.rds')
 ```
 
 ## Get number of samples expressing genes and average expression
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 sumstats_gene <- sum_expression %>% group_by(cell_type,ensembl) %>% 
   summarise(counts_per_celltype=sum(counts),
          n_expressed_per_celltype=sum(n_expressed),
          n_cells_per_celltype=sum(n_cells),
          perc_expressed_per_celltype=round(n_expressed_per_celltype*100/n_cells_per_celltype,digits=2),
          n_samples_expressed=sum(counts>0),
-         perc_samples_expressed=round(n_samples_expressed*100/length(counts),digits=2)) %>% 
+         perc_samples_expressed=round(n_samples_expressed*100/length(counts),digits=2),
+         mean_cpm=mean(counts_scaled_1M)) %>% 
+  group_by(ensembl) %>% 
+  mutate(prop_max_cpm=mean_cpm/max(mean_cpm)) %>% 
   ungroup()
 ```
 
 ## Filter genes
 
-Keep genes expressed in:
+### Get Soupy genes
 
-1) at least 5% of the cells (per cell type)
-2) at least 10 individuals 
+We will first compute the proportion of reads that could be attributed to ambient RNA (conservative estimate).
 
-```{r,eval=FALSE}
-gene_to_keep_per_cell_type <- sumstats_gene %>% 
-  filter(perc_expressed_per_celltype>5,n_samples_expressed>10) %>% 
-  dplyr::select(cell_type,ensembl) %>% 
-  unique()
+```{r,eval=TRUE}
+compute_ambient_per_sample <- function(id){
+  message(id)
+  #Get only counts for individual 'id'
+  counts_id <- counts_per_cell_type %>% 
+    filter(sample_id==id)
+  
+  #Get the cell types for which we have counts in individual 'id'
+  cell_types_id <- counts_id %>% pull(cell_type) %>% unique()
+  
+  #Get only ambient RNA for individual 'id'
+  ambient_id <- ambient %>% filter(sample_id==id) %>% 
+    arrange(ensembl)
+  
+  #Compute ambient proportion for each gene in each cell type from individual 'id'
+  ambient_prop <- lapply(1:length(cell_types_id), function(i){
+    message(cell_types_id[i])
+    counts_id_cell_type <- filter(counts_id,cell_type==cell_types_id[i]) %>% 
+    arrange(ensembl)
+    stopifnot(all(counts_id_cell_type$ensembl==ambient_id$ensembl))
+
+    max_ambience <- DropletUtils::maximumAmbience(y = counts_id_cell_type$counts,
+                                                  ambient = ambient_id$counts,
+                                                  mode='proportion')
+    out <- tibble(individual_id=id,cell_type=cell_types_id[i],ensembl=counts_id_cell_type$ensembl,soup=max_ambience)
+  }) %>% 
+    bind_rows()
+  
+  return(ambient_prop)
+}
 ```
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
+if(file.exists('data_sensitive/ambient/ambient.prop.estimate.droplet_utils.rds')){
+  ambient_prop_per_cell_type <- readRDS('data_sensitive/ambient/ambient.prop.estimate.droplet_utils.rds')
+} else{
+
+  #Load pseudo-bulk counts for each sample in the dataset.
+  sample_id_ms <- readRDS('data_sensitive/expression/ms_sum_expression.sample_id.rds')
+  sample_id_ad <- readRDS('data_sensitive/expression/ad_sum_expression.sample_id.rds')
+  
+  counts_per_cell_type <- rbind(sample_id_ms,sample_id_ad) %>% 
+    dplyr::select(cell_type,sample_id,ensembl,counts)
+  
+  #We also summed counts for all barcodes with less than 100UMI
+  ambient_ad <- read_tsv('data_sensitive/ambient/ambient.100UMI.ad.txt')
+
+  #Swap two samples (genotype of scRNA-seq matches another sample and vice-versa), already done in ad sce object
+  colnames(ambient_ad)[colnames(ambient_ad)=='DWM-B3-24-Cog4-Path1-M'] <- 'tmp'
+  colnames(ambient_ad)[colnames(ambient_ad)=='DWM-B3-22-Cog4-Path0-M'] <- 'DWM-B3-24-Cog4-Path1-M'
+  colnames(ambient_ad)[colnames(ambient_ad)=='tmp'] <- 'DWM-B3-22-Cog4-Path0-M'
+  
+  #Correct scRNA-seq sample names (scRNA-seq was not matching metadata)
+  colnames(ambient_ad)[colnames(ambient_ad)=='MFC-B2-10-Cog1-Path1-F'] <- 'MFC-B2-10-Cog1-Path0-M'
+  colnames(ambient_ad)[colnames(ambient_ad)=='MFC-B2-11-Cog1-Path1-M'] <- 'MFC-B2-11-Cog1-Path1-F'
+
+  #Make the ad ambient data long
+  ambient_ad <- ambient_ad %>% 
+    gather(sample_id,counts,-gene) %>% 
+    mutate(ensembl=gsub('\\..+','',gene)) %>% 
+    dplyr::select(-gene)
+  
+  #Now get ambient RNA for ms samples
+  ambient_ms <- read_tsv('data_sensitive/ambient/ambient.100UMI.ms.txt')
+
+  #Swap two samples (genotype of scRNA-seq matches another sample and vice-versa)
+  colnames(ambient_ms)[colnames(ambient_ms)=='EU017'] <- 'tmp'
+  colnames(ambient_ms)[colnames(ambient_ms)=='EU018'] <- 'EU017'
+  colnames(ambient_ms)[colnames(ambient_ms)=='tmp'] <- 'EU018'
+  
+  colnames(ambient_ms)[colnames(ambient_ms)=='WM189'] <- 'tmp'
+  colnames(ambient_ms)[colnames(ambient_ms)=='WM190'] <- 'WM189'
+  colnames(ambient_ms)[colnames(ambient_ms)=='tmp'] <- 'WM190'
+  
+  #Make the ms ambient data long
+  ambient_ms <- ambient_ms %>% 
+    dplyr::select(-symbol) %>% 
+    gather(sample_id,counts,-ensembl)
+  
+  #Aggregate ambient counts for ad and MS, only keep genes that are in the pseudo-bulks counts
+  ambient <- rbind(ambient_ad,ambient_ms) %>% 
+    filter(ensembl%in%unique(counts_per_cell_type$ensembl))
+  
+  samples <- unique(counts_per_cell_type$sample_id)
+  samples_ambient <- unique(ambient$sample_id)
+  stopifnot(all(samples%in%samples_ambient))
+  
+  #Estimate ambient RNA for each individual
+  ambient_prop_all <- mclapply(samples,compute_ambient_per_sample,mc.cores = 36) %>% 
+  bind_rows()
+  
+  ambient_prop_per_cell_type <- ambient_prop_all%>% 
+  group_by(cell_type,gene) %>% 
+  summarise(mean_soup=mean(soup,na.rm=TRUE),median_soup=median(soup,na.rm=TRUE))
+  
+  saveRDS(ambient_prop_per_cell_type,'data_sensitive/ambient/ambient.prop.estimate.droplet_utils.rds')
+}
+```
+
+### Filtering
+
+Keep genes:
+
+1) For which ambient RNA does not explain more than 10% of the read counts.
+2) Expressed in at least 10 individuals 
+3) Expressed with a mean CPM of at least 1
+
+```{r,eval=TRUE}
+ambient_keep <- filter(ambient_prop_per_cell_type,mean_soup<0.1)
+```
+
+```{r,eval=TRUE}
+gene_to_keep_per_cell_type <- sumstats_gene %>% 
+  filter(n_samples_expressed>10,mean_cpm>1) %>% 
+  dplyr::select(cell_type,ensembl) %>% 
+  unique() %>% 
+  inner_join(.,ambient_keep,by=c('cell_type','ensembl'))
+```
+
+```{r,eval=TRUE}
 sum_expression <- sum_expression %>% 
   inner_join(.,gene_to_keep_per_cell_type,by=c('cell_type','ensembl'))
 ```
 
 Number of genes tested per cell type
 
-```{r,eval=FALSE}
-dplyr::count(sum_expression,cell_type,individual_id) %>% 
-  select(-individual_id) %>% 
+```{r,eval=TRUE}
+(dplyr::count(sum_expression,cell_type,individual_id) %>% 
+  dplyr::select(-individual_id) %>% 
   unique() %>% 
-  arrange(-n)
+  arrange(-n))
 ```
 
 ## Filter individuals
 
-Remove individuals-cell type with less than 10 cells for a given cell type.
+Remove individuals with less than 10 cells for a given cell type.
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 (n_cells_ind_cell_type <- sum_expression %>% 
   dplyr::select(cell_type,individual_id,n_cells) %>% 
   unique() %>% arrange(n_cells))
 ```
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 keep <- filter(n_cells_ind_cell_type,n_cells>=10)
 ```
 
 Number of unique individuals per cell types for eQTL analysis
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 dplyr::count(keep,cell_type) %>% arrange(-n)
 ```
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 sum_expression <- inner_join(sum_expression,keep,by=c('cell_type','individual_id','n_cells'))
 ```
 
@@ -390,7 +612,7 @@ sum_expression <- inner_join(sum_expression,keep,by=c('cell_type','individual_id
 
 Get TSS coordinate for all genes.
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 gtf <- rtracklayer::import('data/gencode/Homo_sapiens.GRCh38.96.filtered.gtf') %>% 
   as.data.frame() %>% 
   dplyr::filter(type=='gene') %>% 
@@ -404,7 +626,7 @@ gtf$seqnames <- droplevels(gtf$seqnames)
 
 Set all samples to the same set of symbol and gene ID (like MS dataset).
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 gene_id_common <- sum_expression %>% 
   filter(dataset=='ms') %>% 
   dplyr::select(symbol,ensembl) %>% 
@@ -412,13 +634,13 @@ gene_id_common <- sum_expression %>%
   mutate(gene=paste0(symbol,'_',ensembl)) %>% dplyr::select(-symbol)
 ```
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 sum_expression <- sum_expression %>% 
   inner_join(.,gene_id_common,by='ensembl') %>% 
   dplyr::select(cell_type,individual_id,gene,counts,n_expressed,n_cells,perc_expressed,counts_scaled_1M)
 ```
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 saveRDS(sum_expression,'data_sensitive/expression/all_sum_expression.rds')
 ```
 
@@ -426,7 +648,7 @@ saveRDS(sum_expression,'data_sensitive/expression/all_sum_expression.rds')
 
 Perform TMM normalization and get fastQTL format
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 get_fastqtl_pheno <- function(cell){
   #keep all expression for the cell type and patient that have genotype
   bed <- sum_expression %>% dplyr::filter(cell_type==cell) %>% 
@@ -449,15 +671,15 @@ get_fastqtl_pheno <- function(cell){
 }    
 ```
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 cells <- unique(sum_expression$cell_type)
 ```
 
-```{r,results=FALSE,eval=FALSE}
+```{r,results=FALSE,eval=TRUE}
 mclapply(cells,get_fastqtl_pheno,mc.cores=8)
 ```
 
-```{bash,eval=FALSE}
+```{bash,eval=TRUE}
 cd $eqtl_path
 ml tabix/0.2.6-goolf-1.7.20
 
@@ -469,15 +691,15 @@ done
 
 ## Generate expression pca
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 geno_cov <- read_tsv('data_sensitive/eqtl/covariate_pca_meta_fastqtl.txt')
 ``` 
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 pheno_files <- list.files('data_sensitive/eqtl/',pattern='*.bed.gz$',full.names = T)
 ```
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
 get_covariates <- function(i){
   
   out_name <- basename(pheno_files[i]) %>% gsub('\\.bed\\.gz','',.) %>% paste0('.cov.txt')
@@ -506,11 +728,11 @@ get_covariates <- function(i){
 }
 ```
 
-```{r,results=FALSE,eval=FALSE}
+```{r,results=FALSE,eval=TRUE}
 mclapply(1:length(pheno_files),get_covariates,mc.cores=8)
 ```
 
-```{bash,eval=FALSE}
+```{bash,eval=TRUE}
 cd $eqtl_path
 for f in PC*
 do
