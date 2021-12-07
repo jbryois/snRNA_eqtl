@@ -11,7 +11,7 @@
 
 <meta name="author" content="Julien Bryois" />
 
-<meta name="date" content="2021-12-01" />
+<meta name="date" content="2021-12-07" />
 
 <title>Process expression</title>
 
@@ -380,7 +380,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Process expression</h1>
 <h4 class="author">Julien Bryois</h4>
-<h4 class="date">December 01, 2021</h4>
+<h4 class="date">December 07, 2021</h4>
 
 </div>
 
@@ -405,7 +405,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-12-01
+<strong>Last updated:</strong> 2021-12-07
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -453,7 +453,7 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 </div>
 <div id="strongSeedstrongcodesetseed20211124code" class="panel-collapse collapse">
 <div class="panel-body">
-<p>The command <code>set.seed(20211124)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+<p>The command <code>set.seed(20211124)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
 </div>
 </div>
 </div>
@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongdb82bd8"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> db82bd8 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstronga3b1cad"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> a3b1cad </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongdb82bd8" class="panel-collapse collapse">
+<div id="strongRepositoryversionstronga3b1cad" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version db82bd8. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version a3b1cad. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -514,26 +514,29 @@ Note that you need to be careful to ensure that all relevant files for the analy
 Ignored files:
     Ignored:    .Rproj.user/
     Ignored:    data_sensitive/
+    Ignored:    output/eqtl/
+    Ignored:    output/eqtl_specific/
     Ignored:    output/tables/
 
 Untracked files:
-    Untracked:  analysis/01_process_expression.Rscript
-    Untracked:  analysis/01_process_expression.sbatch
-    Untracked:  analysis/log_01_exp_stderr
-    Untracked:  analysis/log_01_exp_stdout
+    Untracked:  analysis/03_cell_type_specific_eQTL.Rmd
+    Untracked:  analysis/04_coloc.Rmd
+    Untracked:  analysis/get_tables.Rmd
     Untracked:  analysis/log_run_slurm_out
     Untracked:  analysis/log_run_slurm_stderr
     Untracked:  analysis/run_slurm.Rscript
     Untracked:  analysis/run_slurm.sbatch
     Untracked:  data/gencode/
     Untracked:  data/gnomad_loeuf/
+    Untracked:  data/gwas/
+    Untracked:  data/magma_interaction_eqtl/
     Untracked:  data/metabrain/
     Untracked:  output/Figures/
-    Untracked:  output/eqtl/
 
 Unstaged changes:
     Modified:   .gitignore
     Modified:   analysis/_site.yml
+    Modified:   analysis/index.Rmd
     Modified:   analysis/plot_figures.Rmd
 
 </code></pre>
@@ -573,6 +576,57 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+a3b1cad
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-07
+</td>
+<td>
+expression_filter_soupy_genes
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+fcde74d
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-06
+</td>
+<td>
+expression_filter_soupy_genes
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+0d629e6
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -668,8 +722,6 @@ expression code added
 <pre class="r"><code>library(tidyverse)
 library(SingleCellExperiment)
 library(parallel)</code></pre>
-<p>Set path for genotype data</p>
-<pre class="r"><code>Sys.setenv(eqtl_path=&#39;data_sensitive/eqtl&#39;)</code></pre>
 <div id="files" class="section level1">
 <h1>Files</h1>
 <p>Get individuals with both scRNA-seq and genotype information</p>
@@ -684,7 +736,8 @@ library(parallel)</code></pre>
 <p>Only keep cells that were annotated</p>
 <pre class="r"><code>sce_ms &lt;- sce_ms[,colnames(sce_ms)%in%annot$cell_id]</code></pre>
 <pre class="r"><code>m &lt;- match(colnames(sce_ms),annot$cell_id)
-sce_ms$broad_annot &lt;- annot$type_broad[m]</code></pre>
+sce_ms$broad_annot &lt;- annot$type_broad[m]
+sce_ms$sample_id &lt;- sce_ms$library_id</code></pre>
 <p>Some scRNA-seq were swapped and not corrected in the loaded sce object.</p>
 <p>EU017 and EU018 –&gt; swap WM189 and WM190 –&gt; swap</p>
 <p>Swap them here</p>
@@ -708,8 +761,19 @@ colnames(sce_ms) &lt;- gsub(&#39;tmp&#39;,&#39;WM190&#39;,colnames(sce_ms))</cod
 <pre class="r"><code>sce_ms$individual_id &lt;- sce_ms$patient_id</code></pre>
 <p>Let’s remove the individual which is also in the AD dataset (less cells than the AD dataset)</p>
 <pre class="r"><code>sce_ms &lt;- sce_ms[,sce_ms$individual_id!=&#39;S03-009&#39;]</code></pre>
-<p>And finally let’s remove samples that don’t match their genotype</p>
+<p>Let’s remove samples that don’t match their genotype</p>
 <pre class="r"><code>sce_ms &lt;- sce_ms[,!sce_ms$library_id%in%c(&#39;EU015&#39;,&#39;EU004&#39;,&#39;WM115&#39;,&#39;WM155&#39;,&#39;WM185&#39;)]</code></pre>
+<p>Let’s remove immune cells from the MS dataset (not observed in the AD dataset)</p>
+<pre class="r"><code>sce_ms &lt;- sce_ms[,!sce_ms$broad_annot==&#39;Immune&#39;]</code></pre>
+<p>Let’s set the gene name to ensembl (to merge with the AD sce dataset)</p>
+<pre class="r"><code>rownames(sce_ms) &lt;- rowData(sce_ms)$ensembl</code></pre>
+<p>Finally, let’s save info about which sample corresponds to which individual in the filtered data</p>
+<pre class="r"><code>ms_sample_individual &lt;- colData(sce_ms) %&gt;% 
+  as_tibble() %&gt;% 
+  dplyr::select(sample_id=library_id,
+                individual_id) %&gt;% 
+  unique() %&gt;% 
+  write_tsv(.,&#39;data_sensitive/expression/sample_individual_ms.txt&#39;,col_names = TRUE)</code></pre>
 </div>
 <div id="ad-expression" class="section level1">
 <h1>AD expression</h1>
@@ -724,16 +788,44 @@ colnames(sce_ms) &lt;- gsub(&#39;tmp&#39;,&#39;WM190&#39;,colnames(sce_ms))</cod
   filter(n&gt;1) %&gt;% 
   arrange(individual_id))</code></pre>
 <p>count number of cells for these individuals</p>
-<pre class="r"><code> (n_cells_per_id &lt;- colData(sce_ad) %&gt;% as_tibble() %&gt;% 
+<pre class="r"><code>n_cells_per_id &lt;- colData(sce_ad) %&gt;% as_tibble() %&gt;% 
   filter(individual_id%in%individuals_multiple_studies$individual_id) %&gt;% 
   dplyr::count(individual_id,study) %&gt;% 
     group_by(individual_id) %&gt;% 
-    mutate(keep=ifelse(n==max(n),TRUE,FALSE)))</code></pre>
+    mutate(keep=ifelse(n==max(n),TRUE,FALSE))</code></pre>
 <pre class="r"><code>to_remove &lt;- filter(n_cells_per_id,!keep) %&gt;% 
   mutate(lab=paste0(individual_id,&#39;_&#39;,study))</code></pre>
 <pre class="r"><code>sce_ad$lab &lt;- paste0(sce_ad$individual_id,&#39;_&#39;,sce_ad$study)</code></pre>
 <p>Remove the sample with the least amount of cells (when two samples from the same individual are observed in two datasets)</p>
 <pre class="r"><code>sce_ad &lt;- sce_ad[,!sce_ad$lab%in%to_remove$lab]</code></pre>
+<p>Get same cell type label as the MS dataset</p>
+<pre class="r"><code>sce_ad$broad_annot &lt;- case_when(
+  sce_ad$broad_annot==&#39;Glutamatergic&#39; ~ &#39;Excitatory neurons&#39;,
+  sce_ad$broad_annot==&#39;GABAergic&#39; ~ &#39;Inhibitory neurons&#39;,
+  sce_ad$broad_annot==&#39;OPCs&#39; ~ &#39;OPCs / COPs&#39;,
+  sce_ad$broad_annot==&#39;Endothelial&#39; ~ &#39;Endothelial cells&#39;,
+  TRUE ~ sce_ad$broad_annot)</code></pre>
+<p>Let’s set the gene name to ensembl (to merge with the AD sce dataset)</p>
+<pre class="r"><code>rownames(sce_ad) &lt;- rowData(sce_ad)$ENSEMBL</code></pre>
+<p>Finally, let’s save info about which sample corresponds to which individual in the filtered data</p>
+<pre class="r"><code>ad_sample_individual &lt;- colData(sce_ad) %&gt;% 
+  as_tibble() %&gt;% 
+  dplyr::select(sample_id,
+                individual_id) %&gt;% 
+  unique() %&gt;% 
+  write_tsv(.,&#39;data_sensitive/expression/sample_individual_ad.txt&#39;,col_names = TRUE)</code></pre>
+</div>
+<div id="get-common-genes" class="section level1">
+<h1>Get common genes</h1>
+<pre class="r"><code>common_genes &lt;-  intersect(rownames(sce_ms),rownames(sce_ad))</code></pre>
+<pre class="r"><code>length(common_genes)</code></pre>
+<pre class="r"><code>sce_ms &lt;- sce_ms[common_genes,]
+sce_ad &lt;- sce_ad[common_genes,]</code></pre>
+<p>Save ensembl - symbol names from ms dataset</p>
+<pre class="r"><code>ensembl2symbol &lt;- rowData(sce_ms) %&gt;% 
+  as_tibble() %&gt;% 
+  dplyr::select(-type) %&gt;% 
+  write_tsv(&#39;data_sensitive/expression/ensembl2symbol_ms.txt&#39;)</code></pre>
 </div>
 <div id="get-covariates" class="section level1">
 <h1>Get covariates</h1>
@@ -765,69 +857,103 @@ dplyr::select(individual_id,diagnosis=disease_status) %&gt;%
 </div>
 <div id="get-pseudo-bulk-expression-function" class="section level1">
 <h1>Get Pseudo-bulk expression function</h1>
-<pre class="r"><code>count_per_cluster &lt;- function(sce,i){
-  cnt_matrix &lt;- sce[,sce$broad_annot==cell_type_id$V1[i] &amp; sce$individual_id==cell_type_id$V2[i]]
+<pre class="r"><code>count_per_cluster &lt;- function(sce,i,var){
+  cnt_matrix &lt;- sce[,sce$broad_annot==cell_type_id$V1[i] &amp; sce[[var]]==cell_type_id$V2[i]]
   tot_counts &lt;- Matrix::rowSums(counts(cnt_matrix))
   n_expressed &lt;- Matrix::rowSums(counts(cnt_matrix)&gt;0)
   n_cells &lt;- ncol(cnt_matrix)
-  cnt_df &lt;- data.frame(counts=tot_counts,n_expressed=n_expressed,n_cells=n_cells) %&gt;% rownames_to_column(&#39;gene&#39;)
-  cnt_df &lt;- mutate(cnt_df,perc_expressed=round(n_expressed*100/n_cells,digits=2))
-  cnt_df &lt;- mutate(cnt_df,cell_type=cell_type_id$V1[i],individual_id=cell_type_id$V2[i])
-  cnt_df &lt;- dplyr::select(cnt_df,cell_type,individual_id,gene,counts,n_expressed,n_cells,perc_expressed)
+  cnt_df &lt;- data.frame(counts=tot_counts,
+                       n_expressed=n_expressed,
+                       n_cells=n_cells) %&gt;% 
+    rownames_to_column(&#39;ensembl&#39;) %&gt;% 
+    mutate(perc_expressed=round(n_expressed*100/n_cells,digits=2),
+           cell_type=cell_type_id$V1[i],
+           individual_id=cell_type_id$V2[i]) %&gt;% 
+    inner_join(.,ensembl2symbol,by=&#39;ensembl&#39;) %&gt;% 
+  dplyr::select(cell_type,individual_id,ensembl,symbol,counts,n_expressed,n_cells,perc_expressed)
+  
+  if(var==&#39;sample_id&#39;){
+    colnames(cnt_df)[2] &lt;- &#39;sample_id&#39;
+  }
   return(cnt_df)
 }</code></pre>
 <div id="ms" class="section level2">
 <h2>MS</h2>
-<pre class="r"><code>if(!file.exists(&#39;data_sensitive/expression/ms_sum_expression.rds&#39;)){
+<pre class="r"><code>if(!file.exists(&#39;data_sensitive/expression/ms_sum_expression.individual_id.rds&#39;)){
   
   cell_type_id &lt;- cbind(as.character(sce_ms$broad_annot),sce_ms$individual_id) %&gt;% unique() %&gt;% as.data.frame()
   
-  sum_expression_ms &lt;- mclapply(1:nrow(cell_type_id),count_per_cluster,sce=sce_ms,mc.cores = 36,mc.preschedule = FALSE) %&gt;% 
-    bind_rows() %&gt;% 
-    separate(gene,into=c(&#39;symbol&#39;,&#39;ensembl&#39;),sep=&quot;_&quot;)
+  sum_expression_ms &lt;- mclapply(1:nrow(cell_type_id),
+                                count_per_cluster,
+                                sce=sce_ms,
+                                var=&#39;individual_id&#39;,
+                                mc.cores = 36,
+                                mc.preschedule = FALSE) %&gt;% 
+    bind_rows()
   
-  saveRDS(sum_expression_ms,&#39;data_sensitive/expression/ms_sum_expression.rds&#39;)
-  rm(sce_ms)
+  saveRDS(sum_expression_ms,&#39;data_sensitive/expression/ms_sum_expression.individual_id.rds&#39;)
+  rm(sum_expression_ms)
 }</code></pre>
+<pre class="r"><code>if(!file.exists(&#39;data_sensitive/expression/ms_sum_expression.sample_id.rds&#39;)){
+  
+  cell_type_id &lt;- cbind(as.character(sce_ms$broad_annot),sce_ms$sample_id) %&gt;% unique() %&gt;% as.data.frame()
+  
+  sum_expression_ms &lt;- mclapply(1:nrow(cell_type_id),
+                                count_per_cluster,
+                                sce=sce_ms,
+                                var=&#39;sample_id&#39;,
+                                mc.cores = 36,
+                                mc.preschedule = FALSE) %&gt;% 
+    bind_rows()
+  
+  saveRDS(sum_expression_ms,&#39;data_sensitive/expression/ms_sum_expression.sample_id.rds&#39;)
+  rm(sum_expression_ms)
+}</code></pre>
+<pre class="r"><code>rm(sce_ms)</code></pre>
 </div>
 <div id="ad" class="section level2">
 <h2>AD</h2>
-<pre class="r"><code>if(!file.exists(&#39;data_sensitive/expression/ad_sum_expression.rds&#39;)){
+<pre class="r"><code>if(!file.exists(&#39;data_sensitive/expression/ad_sum_expression.individual_id.rds&#39;)){
   
   cell_type_id &lt;- cbind(as.character(sce_ad$broad_annot),sce_ad$individual_id) %&gt;% unique() %&gt;% as.data.frame()
   
-  sum_expression_ad &lt;- mclapply(1:nrow(cell_type_id),count_per_cluster,sce=sce_ad,mc.cores = 36,mc.preschedule = FALSE) %&gt;% 
-    bind_rows() %&gt;% 
-    mutate(symbol=gsub(&#39;ENSG[0-9]+\\.&#39;,&#39;&#39;,gene)) %&gt;% 
-    mutate(ensembl=gsub(&#39;\\..+&#39;,&#39;&#39;,gene)) %&gt;% 
-    dplyr::select(cell_type,individual_id,symbol,ensembl,counts,n_expressed,n_cells,perc_expressed)
+  sum_expression_ad &lt;- mclapply(1:nrow(cell_type_id),
+                                count_per_cluster,
+                                sce=sce_ad,
+                                var=&#39;individual_id&#39;,
+                                mc.cores = 36,
+                                mc.preschedule = FALSE) %&gt;% 
+    bind_rows()
   
-  saveRDS(sum_expression_ad,&#39;data_sensitive/expression/ad_sum_expression.rds&#39;)
-  rm(sce_ad)
+  saveRDS(sum_expression_ad,&#39;data_sensitive/expression/ad_sum_expression.individual_id.rds&#39;)
+  rm(sum_expression_ad)
 }</code></pre>
+<pre class="r"><code>if(!file.exists(&#39;data_sensitive/expression/ad_sum_expression.sample_id.rds&#39;)){
+  
+  cell_type_id &lt;- cbind(as.character(sce_ad$broad_annot),sce_ad$sample_id) %&gt;% unique() %&gt;% as.data.frame()
+  
+  sum_expression_ad &lt;- mclapply(1:nrow(cell_type_id),
+                                count_per_cluster,
+                                sce=sce_ad,
+                                var=&#39;sample_id&#39;,
+                                mc.cores = 36,
+                                mc.preschedule = FALSE) %&gt;% 
+    bind_rows()
+  
+  saveRDS(sum_expression_ad,&#39;data_sensitive/expression/ad_sum_expression.sample_id.rds&#39;)
+  rm(sum_expression_ad)
+}</code></pre>
+<pre class="r"><code>rm(sce_ad)</code></pre>
 </div>
 </div>
 <div id="load-pseudo-bulk" class="section level1">
 <h1>Load Pseudo-bulk</h1>
-<pre class="r"><code>sum_expression_ms &lt;- readRDS(&#39;data_sensitive/expression/ms_sum_expression.rds&#39;) %&gt;% mutate(dataset=&#39;ms&#39;)
-sum_expression_ad &lt;- readRDS(&#39;data_sensitive/expression/ad_sum_expression.rds&#39;) %&gt;% mutate(dataset=&#39;ad&#39;)</code></pre>
+<pre class="r"><code>sum_expression_ms &lt;- readRDS(&#39;data_sensitive/expression/ms_sum_expression.individual_id.rds&#39;) %&gt;% mutate(dataset=&#39;ms&#39;)
+sum_expression_ad &lt;- readRDS(&#39;data_sensitive/expression/ad_sum_expression.individual_id.rds&#39;) %&gt;% mutate(dataset=&#39;ad&#39;)</code></pre>
 <div id="aggregate-datasets" class="section level2">
 <h2>Aggregate datasets</h2>
-<p>Get genes quantified in both datasets</p>
-<pre class="r"><code>common_genes &lt;- intersect(unique(sum_expression_ad$ensembl),unique(sum_expression_ms$ensembl))</code></pre>
-<pre class="r"><code>length(common_genes)</code></pre>
-<pre class="r"><code>sum_expression_ms &lt;- sum_expression_ms %&gt;% filter(ensembl%in%common_genes)
-sum_expression_ad &lt;- sum_expression_ad %&gt;% filter(ensembl%in%common_genes)</code></pre>
-<p>Get same cell type label</p>
-<pre class="r"><code>sum_expression_ad &lt;- sum_expression_ad %&gt;% mutate(cell_type=case_when(
-  cell_type==&#39;Glutamatergic&#39; ~ &#39;Excitatory neurons&#39;,
-  cell_type==&#39;GABAergic&#39; ~ &#39;Inhibitory neurons&#39;,
-  cell_type==&#39;OPCs&#39; ~ &#39;OPCs / COPs&#39;,
-  cell_type==&#39;Endothelial&#39; ~ &#39;Endothelial cells&#39;,
-  TRUE ~ cell_type))</code></pre>
-<p>Let’s merge the MS and AD dataset. Let’s then remove Immune cells which were not seen in the AD dataset.</p>
-<pre class="r"><code>sum_expression &lt;- rbind(sum_expression_ms,sum_expression_ad) %&gt;% 
-  filter(cell_type !=&quot;Immune&quot;)</code></pre>
+<p>Let’s merge the MS and AD dataset.</p>
+<pre class="r"><code>sum_expression &lt;- rbind(sum_expression_ms,sum_expression_ad)</code></pre>
 <p>Get counts per million (CPM)</p>
 <pre class="r"><code>sum_expression &lt;- sum_expression %&gt;% 
   group_by(cell_type,individual_id) %&gt;% 
@@ -846,31 +972,142 @@ saveRDS(markers,&#39;data_sensitive/expression/cell_marker_expression.rds&#39;)<
          n_cells_per_celltype=sum(n_cells),
          perc_expressed_per_celltype=round(n_expressed_per_celltype*100/n_cells_per_celltype,digits=2),
          n_samples_expressed=sum(counts&gt;0),
-         perc_samples_expressed=round(n_samples_expressed*100/length(counts),digits=2)) %&gt;% 
+         perc_samples_expressed=round(n_samples_expressed*100/length(counts),digits=2),
+         mean_cpm=mean(counts_scaled_1M)) %&gt;% 
+  group_by(ensembl) %&gt;% 
+  mutate(prop_max_cpm=mean_cpm/max(mean_cpm)) %&gt;% 
   ungroup()</code></pre>
 </div>
 <div id="filter-genes" class="section level2">
 <h2>Filter genes</h2>
-<p>Keep genes expressed in:</p>
+<div id="get-soupy-genes" class="section level3">
+<h3>Get Soupy genes</h3>
+<p>We will first compute the proportion of reads that could be attributed to ambient RNA (conservative estimate).</p>
+<pre class="r"><code>compute_ambient_per_sample &lt;- function(id){
+  message(id)
+  #Get only counts for individual &#39;id&#39;
+  counts_id &lt;- counts_per_cell_type %&gt;% 
+    filter(sample_id==id)
+  
+  #Get the cell types for which we have counts in individual &#39;id&#39;
+  cell_types_id &lt;- counts_id %&gt;% pull(cell_type) %&gt;% unique()
+  
+  #Get only ambient RNA for individual &#39;id&#39;
+  ambient_id &lt;- ambient %&gt;% filter(sample_id==id) %&gt;% 
+    arrange(ensembl)
+  
+  #Compute ambient proportion for each gene in each cell type from individual &#39;id&#39;
+  ambient_prop &lt;- lapply(1:length(cell_types_id), function(i){
+    message(cell_types_id[i])
+    counts_id_cell_type &lt;- filter(counts_id,cell_type==cell_types_id[i]) %&gt;% 
+    arrange(ensembl)
+    stopifnot(all(counts_id_cell_type$ensembl==ambient_id$ensembl))
+
+    max_ambience &lt;- DropletUtils::maximumAmbience(y = counts_id_cell_type$counts,
+                                                  ambient = ambient_id$counts,
+                                                  mode=&#39;proportion&#39;)
+    out &lt;- tibble(individual_id=id,cell_type=cell_types_id[i],ensembl=counts_id_cell_type$ensembl,soup=max_ambience)
+  }) %&gt;% 
+    bind_rows()
+  
+  return(ambient_prop)
+}</code></pre>
+<pre class="r"><code>if(file.exists(&#39;data_sensitive/ambient/ambient.prop.estimate.droplet_utils.rds&#39;)){
+  ambient_prop_per_cell_type &lt;- readRDS(&#39;data_sensitive/ambient/ambient.prop.estimate.droplet_utils.rds&#39;)
+} else{
+
+  #Load pseudo-bulk counts for each sample in the dataset.
+  sample_id_ms &lt;- readRDS(&#39;data_sensitive/expression/ms_sum_expression.sample_id.rds&#39;)
+  sample_id_ad &lt;- readRDS(&#39;data_sensitive/expression/ad_sum_expression.sample_id.rds&#39;)
+  
+  counts_per_cell_type &lt;- rbind(sample_id_ms,sample_id_ad) %&gt;% 
+    dplyr::select(cell_type,sample_id,ensembl,counts)
+  
+  #We also summed counts for all barcodes with less than 100UMI
+  ambient_ad &lt;- read_tsv(&#39;data_sensitive/ambient/ambient.100UMI.ad.txt&#39;)
+
+  #Swap two samples (genotype of scRNA-seq matches another sample and vice-versa), already done in ad sce object
+  colnames(ambient_ad)[colnames(ambient_ad)==&#39;DWM-B3-24-Cog4-Path1-M&#39;] &lt;- &#39;tmp&#39;
+  colnames(ambient_ad)[colnames(ambient_ad)==&#39;DWM-B3-22-Cog4-Path0-M&#39;] &lt;- &#39;DWM-B3-24-Cog4-Path1-M&#39;
+  colnames(ambient_ad)[colnames(ambient_ad)==&#39;tmp&#39;] &lt;- &#39;DWM-B3-22-Cog4-Path0-M&#39;
+  
+  #Correct scRNA-seq sample names (scRNA-seq was not matching metadata)
+  colnames(ambient_ad)[colnames(ambient_ad)==&#39;MFC-B2-10-Cog1-Path1-F&#39;] &lt;- &#39;MFC-B2-10-Cog1-Path0-M&#39;
+  colnames(ambient_ad)[colnames(ambient_ad)==&#39;MFC-B2-11-Cog1-Path1-M&#39;] &lt;- &#39;MFC-B2-11-Cog1-Path1-F&#39;
+
+  #Make the ad ambient data long
+  ambient_ad &lt;- ambient_ad %&gt;% 
+    gather(sample_id,counts,-gene) %&gt;% 
+    mutate(ensembl=gsub(&#39;\\..+&#39;,&#39;&#39;,gene)) %&gt;% 
+    dplyr::select(-gene)
+  
+  #Now get ambient RNA for ms samples
+  ambient_ms &lt;- read_tsv(&#39;data_sensitive/ambient/ambient.100UMI.ms.txt&#39;)
+
+  #Swap two samples (genotype of scRNA-seq matches another sample and vice-versa)
+  colnames(ambient_ms)[colnames(ambient_ms)==&#39;EU017&#39;] &lt;- &#39;tmp&#39;
+  colnames(ambient_ms)[colnames(ambient_ms)==&#39;EU018&#39;] &lt;- &#39;EU017&#39;
+  colnames(ambient_ms)[colnames(ambient_ms)==&#39;tmp&#39;] &lt;- &#39;EU018&#39;
+  
+  colnames(ambient_ms)[colnames(ambient_ms)==&#39;WM189&#39;] &lt;- &#39;tmp&#39;
+  colnames(ambient_ms)[colnames(ambient_ms)==&#39;WM190&#39;] &lt;- &#39;WM189&#39;
+  colnames(ambient_ms)[colnames(ambient_ms)==&#39;tmp&#39;] &lt;- &#39;WM190&#39;
+  
+  #Make the ms ambient data long
+  ambient_ms &lt;- ambient_ms %&gt;% 
+    dplyr::select(-symbol) %&gt;% 
+    gather(sample_id,counts,-ensembl)
+  
+  #Aggregate ambient counts for ad and MS, only keep genes that are in the pseudo-bulks counts
+  ambient &lt;- rbind(ambient_ad,ambient_ms) %&gt;% 
+    filter(ensembl%in%unique(counts_per_cell_type$ensembl))
+  
+  samples &lt;- unique(counts_per_cell_type$sample_id)
+  samples_ambient &lt;- unique(ambient$sample_id)
+  stopifnot(all(samples%in%samples_ambient))
+  
+  #Estimate ambient RNA for each individual
+  ambient_prop_all &lt;- mclapply(samples,compute_ambient_per_sample,mc.cores = 36) %&gt;% 
+  bind_rows()
+  
+  ambient_prop_per_cell_type &lt;- ambient_prop_all%&gt;% 
+  group_by(cell_type,ensembl) %&gt;% 
+  summarise(mean_soup=mean(soup,na.rm=TRUE),
+            median_soup=median(soup,na.rm=TRUE),
+            sd_soup=sd(soup,na.rm=TRUE),
+            min_soup=min(soup,na.rm=TRUE),
+            max_soup=max(soup,na.rm=TRUE),
+            n_sample=n())
+  
+  saveRDS(ambient_prop_per_cell_type,&#39;data_sensitive/ambient/ambient.prop.estimate.droplet_utils.rds&#39;)
+}</code></pre>
+</div>
+<div id="filtering" class="section level3">
+<h3>Filtering</h3>
+<p>Keep genes:</p>
 <ol style="list-style-type: decimal">
-<li>at least 5% of the cells (per cell type)</li>
-<li>at least 10 individuals</li>
+<li>For which ambient RNA does not explain more than 10% of the read counts.</li>
+<li>Expressed in at least 10 individuals</li>
+<li>Expressed with a mean CPM of at least 1</li>
 </ol>
+<pre class="r"><code>ambient_keep &lt;- filter(ambient_prop_per_cell_type,mean_soup&lt;0.1)</code></pre>
 <pre class="r"><code>gene_to_keep_per_cell_type &lt;- sumstats_gene %&gt;% 
-  filter(perc_expressed_per_celltype&gt;5,n_samples_expressed&gt;10) %&gt;% 
+  filter(n_samples_expressed&gt;10,mean_cpm&gt;1) %&gt;% 
   dplyr::select(cell_type,ensembl) %&gt;% 
-  unique()</code></pre>
+  unique() %&gt;% 
+  inner_join(.,ambient_keep,by=c(&#39;cell_type&#39;,&#39;ensembl&#39;))</code></pre>
 <pre class="r"><code>sum_expression &lt;- sum_expression %&gt;% 
   inner_join(.,gene_to_keep_per_cell_type,by=c(&#39;cell_type&#39;,&#39;ensembl&#39;))</code></pre>
 <p>Number of genes tested per cell type</p>
-<pre class="r"><code>dplyr::count(sum_expression,cell_type,individual_id) %&gt;% 
-  select(-individual_id) %&gt;% 
+<pre class="r"><code>(dplyr::count(sum_expression,cell_type,individual_id) %&gt;% 
+  dplyr::select(-individual_id) %&gt;% 
   unique() %&gt;% 
-  arrange(-n)</code></pre>
+  arrange(-n))</code></pre>
+</div>
 </div>
 <div id="filter-individuals" class="section level2">
 <h2>Filter individuals</h2>
-<p>Remove individuals-cell type with less than 10 cells for a given cell type.</p>
+<p>Remove individuals with less than 10 cells for a given cell type.</p>
 <pre class="r"><code>(n_cells_ind_cell_type &lt;- sum_expression %&gt;% 
   dplyr::select(cell_type,individual_id,n_cells) %&gt;% 
   unique() %&gt;% arrange(n_cells))</code></pre>
@@ -927,7 +1164,21 @@ gtf$seqnames &lt;- droplevels(gtf$seqnames)</code></pre>
 }    </code></pre>
 <pre class="r"><code>cells &lt;- unique(sum_expression$cell_type)</code></pre>
 <pre class="r"><code>mclapply(cells,get_fastqtl_pheno,mc.cores=8)</code></pre>
-<pre class="bash"><code>cd $eqtl_path
+<pre class="bash"><code>cd data_sensitive/eqtl
+touch test1
+ml tabix/0.2.6-goolf-1.7.20
+touch test2</code></pre>
+<pre><code>Lmod has detected the following error: Cannot load module &quot;GCC/4.8.4&quot; because
+these module(s) are loaded:
+   GCCcore
+
+While processing the following module(s):
+    Module fullname           Module Filename
+    ---------------           ---------------
+    GCC/4.8.4                 /pstore/apps/modules/.all/GCC/4.8.4.lua
+    goolf/1.7.20              /pstore/apps/modules/.all/goolf/1.7.20.lua
+    tabix/0.2.6-goolf-1.7.20  /pstore/apps/modules/.all/tabix/0.2.6-goolf-1.7.20.lua</code></pre>
+<pre class="bash"><code>cd data_sensitive/eqtl
 ml tabix/0.2.6-goolf-1.7.20
 
 for f in *.bed
@@ -966,7 +1217,7 @@ done</code></pre>
   })
 }</code></pre>
 <pre class="r"><code>mclapply(1:length(pheno_files),get_covariates,mc.cores=8)</code></pre>
-<pre class="bash"><code>cd $eqtl_path
+<pre class="bash"><code>cd data_sensitive/eqtl
 for f in PC*
 do
 cd $f
@@ -1014,7 +1265,7 @@ other attached packages:
 [13] dplyr_1.0.0                 purrr_0.3.4                
 [15] readr_1.3.1                 tidyr_1.1.0                
 [17] tibble_3.0.1                ggplot2_3.3.3              
-[19] tidyverse_1.3.0             workflowr_1.6.2            
+[19] tidyverse_1.3.0            
 
 loaded via a namespace (and not attached):
  [1] httr_1.4.1             jsonlite_1.6.1         modelr_0.1.8          
@@ -1036,9 +1287,9 @@ loaded via a namespace (and not attached):
 [49] RCurl_1.98-1.2         rstudioapi_0.11        bitops_1.0-6          
 [52] rmarkdown_2.2          gtable_0.3.0           DBI_1.1.0             
 [55] R6_2.4.1               lubridate_1.7.9        knitr_1.28            
-[58] rprojroot_1.3-2        stringi_1.4.6          Rcpp_1.0.6            
-[61] vctrs_0.3.1            dbplyr_1.4.4           tidyselect_1.1.0      
-[64] xfun_0.14             </code></pre>
+[58] workflowr_1.6.2        rprojroot_1.3-2        stringi_1.4.6         
+[61] Rcpp_1.0.6             vctrs_0.3.1            dbplyr_1.4.4          
+[64] tidyselect_1.1.0       xfun_0.14             </code></pre>
 </div>
 </div>
 </div>
