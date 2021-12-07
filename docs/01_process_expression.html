@@ -453,7 +453,7 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 </div>
 <div id="strongSeedstrongcodesetseed20211124code" class="panel-collapse collapse">
 <div class="panel-body">
-<p>The command <code>set.seed(20211124)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+<p>The command <code>set.seed(20211124)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
 </div>
 </div>
 </div>
@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongb05d4fc"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> b05d4fc </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong62a3cc3"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 62a3cc3 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongb05d4fc" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong62a3cc3" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version b05d4fc. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 62a3cc3. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -576,6 +576,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+62a3cc3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-07
+</td>
+<td>
+process expression without soupy genes
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+48c3088
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-07
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -761,12 +795,25 @@ library(parallel)</code></pre>
 <p>Get individuals with both scRNA-seq and genotype information</p>
 <pre class="r"><code>individidual_genotype_scRNA &lt;- read_tsv(&#39;data_sensitive/genotypes/individuals_with_genotype_scRNA.txt&#39;,
                                         col_names = FALSE)</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  X1 = col_character(),
+  X2 = col_character()
+)</code></pre>
 </div>
 <div id="ms-expression" class="section level1">
 <h1>MS expression</h1>
 <pre class="r"><code>sce_ms &lt;- readRDS(&#39;data_sensitive/sce/ms_sce_3.rds&#39;)</code></pre>
 <p>get annotation</p>
 <pre class="r"><code>annot &lt;- read_csv(&#39;data_sensitive/sce/conos_labelled_2021-05-31.txt&#39;)</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  cell_id = col_character(),
+  sample_id = col_character(),
+  conos = col_character(),
+  type_broad = col_character(),
+  type_fine = col_character()
+)</code></pre>
 <p>Only keep cells that were annotated</p>
 <pre class="r"><code>sce_ms &lt;- sce_ms[,colnames(sce_ms)%in%annot$cell_id]</code></pre>
 <pre class="r"><code>m &lt;- match(colnames(sce_ms),annot$cell_id)
@@ -814,6 +861,8 @@ colnames(sce_ms) &lt;- gsub(&#39;tmp&#39;,&#39;WM190&#39;,colnames(sce_ms))</cod
 <pre class="r"><code>sce_ad &lt;- readRDS(&#39;data_sensitive/sce/sce.annotated8.rds&#39;)</code></pre>
 <p>Keep only individuals for which we have both scRNA-seq and expression</p>
 <pre class="r"><code>sce_ad &lt;- sce_ad[,sce_ad$individual_id%in%individidual_genotype_scRNA$X1]</code></pre>
+<pre><code>Loading required package: HDF5Array</code></pre>
+<pre><code>Loading required package: rhdf5</code></pre>
 <p>Some individuals are present in multiple AD studies</p>
 <pre class="r"><code>(individuals_multiple_studies &lt;- colData(sce_ad) %&gt;% as_tibble() %&gt;% 
   dplyr::select(individual_id,study,diagnosis) %&gt;% 
@@ -821,6 +870,19 @@ colnames(sce_ms) &lt;- gsub(&#39;tmp&#39;,&#39;WM190&#39;,colnames(sce_ms))</cod
   add_count(individual_id) %&gt;% 
   filter(n&gt;1) %&gt;% 
   arrange(individual_id))</code></pre>
+<pre><code># A tibble: 10 x 4
+   individual_id study    diagnosis     n
+   &lt;chr&gt;         &lt;chr&gt;    &lt;chr&gt;     &lt;int&gt;
+ 1 SM-CJGLH      Mathys   Ctrl          2
+ 2 SM-CJGLH      Zhou     Ctrl          2
+ 3 SM-CJIZ1      Mathys   Ctrl          2
+ 4 SM-CJIZ1      Zhou     Ctrl          2
+ 5 SM-CJJ35      Mathys   AD            2
+ 6 SM-CJJ35      Zhou     AD            2
+ 7 SM-CTDQW      Columbia AD            2
+ 8 SM-CTDQW      Mathys   AD            2
+ 9 SM-CTEM3      Mathys   Ctrl          2
+10 SM-CTEM3      Zhou     Ctrl          2</code></pre>
 <p>count number of cells for these individuals</p>
 <pre class="r"><code>n_cells_per_id &lt;- colData(sce_ad) %&gt;% as_tibble() %&gt;% 
   filter(individual_id%in%individuals_multiple_studies$individual_id) %&gt;% 
@@ -853,6 +915,7 @@ colnames(sce_ms) &lt;- gsub(&#39;tmp&#39;,&#39;WM190&#39;,colnames(sce_ms))</cod
 <h1>Get common genes</h1>
 <pre class="r"><code>common_genes &lt;-  intersect(rownames(sce_ms),rownames(sce_ad))</code></pre>
 <pre class="r"><code>length(common_genes)</code></pre>
+<pre><code>[1] 25938</code></pre>
 <pre class="r"><code>sce_ms &lt;- sce_ms[common_genes,]
 sce_ad &lt;- sce_ad[common_genes,]</code></pre>
 <p>Save ensembl - symbol names from ms dataset</p>
@@ -884,6 +947,12 @@ dplyr::select(individual_id,diagnosis=disease_status) %&gt;%
 <pre class="r"><code>cov_all_t &lt;- cov_all %&gt;% column_to_rownames(&#39;individual_id&#39;) %&gt;% t() %&gt;% as.data.frame() %&gt;% rownames_to_column(&#39;id&#39;)</code></pre>
 <p>Load genotype PCs</p>
 <pre class="r"><code>cov_genotype_pcs &lt;- read_tsv(&#39;data_sensitive/genotypes/pca_covariate_fastqtl.txt&#39;)</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  .default = col_double(),
+  id = col_character()
+)</code></pre>
+<pre><code>See spec(...) for full column specifications.</code></pre>
 <pre class="r"><code>cov_all_t &lt;- cov_all_t[,colnames(cov_genotype_pcs)]</code></pre>
 <p>Add covariates from metadata (study, case-control) to genotype PCs.</p>
 <pre class="r"><code>cov &lt;- rbind(cov_genotype_pcs,cov_all_t) %&gt;% as_tibble()</code></pre>
@@ -1011,6 +1080,7 @@ saveRDS(markers,&#39;data_sensitive/expression/cell_marker_expression.rds&#39;)<
   group_by(ensembl) %&gt;% 
   mutate(prop_max_cpm=mean_cpm/max(mean_cpm)) %&gt;% 
   ungroup()</code></pre>
+<pre><code>`summarise()` regrouping output by &#39;cell_type&#39; (override with `.groups` argument)</code></pre>
 </div>
 <div id="filter-genes" class="section level2">
 <h2>Filter genes</h2>
@@ -1137,6 +1207,17 @@ saveRDS(markers,&#39;data_sensitive/expression/cell_marker_expression.rds&#39;)<
   dplyr::select(-individual_id) %&gt;% 
   unique() %&gt;% 
   arrange(-n))</code></pre>
+<pre><code># A tibble: 8 x 2
+  cell_type              n
+  &lt;chr&gt;              &lt;int&gt;
+1 Excitatory neurons 14596
+2 Inhibitory neurons 12946
+3 Astrocytes         11434
+4 Oligodendrocytes   10824
+5 OPCs / COPs        10803
+6 Endothelial cells  10788
+7 Microglia           8900
+8 Pericytes           6941</code></pre>
 </div>
 </div>
 <div id="filter-individuals" class="section level2">
@@ -1145,9 +1226,34 @@ saveRDS(markers,&#39;data_sensitive/expression/cell_marker_expression.rds&#39;)<
 <pre class="r"><code>(n_cells_ind_cell_type &lt;- sum_expression %&gt;% 
   dplyr::select(cell_type,individual_id,n_cells) %&gt;% 
   unique() %&gt;% arrange(n_cells))</code></pre>
+<pre><code># A tibble: 1,514 x 3
+   cell_type          individual_id n_cells
+   &lt;chr&gt;              &lt;chr&gt;           &lt;int&gt;
+ 1 Astrocytes         SD030/18            1
+ 2 Endothelial cells  SD015/18            1
+ 3 Pericytes          SD015/18            1
+ 4 Inhibitory neurons S13-096             1
+ 5 Pericytes          SM-CJGIM            1
+ 6 Endothelial cells  SM-CJGIM            1
+ 7 Endothelial cells  SM-CTEGO            1
+ 8 Endothelial cells  SM-CJFOL            1
+ 9 Endothelial cells  SM-CTECO            1
+10 Inhibitory neurons SM-CJFOC            1
+# … with 1,504 more rows</code></pre>
 <pre class="r"><code>keep &lt;- filter(n_cells_ind_cell_type,n_cells&gt;=10)</code></pre>
 <p>Number of unique individuals per cell types for eQTL analysis</p>
 <pre class="r"><code>dplyr::count(keep,cell_type) %&gt;% arrange(-n)</code></pre>
+<pre><code># A tibble: 8 x 2
+  cell_type              n
+  &lt;chr&gt;              &lt;int&gt;
+1 Oligodendrocytes     192
+2 Astrocytes           189
+3 Excitatory neurons   187
+4 Microglia            187
+5 OPCs / COPs          187
+6 Inhibitory neurons   178
+7 Pericytes            150
+8 Endothelial cells    144</code></pre>
 <pre class="r"><code>sum_expression &lt;- inner_join(sum_expression,keep,by=c(&#39;cell_type&#39;,&#39;individual_id&#39;,&#39;n_cells&#39;))</code></pre>
 </div>
 <div id="get-gene-coordinates" class="section level2">
@@ -1199,27 +1305,6 @@ gtf$seqnames &lt;- droplevels(gtf$seqnames)</code></pre>
 <pre class="r"><code>cells &lt;- unique(sum_expression$cell_type)</code></pre>
 <pre class="r"><code>mclapply(cells,get_fastqtl_pheno,mc.cores=8)</code></pre>
 <pre class="bash"><code>cd data_sensitive/eqtl
-touch test3
-ml tabix/0.2.6-goolf-1.7.20
-touch test4
-
-for f in *.bed
-do
-echo $f
-done</code></pre>
-<pre><code>Lmod has detected the following error: Cannot load module &quot;GCC/4.8.4&quot; because
-these module(s) are loaded:
-   GCCcore
-
-While processing the following module(s):
-    Module fullname           Module Filename
-    ---------------           ---------------
-    GCC/4.8.4                 /pstore/apps/modules/.all/GCC/4.8.4.lua
-    goolf/1.7.20              /pstore/apps/modules/.all/goolf/1.7.20.lua
-    tabix/0.2.6-goolf-1.7.20  /pstore/apps/modules/.all/tabix/0.2.6-goolf-1.7.20.lua
-
-*.bed</code></pre>
-<pre class="bash"><code>cd data_sensitive/eqtl
 ml tabix/0.2.6-goolf-1.7.20
 
 for f in *.bed
@@ -1230,6 +1315,11 @@ done</code></pre>
 <div id="generate-expression-pca" class="section level2">
 <h2>Generate expression pca</h2>
 <pre class="r"><code>geno_cov &lt;- read_tsv(&#39;data_sensitive/eqtl/covariate_pca_meta_fastqtl.txt&#39;)</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  .default = col_character()
+)</code></pre>
+<pre><code>See spec(...) for full column specifications.</code></pre>
 <pre class="r"><code>pheno_files &lt;- list.files(&#39;data_sensitive/eqtl/&#39;,pattern=&#39;*.bed.gz$&#39;,full.names = T)</code></pre>
 <pre class="r"><code>get_covariates &lt;- function(i){
   
@@ -1297,40 +1387,61 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] SingleCellExperiment_1.10.1 SummarizedExperiment_1.18.1
- [3] DelayedArray_0.14.0         matrixStats_0.56.0         
- [5] Biobase_2.48.0              GenomicRanges_1.40.0       
- [7] GenomeInfoDb_1.24.0         IRanges_2.22.2             
- [9] S4Vectors_0.26.1            BiocGenerics_0.34.0        
-[11] forcats_0.5.0               stringr_1.4.0              
-[13] dplyr_1.0.0                 purrr_0.3.4                
-[15] readr_1.3.1                 tidyr_1.1.0                
-[17] tibble_3.0.1                ggplot2_3.3.3              
-[19] tidyverse_1.3.0            
+ [1] HDF5Array_1.16.1            rhdf5_2.32.4               
+ [3] SingleCellExperiment_1.10.1 SummarizedExperiment_1.18.1
+ [5] DelayedArray_0.14.0         matrixStats_0.56.0         
+ [7] Biobase_2.48.0              GenomicRanges_1.40.0       
+ [9] GenomeInfoDb_1.24.0         IRanges_2.22.2             
+[11] S4Vectors_0.26.1            BiocGenerics_0.34.0        
+[13] forcats_0.5.0               stringr_1.4.0              
+[15] dplyr_1.0.0                 purrr_0.3.4                
+[17] readr_1.3.1                 tidyr_1.1.0                
+[19] tibble_3.0.1                ggplot2_3.3.3              
+[21] tidyverse_1.3.0             workflowr_1.6.2            
 
 loaded via a namespace (and not attached):
- [1] httr_1.4.1             jsonlite_1.6.1         modelr_0.1.8          
- [4] assertthat_0.2.1       blob_1.2.1             GenomeInfoDbData_1.2.3
- [7] cellranger_1.1.0       yaml_2.2.1             pillar_1.4.4          
-[10] backports_1.1.7        lattice_0.20-41        glue_1.4.1            
-[13] digest_0.6.25          promises_1.1.1         XVector_0.28.0        
-[16] rvest_0.3.5            colorspace_1.4-1       htmltools_0.5.1.1     
-[19] httpuv_1.5.4           Matrix_1.2-18          pkgconfig_2.0.3       
-[22] broom_0.5.6            haven_2.3.1            zlibbioc_1.34.0       
-[25] scales_1.1.1           whisker_0.4            later_1.1.0.1         
-[28] git2r_0.27.1           generics_0.0.2         ellipsis_0.3.1        
-[31] withr_2.2.0            cli_2.0.2              magrittr_1.5          
-[34] crayon_1.3.4           readxl_1.3.1           evaluate_0.14         
-[37] fs_1.4.1               fansi_0.4.1            nlme_3.1-148          
-[40] xml2_1.3.2             tools_4.0.1            hms_0.5.3             
-[43] lifecycle_0.2.0        munsell_0.5.0          reprex_0.3.0          
-[46] compiler_4.0.1         rlang_0.4.10           grid_4.0.1            
-[49] RCurl_1.98-1.2         rstudioapi_0.11        bitops_1.0-6          
-[52] rmarkdown_2.2          gtable_0.3.0           DBI_1.1.0             
-[55] R6_2.4.1               lubridate_1.7.9        knitr_1.28            
-[58] workflowr_1.6.2        rprojroot_1.3-2        stringi_1.4.6         
-[61] Rcpp_1.0.6             vctrs_0.3.1            dbplyr_1.4.4          
-[64] tidyselect_1.1.0       xfun_0.14             </code></pre>
+ [1] nlme_3.1-148              bitops_1.0-6             
+ [3] fs_1.4.1                  lubridate_1.7.9          
+ [5] httr_1.4.1                rprojroot_1.3-2          
+ [7] tools_4.0.1               backports_1.1.7          
+ [9] utf8_1.1.4                R6_2.4.1                 
+[11] irlba_2.3.3               vipor_0.4.5              
+[13] DBI_1.1.0                 colorspace_1.4-1         
+[15] withr_2.2.0               gridExtra_2.3            
+[17] tidyselect_1.1.0          compiler_4.0.1           
+[19] git2r_0.27.1              cli_2.0.2                
+[21] rvest_0.3.5               BiocNeighbors_1.6.0      
+[23] xml2_1.3.2                rtracklayer_1.48.0       
+[25] scales_1.1.1              Rsamtools_2.4.0          
+[27] digest_0.6.25             rmarkdown_2.2            
+[29] XVector_0.28.0            scater_1.16.2            
+[31] pkgconfig_2.0.3           htmltools_0.5.1.1        
+[33] dbplyr_1.4.4              rlang_0.4.10             
+[35] readxl_1.3.1              rstudioapi_0.11          
+[37] DelayedMatrixStats_1.10.1 generics_0.0.2           
+[39] jsonlite_1.6.1            BiocParallel_1.22.0      
+[41] RCurl_1.98-1.2            magrittr_1.5             
+[43] BiocSingular_1.4.0        GenomeInfoDbData_1.2.3   
+[45] Matrix_1.2-18             Rhdf5lib_1.10.0          
+[47] ggbeeswarm_0.6.0          Rcpp_1.0.6               
+[49] munsell_0.5.0             fansi_0.4.1              
+[51] viridis_0.5.1             lifecycle_0.2.0          
+[53] stringi_1.4.6             whisker_0.4              
+[55] yaml_2.2.1                zlibbioc_1.34.0          
+[57] grid_4.0.1                blob_1.2.1               
+[59] promises_1.1.1            crayon_1.3.4             
+[61] lattice_0.20-41           Biostrings_2.56.0        
+[63] haven_2.3.1               hms_0.5.3                
+[65] knitr_1.28                pillar_1.4.4             
+[67] XML_3.99-0.3              reprex_0.3.0             
+[69] glue_1.4.1                evaluate_0.14            
+[71] modelr_0.1.8              vctrs_0.3.1              
+[73] httpuv_1.5.4              cellranger_1.1.0         
+[75] gtable_0.3.0              assertthat_0.2.1         
+[77] xfun_0.14                 rsvd_1.0.3               
+[79] broom_0.5.6               later_1.1.0.1            
+[81] viridisLite_0.3.0         GenomicAlignments_1.24.0 
+[83] beeswarm_0.2.3            ellipsis_0.3.1           </code></pre>
 </div>
 </div>
 </div>
