@@ -680,9 +680,14 @@ mclapply(cells,get_fastqtl_pheno,mc.cores=8)
 
 ```{bash,eval=TRUE}
 cd data_sensitive/eqtl
-touch test1
+touch test3
 ml tabix/0.2.6-goolf-1.7.20
-touch test2
+touch test4
+
+for f in *.bed
+do
+echo $f
+done
 ```
 
 ```{bash,eval=FALSE}
