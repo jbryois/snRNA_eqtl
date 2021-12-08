@@ -209,10 +209,13 @@ interaction_model <- function(i){
     filter(mean_soup<0.1)
   
   #Get cell types expressing the gene, Same threshold as used for the eQTL analysis
-  cell_type_expressed <- gene_sumstats %>% 
-    filter(mean_cpm>1,n_samples_expressed>10) %>% 
-    filter(cell_type%in%ambient_prop$cell_type) %>% 
-    pull(cell_type)
+  #cell_type_expressed <- gene_sumstats %>% 
+  #  filter(mean_cpm>1,n_samples_expressed>10) %>% 
+  #  filter(cell_type%in%ambient_prop$cell_type) %>% 
+  #  pull(cell_type)
+  
+  #Specify that expression in all cell types should be considered
+  cell_type_expressed <- gene_sumstats$cell_type %>% unique()
   
   #Aggregate - Set all cell types that are not the cell type in which the eQTL was discovered as 'Others'
   df <- df %>% 
