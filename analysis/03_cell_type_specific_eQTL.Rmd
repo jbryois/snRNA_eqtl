@@ -297,7 +297,7 @@ interaction_model <- function(i){
   
     out <- tibble(cell_type_id=cell_type_id,gene_id=gene_id,snp_id=snp_id,
                 nb_pvalue_aggregate=nb_pvalues_aggregate$`Pr(>|z|)`,
-                nb_pvalue_at_least_one=min(nb_pvalues$p_bonf)) %>% 
+                nb_pvalue_at_least_one=min(nb_pvalues$p_bonf,na.rm=TRUE)) %>% 
     cbind(nb_pvalues_all,
           nb_pvalue_aggregate_model_converged=full_model_nb_aggregate_convergence,
           nb_pvalue_at_least_one_model_converged=full_model_nb_convergence)
