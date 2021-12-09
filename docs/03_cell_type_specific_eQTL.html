@@ -11,7 +11,7 @@
 
 <meta name="author" content="Julien Bryois" />
 
-<meta name="date" content="2021-12-08" />
+<meta name="date" content="2021-12-09" />
 
 <title>Run cell type specific eQTL analysis</title>
 
@@ -380,7 +380,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Run cell type specific eQTL analysis</h1>
 <h4 class="author">Julien Bryois</h4>
-<h4 class="date">December 08, 2021</h4>
+<h4 class="date">December 09, 2021</h4>
 
 </div>
 
@@ -405,7 +405,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-12-08
+<strong>Last updated:</strong> 2021-12-09
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongc72dd96"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> c72dd96 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong38fa8bb"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 38fa8bb </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongc72dd96" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong38fa8bb" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version c72dd96. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 38fa8bb. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -577,6 +577,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+38fa8bb
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-09
+</td>
+<td>
+interaction_qtl_soup_filter_NA_replacement
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+9540a29
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-08
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -793,13 +827,13 @@ try_other_optimizers &lt;- function(model_fit){
     filter(mean_soup&lt;0.1)
   
   #Get cell types expressing the gene, Same threshold as used for the eQTL analysis
-  #cell_type_expressed &lt;- gene_sumstats %&gt;% 
-  #  filter(mean_cpm&gt;1,n_samples_expressed&gt;10) %&gt;% 
-  #  filter(cell_type%in%ambient_prop$cell_type) %&gt;% 
-  #  pull(cell_type)
+  cell_type_expressed &lt;- gene_sumstats %&gt;% 
+    filter(mean_cpm&gt;1,n_samples_expressed&gt;10) %&gt;% 
+    filter(cell_type%in%ambient_prop$cell_type) %&gt;% 
+    pull(cell_type)
   
   #Specify that expression in all cell types should be considered
-  cell_type_expressed &lt;- gene_sumstats$cell_type %&gt;% unique()
+  #cell_type_expressed &lt;- gene_sumstats$cell_type %&gt;% unique()
   
   #Aggregate - Set all cell types that are not the cell type in which the eQTL was discovered as &#39;Others&#39;
   df &lt;- df %&gt;% 
@@ -831,8 +865,8 @@ try_other_optimizers &lt;- function(model_fit){
     filter(grepl(&#39;genotype_parsed:&#39;,variable)) %&gt;% 
     dplyr::select(-variable)
   } else{
-    #If there is only one cell type, the pvalue is set to 0 as the genetic effect is cell type specific.
-    nb_pvalues_aggregate &lt;- tibble(Estimate=NA,`Std. Error`=NA,`z value`=NA,`Pr(&gt;|z|)`=0)
+    #If there is only one cell type, the pvalue is set to NA
+    nb_pvalues_aggregate &lt;- tibble(Estimate=NA,`Std. Error`=NA,`z value`=NA,`Pr(&gt;|z|)`=NA)
     full_model_nb_aggregate_convergence &lt;- TRUE
   }
   
@@ -861,7 +895,7 @@ try_other_optimizers &lt;- function(model_fit){
       filter(grepl(&#39;genotype_parsed:&#39;,variable)) %&gt;% 
       dplyr::select(variable,`Pr(&gt;|z|)`) %&gt;% 
       mutate(variable=gsub(&#39;genotype_parsed:cell_type_model&#39;,&#39;&#39;,variable)) %&gt;% 
-      mutate(`Pr(&gt;|z|)`=ifelse(!variable%in%cell_type_expressed,0,`Pr(&gt;|z|)`)) %&gt;% 
+      mutate(`Pr(&gt;|z|)`=ifelse(!variable%in%cell_type_expressed,NA,`Pr(&gt;|z|)`)) %&gt;% 
       mutate(p_bonf=p.adjust(`Pr(&gt;|z|)`,method=&#39;bonferroni&#39;))
   
     nb_pvalues_all &lt;- nb_pvalues %&gt;% dplyr::select(-p_bonf) %&gt;% spread(variable,`Pr(&gt;|z|)`)
@@ -870,12 +904,12 @@ try_other_optimizers &lt;- function(model_fit){
   
     nb_pvalues_all &lt;- nb_pvalues_all[,order(names(nb_pvalues_all))]
   } else {
-    nb_pvalues_all &lt;- tibble(Astrocytes=0,`Endothelial cells`=0,`Excitatory neurons`=0,
-                             `Inhibitory neurons`=0,Microglia=0,Oligodendrocytes=0,
-                             `OPCs / COPs`=0,Pericytes=0)
+    nb_pvalues_all &lt;- tibble(Astrocytes=NA,`Endothelial cells`=NA,`Excitatory neurons`=NA,
+                             `Inhibitory neurons`=NA,Microglia=NA,Oligodendrocytes=NA,
+                             `OPCs / COPs`=NA,Pericytes=NA)
     nb_pvalues_all[,cell_type_id] &lt;- NA
     colnames(nb_pvalues_all) &lt;- paste0(colnames(nb_pvalues_all),&#39;_p&#39;)
-    nb_pvalues &lt;- tibble(p_bonf=0)
+    nb_pvalues &lt;- tibble(p_bonf=NA)
     full_model_nb_convergence &lt;- TRUE
   }
   
