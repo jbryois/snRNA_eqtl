@@ -209,13 +209,13 @@ interaction_model <- function(i){
     filter(mean_soup<0.1)
   
   #Get cell types expressing the gene, Same threshold as used for the eQTL analysis
-  #cell_type_expressed <- gene_sumstats %>% 
-  #  filter(mean_cpm>1,n_samples_expressed>10) %>% 
-  #  filter(cell_type%in%ambient_prop$cell_type) %>% 
-  #  pull(cell_type)
+  cell_type_expressed <- gene_sumstats %>% 
+    filter(mean_cpm>1,n_samples_expressed>10) %>% 
+    filter(cell_type%in%ambient_prop$cell_type) %>% 
+    pull(cell_type)
   
   #Specify that expression in all cell types should be considered
-  cell_type_expressed <- gene_sumstats$cell_type %>% unique()
+  #cell_type_expressed <- gene_sumstats$cell_type %>% unique()
   
   #Aggregate - Set all cell types that are not the cell type in which the eQTL was discovered as 'Others'
   df <- df %>% 
@@ -247,8 +247,8 @@ interaction_model <- function(i){
     filter(grepl('genotype_parsed:',variable)) %>% 
     dplyr::select(-variable)
   } else{
-    #If there is only one cell type, the pvalue is set to 0 as the genetic effect is cell type specific.
-    nb_pvalues_aggregate <- tibble(Estimate=NA,`Std. Error`=NA,`z value`=NA,`Pr(>|z|)`=0)
+    #If there is only one cell type, the pvalue is set to NA
+    nb_pvalues_aggregate <- tibble(Estimate=NA,`Std. Error`=NA,`z value`=NA,`Pr(>|z|)`=NA)
     full_model_nb_aggregate_convergence <- TRUE
   }
   
@@ -277,7 +277,7 @@ interaction_model <- function(i){
       filter(grepl('genotype_parsed:',variable)) %>% 
       dplyr::select(variable,`Pr(>|z|)`) %>% 
       mutate(variable=gsub('genotype_parsed:cell_type_model','',variable)) %>% 
-      mutate(`Pr(>|z|)`=ifelse(!variable%in%cell_type_expressed,0,`Pr(>|z|)`)) %>% 
+      mutate(`Pr(>|z|)`=ifelse(!variable%in%cell_type_expressed,NA,`Pr(>|z|)`)) %>% 
       mutate(p_bonf=p.adjust(`Pr(>|z|)`,method='bonferroni'))
   
     nb_pvalues_all <- nb_pvalues %>% dplyr::select(-p_bonf) %>% spread(variable,`Pr(>|z|)`)
@@ -286,12 +286,12 @@ interaction_model <- function(i){
   
     nb_pvalues_all <- nb_pvalues_all[,order(names(nb_pvalues_all))]
   } else {
-    nb_pvalues_all <- tibble(Astrocytes=0,`Endothelial cells`=0,`Excitatory neurons`=0,
-                             `Inhibitory neurons`=0,Microglia=0,Oligodendrocytes=0,
-                             `OPCs / COPs`=0,Pericytes=0)
+    nb_pvalues_all <- tibble(Astrocytes=NA,`Endothelial cells`=NA,`Excitatory neurons`=NA,
+                             `Inhibitory neurons`=NA,Microglia=NA,Oligodendrocytes=NA,
+                             `OPCs / COPs`=NA,Pericytes=NA)
     nb_pvalues_all[,cell_type_id] <- NA
     colnames(nb_pvalues_all) <- paste0(colnames(nb_pvalues_all),'_p')
-    nb_pvalues <- tibble(p_bonf=0)
+    nb_pvalues <- tibble(p_bonf=NA)
     full_model_nb_convergence <- TRUE
   }
   
