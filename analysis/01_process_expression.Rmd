@@ -26,7 +26,7 @@ library(parallel)
 
 Get individuals with both scRNA-seq and genotype information
 
-```{r,eval=TRUE}
+```{r,eval=TRUE,message=FALSE}
 individidual_genotype_scRNA <- read_tsv('data_sensitive/genotypes/individuals_with_genotype_scRNA.txt',
                                         col_names = FALSE)
 ```
@@ -39,7 +39,7 @@ sce_ms <- readRDS('data_sensitive/sce/ms_sce_3.rds')
 
 get annotation
 
-```{r,eval=TRUE}
+```{r,eval=TRUE,message=FALSE}
 annot <- read_csv('data_sensitive/sce/conos_labelled_2021-05-31.txt')
 ```
 
@@ -264,7 +264,7 @@ cov_all_t <- cov_all %>% column_to_rownames('individual_id') %>% t() %>% as.data
 
 Load genotype PCs
 
-```{r,eval=TRUE}
+```{r,eval=TRUE,message=FALSE}
 cov_genotype_pcs <- read_tsv('data_sensitive/genotypes/pca_covariate_fastqtl.txt')
 ```
 
@@ -310,24 +310,6 @@ count_per_cluster <- function(sce,i,var){
 ## MS
 
 ```{r,eval=TRUE}
-if(!file.exists('data_sensitive/expression/ms_sum_expression.individual_id.rds')){
-  
-  cell_type_id <- cbind(as.character(sce_ms$broad_annot),sce_ms$individual_id) %>% unique() %>% as.data.frame()
-  
-  sum_expression_ms <- mclapply(1:nrow(cell_type_id),
-                                count_per_cluster,
-                                sce=sce_ms,
-                                var='individual_id',
-                                mc.cores = 36,
-                                mc.preschedule = FALSE) %>% 
-    bind_rows()
-  
-  saveRDS(sum_expression_ms,'data_sensitive/expression/ms_sum_expression.individual_id.rds')
-  rm(sum_expression_ms)
-}
-```
-
-```{r,eval=TRUE}
 if(!file.exists('data_sensitive/expression/ms_sum_expression.sample_id.rds')){
   
   cell_type_id <- cbind(as.character(sce_ms$broad_annot),sce_ms$sample_id) %>% unique() %>% as.data.frame()
@@ -345,29 +327,7 @@ if(!file.exists('data_sensitive/expression/ms_sum_expression.sample_id.rds')){
 }
 ```
 
-```{r,eval=TRUE}
-rm(sce_ms)
-```
-
 ## AD
-
-```{r,eval=TRUE}
-if(!file.exists('data_sensitive/expression/ad_sum_expression.individual_id.rds')){
-  
-  cell_type_id <- cbind(as.character(sce_ad$broad_annot),sce_ad$individual_id) %>% unique() %>% as.data.frame()
-  
-  sum_expression_ad <- mclapply(1:nrow(cell_type_id),
-                                count_per_cluster,
-                                sce=sce_ad,
-                                var='individual_id',
-                                mc.cores = 36,
-                                mc.preschedule = FALSE) %>% 
-    bind_rows()
-  
-  saveRDS(sum_expression_ad,'data_sensitive/expression/ad_sum_expression.individual_id.rds')
-  rm(sum_expression_ad)
-}
-```
 
 ```{r,eval=TRUE}
 if(!file.exists('data_sensitive/expression/ad_sum_expression.sample_id.rds')){
@@ -387,63 +347,9 @@ if(!file.exists('data_sensitive/expression/ad_sum_expression.sample_id.rds')){
 }
 ```
 
-```{r,eval=TRUE}
-rm(sce_ad)
-```
+# Get ambient RNA
 
-# Load Pseudo-bulk
-
-```{r,eval=TRUE}
-sum_expression_ms <- readRDS('data_sensitive/expression/ms_sum_expression.individual_id.rds') %>% mutate(dataset='ms')
-sum_expression_ad <- readRDS('data_sensitive/expression/ad_sum_expression.individual_id.rds') %>% mutate(dataset='ad')
-```
-
-## Aggregate datasets
-
-Let's merge the MS and AD dataset.
-
-```{r,eval=TRUE}
-sum_expression <- rbind(sum_expression_ms,sum_expression_ad)
-```
-
-Get counts per million (CPM)
-
-```{r,eval=TRUE}
-sum_expression <- sum_expression %>% 
-  group_by(cell_type,individual_id) %>% 
-  mutate(counts_scaled_1M=counts*10^6/sum(counts)) %>% 
-  ungroup() %>% 
-  as_tibble()
-```
-
-Save expression of cell type marker genes
-
-```{r,eval=TRUE}
-markers <- sum_expression %>% filter(symbol%in%c('SLC17A7','GAD2','AQP4','MOG','PDGFRA','C1QA','CLDN5','RGS5'))
-saveRDS(markers,'data_sensitive/expression/cell_marker_expression.rds')
-```
-
-## Get number of samples expressing genes and average expression
-
-```{r,eval=TRUE}
-sumstats_gene <- sum_expression %>% group_by(cell_type,ensembl) %>% 
-  summarise(counts_per_celltype=sum(counts),
-         n_expressed_per_celltype=sum(n_expressed),
-         n_cells_per_celltype=sum(n_cells),
-         perc_expressed_per_celltype=round(n_expressed_per_celltype*100/n_cells_per_celltype,digits=2),
-         n_samples_expressed=sum(counts>0),
-         perc_samples_expressed=round(n_samples_expressed*100/length(counts),digits=2),
-         mean_cpm=mean(counts_scaled_1M)) %>% 
-  group_by(ensembl) %>% 
-  mutate(prop_max_cpm=mean_cpm/max(mean_cpm)) %>% 
-  ungroup()
-```
-
-## Filter genes
-
-### Get Soupy genes
-
-We will first compute the proportion of reads that could be attributed to ambient RNA (conservative estimate).
+We will first compute the proportion of reads that could be attributed to ambient RNA (conservative estimate) for each sample.
 
 ```{r,eval=TRUE}
 compute_ambient_per_sample <- function(id){
@@ -478,10 +384,11 @@ compute_ambient_per_sample <- function(id){
 ```
 
 ```{r,eval=TRUE}
-if(file.exists('data_sensitive/ambient/ambient.prop.estimate.droplet_utils.rds')){
-  ambient_prop_per_cell_type <- readRDS('data_sensitive/ambient/ambient.prop.estimate.droplet_utils.rds')
+if(file.exists('data_sensitive/ambient/ambient.prop.estimate.droplet_utils.samples.rds')){
+  soup_genes <- readRDS('data_sensitive/ambient/ambient.prop.estimate.droplet_utils.genes.rds')
+  soup_samples <- readRDS('data_sensitive/ambient/ambient.prop.estimate.droplet_utils.samples.rds')
 } else{
-
+  
   #Load pseudo-bulk counts for each sample in the dataset.
   sample_id_ms <- readRDS('data_sensitive/expression/ms_sum_expression.sample_id.rds')
   sample_id_ad <- readRDS('data_sensitive/expression/ad_sum_expression.sample_id.rds')
@@ -533,10 +440,11 @@ if(file.exists('data_sensitive/ambient/ambient.prop.estimate.droplet_utils.rds')
   stopifnot(all(samples%in%samples_ambient))
   
   #Estimate ambient RNA for each individual
-  ambient_prop_all <- mclapply(samples,compute_ambient_per_sample,mc.cores = 36) %>% 
+  ambient_prop_all <- mclapply(samples,compute_ambient_per_sample,mc.cores = 32) %>% 
   bind_rows()
-  
-  ambient_prop_per_cell_type <- ambient_prop_all%>% 
+  saveRDS(ambient_prop_all,'data_sensitive/ambient/ambient.prop.estimate.droplet_utils.all.rds')
+
+  soup_genes <- ambient_prop_all %>% 
   group_by(cell_type,ensembl) %>% 
   summarise(mean_soup=mean(soup,na.rm=TRUE),
             median_soup=median(soup,na.rm=TRUE),
@@ -545,9 +453,136 @@ if(file.exists('data_sensitive/ambient/ambient.prop.estimate.droplet_utils.rds')
             max_soup=max(soup,na.rm=TRUE),
             n_sample=n())
   
-  saveRDS(ambient_prop_per_cell_type,'data_sensitive/ambient/ambient.prop.estimate.droplet_utils.rds')
+  saveRDS(soup_genes,'data_sensitive/ambient/ambient.prop.estimate.droplet_utils.genes.rds')
+  
+  #Let's get gene that are not contaminated by ambient RNA.
+  keep_genes <- soup_genes %>% 
+    filter(mean_soup<0.1) %>% 
+    dplyr::select(cell_type,ensembl)
+  
+  #Only keep those genes and compute the mean ambient RNA for each sample.
+  soup_samples <- ambient_prop_all %>% 
+    inner_join(.,keep_genes) %>% 
+    group_by(individual_id,cell_type) %>% 
+    summarise(mean_soup=mean(soup,na.rm=TRUE))
+  
+  saveRDS(soup_samples,'data_sensitive/ambient/ambient.prop.estimate.droplet_utils.samples.rds')
 }
 ```
+
+# Compute individual_id pseudo-bulk
+
+We will now compute pseudo-bulk expression excluding samples for which we estimated a large fraction of ambient RNA.
+
+First let's get sample/cell_type combination to keep
+
+```{r}
+soup_samples_keep <- soup_samples %>% 
+  filter(mean_soup<0.1) %>% 
+  mutate(id_celltype=paste0(individual_id,'_',cell_type))
+```
+
+```{r,eval=TRUE}
+if(!file.exists('data_sensitive/expression/ms_sum_expression.individual_id.rds')){
+  
+  #Only keep samples/celltype with an average of less than 10% reads from ambient RNA
+  sce_ms$id_celltype <- paste0(sce_ms$sample_id,'_',sce_ms$broad_annot)
+  sce_ms <- sce_ms[,sce_ms$id_celltype%in%soup_samples_keep$id_celltype]
+  
+  #Compute Pseudo-bulk per individual
+  cell_type_id <- cbind(as.character(sce_ms$broad_annot),sce_ms$individual_id) %>% 
+    unique() %>%
+    as.data.frame()
+  
+  sum_expression_ms <- mclapply(1:nrow(cell_type_id),
+                                count_per_cluster,
+                                sce=sce_ms,
+                                var='individual_id',
+                                mc.cores = 36,
+                                mc.preschedule = FALSE) %>% 
+    bind_rows()
+  
+  saveRDS(sum_expression_ms,'data_sensitive/expression/ms_sum_expression.individual_id.rds')
+  rm(sum_expression_ms)
+  rm(sce_ms)
+}
+```
+
+```{r,eval=TRUE}
+if(!file.exists('data_sensitive/expression/ad_sum_expression.individual_id.rds')){
+  
+  #Only keep samples/celltype with an average of less than 10% reads from ambient RNA
+  sce_ad$id_celltype <- paste0(sce_ad$sample_id,'_',sce_ad$broad_annot)
+  sce_ad <- sce_ad[,sce_ad$id_celltype%in%soup_samples_keep$id_celltype]
+  
+  #Compute Pseudo-bulk per individual
+  cell_type_id <- cbind(as.character(sce_ad$broad_annot),sce_ad$individual_id) %>% 
+    unique() %>% 
+    as.data.frame()
+  
+  sum_expression_ad <- mclapply(1:nrow(cell_type_id),
+                                count_per_cluster,
+                                sce=sce_ad,
+                                var='individual_id',
+                                mc.cores = 36,
+                                mc.preschedule = FALSE) %>% 
+    bind_rows()
+  
+  saveRDS(sum_expression_ad,'data_sensitive/expression/ad_sum_expression.individual_id.rds')
+  rm(sum_expression_ad)
+  rm(sce_ad)
+}
+```
+
+# Load Pseudo-bulk
+
+```{r,eval=TRUE}
+sum_expression_ms <- readRDS('data_sensitive/expression/ms_sum_expression.individual_id.rds') %>% mutate(dataset='ms')
+sum_expression_ad <- readRDS('data_sensitive/expression/ad_sum_expression.individual_id.rds') %>% mutate(dataset='ad')
+```
+
+## Aggregate datasets
+
+Let's merge the MS and AD dataset.
+
+```{r,eval=TRUE}
+sum_expression <- rbind(sum_expression_ms,sum_expression_ad)
+```
+
+Get counts per million (CPM)
+
+```{r,eval=TRUE}
+sum_expression <- sum_expression %>% 
+  group_by(cell_type,individual_id) %>% 
+  mutate(counts_scaled_1M=counts*10^6/sum(counts)) %>% 
+  ungroup() %>% 
+  as_tibble()
+```
+
+Save expression of cell type marker genes
+
+```{r,eval=TRUE}
+markers <- sum_expression %>% filter(symbol%in%c('SLC17A7','GAD2','AQP4','MOG','PDGFRA','C1QA','CLDN5','RGS5'))
+saveRDS(markers,'data_sensitive/expression/cell_marker_expression.rds')
+```
+
+## Get number of samples expressing genes and average expression
+
+```{r,eval=TRUE,message=FALSE}
+sumstats_gene <- sum_expression %>% group_by(cell_type,ensembl) %>% 
+  summarise(counts_per_celltype=sum(counts),
+         n_expressed_per_celltype=sum(n_expressed),
+         n_cells_per_celltype=sum(n_cells),
+         perc_expressed_per_celltype=round(n_expressed_per_celltype*100/n_cells_per_celltype,digits=2),
+         n_samples_expressed=sum(counts>0),
+         perc_samples_expressed=round(n_samples_expressed*100/length(counts),digits=2),
+         mean_cpm=mean(counts_scaled_1M)) %>% 
+  group_by(ensembl) %>% 
+  mutate(prop_max_cpm=mean_cpm/max(mean_cpm)) %>% 
+  ungroup()
+```
+
+## Filter genes
 
 ### Filtering
 
@@ -558,7 +593,7 @@ Keep genes:
 3) Expressed with a mean CPM of at least 1
 
 ```{r,eval=TRUE}
-ambient_keep <- filter(ambient_prop_per_cell_type,mean_soup<0.1)
+ambient_keep <- filter(soup_genes,mean_soup<0.1)
 ```
 
 ```{r,eval=TRUE}
@@ -586,6 +621,8 @@ Number of genes tested per cell type
 ## Filter individuals
 
 Remove individuals with less than 10 cells for a given cell type.
+
+Samples with more than 10% of ambient RNA were removed above in pseudo-bulk computation.
 
 ```{r,eval=TRUE}
 (n_cells_ind_cell_type <- sum_expression %>% 
@@ -690,7 +727,7 @@ done
 
 ## Generate expression pca
 
-```{r,eval=TRUE}
+```{r,eval=TRUE,message=FALSE}
 geno_cov <- read_tsv('data_sensitive/eqtl/covariate_pca_meta_fastqtl.txt')
 ``` 
 
