@@ -743,7 +743,7 @@ get_covariates <- function(i){
   #load expression data
   d <- data.table::fread(pheno_files[i],data.table=FALSE)
   #perform pca
-  pca <- d[-c(1,2,3,4)] %>% t() %>% prcomp(.,scale.=T)
+  pca <- d[-c(1,2,3,4,5,6)] %>% t() %>% prcomp(.,scale.=T)
   
   #Create directories with different number of expression pcs
   #Add the n first pcs to the covariate file and write the covariate file in fastqtl format
