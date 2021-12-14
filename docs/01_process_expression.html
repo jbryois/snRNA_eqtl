@@ -11,7 +11,7 @@
 
 <meta name="author" content="Julien Bryois" />
 
-<meta name="date" content="2021-12-13" />
+<meta name="date" content="2021-12-14" />
 
 <title>Process expression</title>
 
@@ -380,7 +380,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Process expression</h1>
 <h4 class="author">Julien Bryois</h4>
-<h4 class="date">December 13, 2021</h4>
+<h4 class="date">December 14, 2021</h4>
 
 </div>
 
@@ -405,7 +405,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-12-13
+<strong>Last updated:</strong> 2021-12-14
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong329b2da"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 329b2da </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongdca9a01"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> dca9a01 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong329b2da" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongdca9a01" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 329b2da. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version dca9a01. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -528,11 +528,14 @@ Untracked files:
     Untracked:  data/gwas/
     Untracked:  data/magma_interaction_eqtl/
     Untracked:  data/metabrain/
+    Untracked:  output/Figures/
+    Untracked:  output/eqtl/
     Untracked:  output_tmp/
 
 Unstaged changes:
     Modified:   .gitignore
     Modified:   analysis/02_run_eQTL.Rmd
+    Modified:   analysis/03_cell_type_specific_eQTL.Rmd
     Modified:   analysis/_site.yml
     Modified:   analysis/index.Rmd
     Modified:   analysis/plot_figures.Rmd
@@ -575,6 +578,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+dca9a01
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-14
+</td>
+<td>
+QTLtools format update
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+16a97be
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-13
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1334,6 +1371,7 @@ gtf$seqnames &lt;- droplevels(gtf$seqnames)</code></pre>
 <h2>Get fastQTL format</h2>
 <p>Perform TMM normalization and get fastQTL format</p>
 <pre class="r"><code>get_fastqtl_pheno &lt;- function(cell){
+  
   #keep all expression for the cell type and patient that have genotype
   bed &lt;- sum_expression %&gt;% dplyr::filter(cell_type==cell) %&gt;% 
     dplyr::select(individual_id,gene,counts) %&gt;% 
@@ -1343,13 +1381,12 @@ gtf$seqnames &lt;- droplevels(gtf$seqnames)</code></pre>
     edgeR::calcNormFactors(.) %&gt;% 
     edgeR::cpm(.) %&gt;%
     as.data.frame() %&gt;% 
-    rownames_to_column(&#39;gene&#39;)
+    rownames_to_column(&#39;gene&#39;) %&gt;% 
+    mutate(pid=&#39;.&#39;,strand=&#39;+&#39;)
   
     bed &lt;- bed %&gt;% inner_join(.,gtf,by=&#39;gene&#39;) %&gt;% 
-      dplyr::select(seqnames,TSS_start,TSS_end,gene,everything()) %&gt;% 
-      arrange(seqnames,TSS_start)
-    
-    colnames(bed)[c(1,2,3,4)] &lt;- c(&#39;#Chr&#39;,&#39;start&#39;,&#39;end&#39;,&#39;ID&#39;)
+      dplyr::select(`#Chr`=seqnames,start=TSS_start,end=TSS_end,ID=gene,pid,strand,everything()) %&gt;% 
+      arrange(`#Chr`,start)
     
     write_tsv(bed,path = paste0(&#39;data_sensitive/eqtl/&#39;,make.names(cell),&#39;.bed&#39;))
 }    </code></pre>
@@ -1394,6 +1431,8 @@ done</code></pre>
   })
 }</code></pre>
 <pre class="r"><code>mclapply(1:length(pheno_files),get_covariates,mc.cores=8)</code></pre>
+<pre><code>Warning in mclapply(1:length(pheno_files), get_covariates, mc.cores = 8): all
+scheduled cores encountered errors in user code</code></pre>
 <pre class="bash"><code>cd data_sensitive/eqtl
 for f in PC*
 do
@@ -1405,6 +1444,15 @@ ln -s ../../genotypes/processed/combined_final.vcf.gz .
 ln -s ../../genotypes/processed/combined_final.vcf.gz.tbi .
 cd ..
 done</code></pre>
+<pre><code>bash: line 3: cd: PC*: No such file or directory
+gzip: Astrocytes.bed.gz already has .gz suffix -- unchanged
+gzip: Endothelial.cells.bed.gz already has .gz suffix -- unchanged
+gzip: Excitatory.neurons.bed.gz already has .gz suffix -- unchanged
+gzip: Inhibitory.neurons.bed.gz already has .gz suffix -- unchanged
+gzip: Microglia.bed.gz already has .gz suffix -- unchanged
+gzip: Oligodendrocytes.bed.gz already has .gz suffix -- unchanged
+gzip: OPCs...COPs.bed.gz already has .gz suffix -- unchanged
+gzip: Pericytes.bed.gz already has .gz suffix -- unchanged</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
