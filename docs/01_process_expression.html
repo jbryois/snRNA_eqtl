@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongdca9a01"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> dca9a01 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong9a80a23"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 9a80a23 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongdca9a01" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong9a80a23" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version dca9a01. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 9a80a23. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -518,6 +518,7 @@ Ignored files:
 Untracked files:
     Untracked:  analysis/04_coloc.Rmd
     Untracked:  analysis/Alternatives/
+    Untracked:  analysis/copy_to_delete_02_run_eQTL.Rmd
     Untracked:  analysis/get_tables.Rmd
     Untracked:  analysis/log_run_slurm_out
     Untracked:  analysis/log_run_slurm_stderr
@@ -578,6 +579,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+9a80a23
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-14
+</td>
+<td>
+QTLtools format update - bug fix
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+7c447bd
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-14
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1411,7 +1446,7 @@ done</code></pre>
   #load expression data
   d &lt;- data.table::fread(pheno_files[i],data.table=FALSE)
   #perform pca
-  pca &lt;- d[-c(1,2,3,4)] %&gt;% t() %&gt;% prcomp(.,scale.=T)
+  pca &lt;- d[-c(1,2,3,4,5,6)] %&gt;% t() %&gt;% prcomp(.,scale.=T)
   
   #Create directories with different number of expression pcs
   #Add the n first pcs to the covariate file and write the covariate file in fastqtl format
@@ -1431,8 +1466,6 @@ done</code></pre>
   })
 }</code></pre>
 <pre class="r"><code>mclapply(1:length(pheno_files),get_covariates,mc.cores=8)</code></pre>
-<pre><code>Warning in mclapply(1:length(pheno_files), get_covariates, mc.cores = 8): all
-scheduled cores encountered errors in user code</code></pre>
 <pre class="bash"><code>cd data_sensitive/eqtl
 for f in PC*
 do
@@ -1444,15 +1477,6 @@ ln -s ../../genotypes/processed/combined_final.vcf.gz .
 ln -s ../../genotypes/processed/combined_final.vcf.gz.tbi .
 cd ..
 done</code></pre>
-<pre><code>bash: line 3: cd: PC*: No such file or directory
-gzip: Astrocytes.bed.gz already has .gz suffix -- unchanged
-gzip: Endothelial.cells.bed.gz already has .gz suffix -- unchanged
-gzip: Excitatory.neurons.bed.gz already has .gz suffix -- unchanged
-gzip: Inhibitory.neurons.bed.gz already has .gz suffix -- unchanged
-gzip: Microglia.bed.gz already has .gz suffix -- unchanged
-gzip: Oligodendrocytes.bed.gz already has .gz suffix -- unchanged
-gzip: OPCs...COPs.bed.gz already has .gz suffix -- unchanged
-gzip: Pericytes.bed.gz already has .gz suffix -- unchanged</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
