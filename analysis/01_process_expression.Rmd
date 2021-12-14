@@ -686,6 +686,7 @@ Perform TMM normalization and get fastQTL format
 
 ```{r,eval=TRUE}
 get_fastqtl_pheno <- function(cell){
+  
   #keep all expression for the cell type and patient that have genotype
   bed <- sum_expression %>% dplyr::filter(cell_type==cell) %>% 
     dplyr::select(individual_id,gene,counts) %>% 
@@ -695,13 +696,12 @@ get_fastqtl_pheno <- function(cell){
     edgeR::calcNormFactors(.) %>% 
     edgeR::cpm(.) %>%
     as.data.frame() %>% 
-    rownames_to_column('gene')
+    rownames_to_column('gene') %>% 
+    mutate(pid='.',strand='+')
   
     bed <- bed %>% inner_join(.,gtf,by='gene') %>% 
-      dplyr::select(seqnames,TSS_start,TSS_end,gene,everything()) %>% 
-      arrange(seqnames,TSS_start)
-    
-    colnames(bed)[c(1,2,3,4)] <- c('#Chr','start','end','ID')
+      dplyr::select(`#Chr`=seqnames,start=TSS_start,end=TSS_end,ID=gene,pid,strand,everything()) %>% 
+      arrange(`#Chr`,start)
     
     write_tsv(bed,path = paste0('data_sensitive/eqtl/',make.names(cell),'.bed'))
 }    
