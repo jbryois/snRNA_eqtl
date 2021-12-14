@@ -11,6 +11,8 @@ editor_options:
   chunk_output_type: console
 ---
 
+This version filters genes based on soup as well as samples. Output fastQTL format.
+
 ```{r,echo=FALSE}
 #Necessary for module load to work
 knitr::opts_chunk$set(engine.opts = list(bash="--login"))
@@ -696,11 +698,10 @@ get_fastqtl_pheno <- function(cell){
     edgeR::calcNormFactors(.) %>% 
     edgeR::cpm(.) %>%
     as.data.frame() %>% 
-    rownames_to_column('gene') %>% 
-    mutate(pid='.',strand='+')
+    rownames_to_column('gene')
   
     bed <- bed %>% inner_join(.,gtf,by='gene') %>% 
-      dplyr::select(`#Chr`=seqnames,start=TSS_start,end=TSS_end,ID=gene,pid,strand,everything()) %>% 
+      dplyr::select(`#Chr`=seqnames,start=TSS_start,end=TSS_end,ID=gene,everything()) %>% 
       arrange(`#Chr`,start)
     
     write_tsv(bed,path = paste0('data_sensitive/eqtl/',make.names(cell),'.bed'))
@@ -743,7 +744,7 @@ get_covariates <- function(i){
   #load expression data
   d <- data.table::fread(pheno_files[i],data.table=FALSE)
   #perform pca
-  pca <- d[-c(1,2,3,4,5,6)] %>% t() %>% prcomp(.,scale.=T)
+  pca <- d[-c(1,2,3,4)] %>% t() %>% prcomp(.,scale.=T)
   
   #Create directories with different number of expression pcs
   #Add the n first pcs to the covariate file and write the covariate file in fastqtl format
