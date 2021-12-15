@@ -11,7 +11,7 @@
 
 <meta name="author" content="Julien Bryois" />
 
-<meta name="date" content="2021-12-14" />
+<meta name="date" content="2021-12-15" />
 
 <title>Run cell type specific eQTL analysis</title>
 
@@ -380,7 +380,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Run cell type specific eQTL analysis</h1>
 <h4 class="author">Julien Bryois</h4>
-<h4 class="date">December 14, 2021</h4>
+<h4 class="date">December 15, 2021</h4>
 
 </div>
 
@@ -405,7 +405,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-12-14
+<strong>Last updated:</strong> 2021-12-15
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong0b0746e"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 0b0746e </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong7976db1"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 7976db1 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong0b0746e" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong7976db1" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 0b0746e. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 7976db1. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -528,9 +528,9 @@ Untracked files:
     Untracked:  data/gwas/
     Untracked:  data/magma_interaction_eqtl/
     Untracked:  data/metabrain/
-    Untracked:  output/Figures/
+    Untracked:  output/Coloc/
     Untracked:  output/eqtl/
-    Untracked:  output_tmp/
+    Untracked:  output_tmp_QTLtools/
 
 Unstaged changes:
     Modified:   .gitignore
@@ -577,6 +577,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+7976db1
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-15
+</td>
+<td>
+Update without soupy samples
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+55bd5ea
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-14
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -783,7 +817,7 @@ library(glmmTMB)</code></pre>
 <ol style="list-style-type: decimal">
 <li>Load eQTL data</li>
 </ol>
-<pre class="r"><code>d &lt;- read_tsv(&#39;output/eqtl/eqtl.PC60.txt&#39;)</code></pre>
+<pre class="r"><code>d &lt;- read_tsv(&#39;output/eqtl/eqtl.PC70.txt&#39;)</code></pre>
 <pre class="r"><code>d_sig &lt;- filter(d,adj_p&lt;0.05)</code></pre>
 <ol start="2" style="list-style-type: decimal">
 <li>Load gene expression</li>
@@ -814,8 +848,8 @@ tmm_libsizes &lt;- mclapply(cell_types,get_tmm_libsize,mc.cores=8) %&gt;%
 <li>Load genotypes</li>
 </ol>
 <pre class="r"><code>genotype_file &lt;- &#39;data_sensitive/genotypes/processed/combined_final.vcf.gz&#39;
-snp_positions_file &lt;- &#39;data_sensitive/eqtl/PC60_caveman/sig_eQTL_snps_alleles.txt&#39;</code></pre>
-<pre class="r"><code>snp_coordinates &lt;- read_tsv(snp_positions_file,col_names = FALSE) %&gt;% setNames(c(&#39;chr&#39;,&#39;start&#39;,&#39;var_id&#39;,&#39;A1&#39;,&#39;A2&#39;))</code></pre>
+snp_positions_file &lt;- &#39;data_sensitive/eqtl/PC70_caveman/sig_eQTL_snps_alleles.txt&#39;</code></pre>
+<pre class="r"><code>snp_coordinates &lt;- read_tsv(snp_positions_file,col_names = FALSE) %&gt;% setNames(c(&#39;chr&#39;,&#39;start&#39;,&#39;sid&#39;,&#39;A1&#39;,&#39;A2&#39;))</code></pre>
 <pre><code>Parsed with column specification:
 cols(
   X1 = col_double(),
@@ -834,11 +868,11 @@ cols(
     )) %&gt;% as_tibble() %&gt;% 
     dplyr::select(ID,individual_id,genotype_parsed) %&gt;% 
     filter(!is.na(genotype_parsed)) %&gt;% 
-  dplyr::rename(var_id=ID)</code></pre>
+  dplyr::rename(sid=ID)</code></pre>
 <ol start="4" style="list-style-type: decimal">
 <li>Get covariates</li>
 </ol>
-<pre class="r"><code>cov_files &lt;- list.files(&#39;data_sensitive/eqtl/PC60/&#39;,pattern = &#39;cov.txt.gz&#39;,full.names = TRUE)
+<pre class="r"><code>cov_files &lt;- list.files(&#39;data_sensitive/eqtl/PC70/&#39;,pattern = &#39;cov.txt.gz&#39;,full.names = TRUE)
 
 cov &lt;- tibble(files = cov_files) %&gt;%
   mutate(
@@ -888,15 +922,15 @@ try_other_optimizers &lt;- function(model_fit){
 <p>If a gene is not expressed in a cell type, we can’t estimate the genetic effect on gene expression in that cell type. Hence, an eQTL for a gene that is expressed in a single cell type would not be called cell-type specific.</p>
 <pre class="r"><code>interaction_model &lt;- function(i){
 
-  gene_id &lt;- d_sig$phe_id[i]
+  gene_id &lt;- d_sig$pid[i]
   ensenmbl_id &lt;- gsub(&#39;.+_&#39;,&#39;&#39;,gene_id)
-  snp_id &lt;- d_sig$var_id[i]
+  snp_id &lt;- d_sig$sid[i]
   cell_type_id &lt;- d_sig$cell_type[i]
   
   expression_gene &lt;- filter(expression,ensembl==ensenmbl_id) %&gt;%
     mutate(individual_id=make.names(individual_id))
   
-  genotype_snp &lt;- filter(genotypes,var_id==snp_id)
+  genotype_snp &lt;- filter(genotypes,sid==snp_id)
   
   df &lt;- inner_join(expression_gene,genotype_snp,by=&#39;individual_id&#39;)
   
@@ -983,7 +1017,7 @@ try_other_optimizers &lt;- function(model_fit){
   as_tibble() %&gt;% 
   mutate_if(is.numeric,signif,3)</code></pre>
 <pre class="r"><code>dir.create(&#39;output/eqtl_specific/&#39;,showWarnings = FALSE)
-write_tsv(results,&#39;output/eqtl_specific/eqtl.PC60.specific.txt&#39;)</code></pre>
+write_tsv(results,&#39;output/eqtl_specific/eqtl.PC70.specific.txt&#39;)</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
