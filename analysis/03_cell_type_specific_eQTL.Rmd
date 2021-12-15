@@ -30,7 +30,7 @@ library(glmmTMB)
 1. Load eQTL data
 
 ```{r,message=FALSE,eval=TRUE}
-d <- read_tsv('output/eqtl/eqtl.PC60.txt')
+d <- read_tsv('output/eqtl/eqtl.PC70.txt')
 ```
 
 ```{r,eval=TRUE}
@@ -78,11 +78,11 @@ tmm_libsizes <- mclapply(cell_types,get_tmm_libsize,mc.cores=8) %>%
 
 ```{r,eval=TRUE}
 genotype_file <- 'data_sensitive/genotypes/processed/combined_final.vcf.gz'
-snp_positions_file <- 'data_sensitive/eqtl/PC60_caveman/sig_eQTL_snps_alleles.txt'
+snp_positions_file <- 'data_sensitive/eqtl/PC70_caveman/sig_eQTL_snps_alleles.txt'
 ```
   
 ```{r,eval=TRUE}
-snp_coordinates <- read_tsv(snp_positions_file,col_names = FALSE) %>% setNames(c('chr','start','var_id','A1','A2'))
+snp_coordinates <- read_tsv(snp_positions_file,col_names = FALSE) %>% setNames(c('chr','start','sid','A1','A2'))
 ```
 
 ```{r,eval=TRUE}
@@ -96,13 +96,13 @@ genotypes <- tabix.read.table(genotype_file, paste0(snp_coordinates$chr,':',snp_
     )) %>% as_tibble() %>% 
     dplyr::select(ID,individual_id,genotype_parsed) %>% 
     filter(!is.na(genotype_parsed)) %>% 
-  dplyr::rename(var_id=ID)
+  dplyr::rename(sid=ID)
 ```
 
 4. Get covariates
 
 ```{r,message=FALSE,eval=TRUE}
-cov_files <- list.files('data_sensitive/eqtl/PC60/',pattern = 'cov.txt.gz',full.names = TRUE)
+cov_files <- list.files('data_sensitive/eqtl/PC70/',pattern = 'cov.txt.gz',full.names = TRUE)
 
 cov <- tibble(files = cov_files) %>%
   mutate(
@@ -158,15 +158,15 @@ If a gene is not expressed in a cell type, we can't estimate the genetic effect 
 ```{r,warning=FALSE,eval=TRUE}
 interaction_model <- function(i){
 
-  gene_id <- d_sig$phe_id[i]
+  gene_id <- d_sig$pid[i]
   ensenmbl_id <- gsub('.+_','',gene_id)
-  snp_id <- d_sig$var_id[i]
+  snp_id <- d_sig$sid[i]
   cell_type_id <- d_sig$cell_type[i]
   
   expression_gene <- filter(expression,ensembl==ensenmbl_id) %>%
     mutate(individual_id=make.names(individual_id))
   
-  genotype_snp <- filter(genotypes,var_id==snp_id)
+  genotype_snp <- filter(genotypes,sid==snp_id)
   
   df <- inner_join(expression_gene,genotype_snp,by='individual_id')
   
@@ -259,5 +259,5 @@ results <- mclapply(1:nrow(d_sig),interaction_model,mc.cores=36) %>%
 
 ```{r,eval=TRUE}
 dir.create('output/eqtl_specific/',showWarnings = FALSE)
-write_tsv(results,'output/eqtl_specific/eqtl.PC60.specific.txt')
+write_tsv(results,'output/eqtl_specific/eqtl.PC70.specific.txt')
 ```
