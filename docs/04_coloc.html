@@ -502,16 +502,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong752513d"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 752513d </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong7df50cb"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 7df50cb </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong752513d" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong7df50cb" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 752513d. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 7df50cb. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -519,7 +519,6 @@ Note that you need to be careful to ensure that all relevant files for the analy
 <pre><code>
 Ignored files:
     Ignored:    .Rproj.user/
-    Ignored:    analysis/figure/
     Ignored:    data_sensitive/
 
 Untracked files:
@@ -590,6 +589,40 @@ Message
 Rmd
 </td>
 <td>
+7df50cb
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-16
+</td>
+<td>
+Coloc MS
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+9408e85
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-16
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 752513d
 </td>
 <td>
@@ -616,7 +649,7 @@ library(data.table)
 library(coloc)
 library(parallel)
 library(GenomicRanges)</code></pre>
-<pre class="r"><code>selected_trait &lt;- &#39;ad&#39;</code></pre>
+<pre class="r"><code>selected_trait &lt;- &#39;scz&#39;</code></pre>
 </div>
 <div id="process-gwas" class="section level1">
 <h1>Process GWAS</h1>
@@ -631,23 +664,6 @@ sumstats &lt;- vroom::vroom(&#39;data/gwas/ad/GCST90012877_buildGRCh37.tsv&#39;)
 
 loci &lt;- read_tsv(&#39;data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
 }</code></pre>
-<pre><code>Rows: 10,687,077
-Columns: 20
-Delimiter: &quot;\t&quot;
-chr [ 5]: variant_id, effect_allele, other_allele, SNP_ID, DIRECT
-dbl [15]: p_value, chromosome, base_pair_location, effect_allele_frequency, beta, standard...
-
-Use `spec()` to retrieve the guessed column specification
-Pass a specification to the `col_types` argument to quiet this message</code></pre>
-<pre><code>Parsed with column specification:
-cols(
-  GWAS_snp = col_character(),
-  GWAS_snp_pos = col_character(),
-  locus_name = col_character(),
-  chrom = col_character(),
-  start = col_double(),
-  end = col_double()
-)</code></pre>
 <div id="get-loci-coordinates" class="section level3">
 <h3>Get loci coordinates</h3>
 <p>This section of the code is run only once.</p>
@@ -843,6 +859,23 @@ sumstats &lt;- vroom::vroom(&#39;data/gwas/scz/PGC3_SCZ_wave3_public.v2.tsv.gz&#
 
 loci &lt;- read_tsv(&#39;data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
 }</code></pre>
+<pre><code>Rows: 7,585,077
+Columns: 19
+Delimiter: &quot;\t&quot;
+chr [ 4]: SNP, A1, A2, Direction
+dbl [15]: CHR, BP, FRQ_A_67390, FRQ_U_94015, INFO, OR, SE, P, ngt, HetISqt, HetDf, HetPVa,...
+
+Use `spec()` to retrieve the guessed column specification
+Pass a specification to the `col_types` argument to quiet this message</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  GWAS_snp = col_character(),
+  GWAS_snp_pos = col_character(),
+  locus_name = col_character(),
+  chrom = col_character(),
+  start = col_double(),
+  end = col_double()
+)</code></pre>
 <div id="get-loci-coordinates-3" class="section level3">
 <h3>Get loci coordinates</h3>
 <p>This section of the code is run only once.</p>
