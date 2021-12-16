@@ -1,0 +1,684 @@
+---
+title: "Colocalization analysis"
+author: "Julien Bryois"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output:
+  workflowr::wflow_html:
+  toc: true
+toc_float: true
+number_sections: false
+editor_options:
+  chunk_output_type: console
+---
+  
+```{r setup,include=FALSE}
+knitr::opts_chunk$set(autodep=FALSE, cache=FALSE, cache.lazy=FALSE, dev='png' )
+```
+
+## Libraries
+
+```{r,message=FALSE}
+library(tidyverse)
+library(data.table)
+library(coloc)
+library(parallel)
+library(GenomicRanges)
+```
+
+```{r}
+selected_trait <- 'ad'
+```
+
+# Process GWAS
+
+## AD Schwartzentruber
+
+```{r}
+if(selected_trait=='ad'){
+sumstats <- vroom::vroom('data/gwas/ad/GCST90012877_buildGRCh37.tsv') %>% 
+  mutate(chr=paste0('chr',chromosome)) %>% 
+  dplyr::rename(bp_b37=base_pair_location) %>% 
+  dplyr::select(variant_id,p_value,chr,bp_b37,effect_allele,other_allele,beta,se=standard_error) %>% 
+  filter(!is.na(p_value))
+
+loci <- read_tsv('data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt')
+}
+```
+
+### Get loci coordinates
+
+This section of the code is run only once.
+
+Get GWAS top SNPs 
+
+```{r,eval=FALSE}
+#Supplementary table file from Schwartzentruber et al.
+top_snps <- readxl::read_xlsx('data/gwas/ad/41588_2020_776_MOESM3_ESM.xlsx',sheet=2) %>% 
+  dplyr::select(Chr,SNP,`Lead SNP pos`) %>% dplyr::rename(pos=`Lead SNP pos`) %>% 
+  mutate(bp_37=paste0('chr',Chr,':',pos)) %>% dplyr::select(-Chr) %>% 
+  mutate(SNP=gsub('_.+','',SNP))
+
+#Add novel loci only observed in replication + discovery (not used for their downstream analysis)
+additional_snps <- readxl::read_xlsx('data/gwas/ad/41588_2020_776_MOESM3_ESM.xlsx',sheet=4,skip=43) %>%
+  dplyr::select(1,2,3) %>% 
+  setNames(c('chr','pos','SNP')) %>% 
+  filter(!is.na(SNP)) %>% 
+  mutate(bp_37=paste0('chr',chr,':',pos)) %>% 
+  dplyr::select(SNP,pos,bp_37)
+
+top_snps <- rbind(top_snps,additional_snps)
+```
+
+Get 1KG LD for the top GWAS SNPs at each loci
+
+```{r,eval=FALSE}
+proxy_snps <- lapply(top_snps$SNP,LDlinkR::LDproxy,pop = "EUR", r2d = "r2", token = '72edb9cc22c9', file = FALSE)
+```
+
+```{r,eval=FALSE}
+saveRDS(proxy_snps,'data/gwas/ad/loci_LDlinkR.allSNPs.EUR.rds')
+```
+
+Define each locus as the most extreme coordinates of SNPs in LD (r2>=0.1) with the index GWAS SNP.
+
+```{r,eval=FALSE}
+loci <- lapply(proxy_snps,function(x){
+  if(nrow(x)>1){
+    x <- filter(x,R2>=0.1) 
+    chr <- x$Coord %>% gsub(':.+','',.) %>% unique()
+    pos <- x$Coord %>% gsub('chr[0-9]{1,2}:','',.) %>% as.numeric()
+    locus_name <- paste0(chr,':',min(pos),'_',max(pos))
+    top_snp_df <- filter(x,Distance==0) 
+    top_snp <- top_snp_df %>% pull(RS_Number)
+    top_snp_pos <- top_snp_df %>% pull(Coord)
+    locus <- tibble(GWAS_snp=top_snp,
+                    GWAS_snp_pos=top_snp_pos,
+                    locus_name=locus_name,
+                    chrom=chr,
+                    start=min(pos),
+                    end=max(pos))
+    return(locus)
+  }
+  else{
+    return(NULL)
+  }
+}) %>% 
+  bind_rows() %>% 
+write_tsv(.,'data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt')
+```
+
+### Get closest gene
+
+This section of the code is run only once.
+
+```{r,eval=FALSE}
+sumstats_min <- sumstats %>% dplyr::select(chr,variant_id,bp_b37,beta)
+```
+
+```{r,eval=FALSE}
+gwas_snp <- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %>% 
+  separate(GWAS_SNP_pos,into=c('chr','bp_b37'),sep=':') %>% 
+  mutate(end=bp_b37) %>% 
+  mutate(bp_b37=as.numeric(bp_b37)) %>% 
+  left_join(.,sumstats_min,by=c('chr','bp_b37')) %>% 
+  arrange(chr,bp_b37) %>% 
+  write_tsv(.,'data/gwas/ad/ad_GWAS_index_snps.v2.bed',col_names = FALSE)
+```
+
+```{r,eval=FALSE}
+gtf_b37 <- rtracklayer::import('data/gencode/gencode.v39lift37.annotation.gtf.gz') %>% as.data.frame() %>% as_tibble()
+```
+
+```{r,eval=FALSE}
+protein_coding <- filter(gtf_b37,type=='gene',gene_type=='protein_coding') %>% 
+  mutate(gene_label=paste0(gene_name,'_',gsub('\\..+','',gene_id))) %>% 
+  dplyr::select(seqnames,start,end,gene_label) %>% 
+  filter(seqnames %in% paste0('chr',1:22)) %>% 
+  mutate(seqnames=as.character(seqnames)) %>% 
+  arrange(seqnames,start) %>% 
+  write_tsv('data/gencode/gencode.v39lift37.annotation.protein_coding.1_22.bed',col_names = FALSE)
+```
+
+```{bash,eval=FALSE}
+cd data/gwas/ad
+ln -s ../../gencode/gencode.v39lift37.annotation.protein_coding.1_22.bed .
+
+ml bedtools/2.25.0-goolf-1.7.20
+bedtools closest -d -wa -a ad_GWAS_index_snps.v2.bed -b gencode.v39lift37.annotation.protein_coding.1_22.bed > closest.protein.coding.bed
+```
+
+## PD meta-analysis
+
+```{r}
+if(selected_trait=='pd'){
+sumstats <- vroom::vroom('data/gwas/pd/ParkinsonMeta_Nalls2014_2019.tbl') %>% 
+  dplyr::select(variant_id=MarkerName,p_value=`P-value`,chr,bp_b37=bp,effect_allele=Allele1,other_allele=Allele2,beta=Effect,se=StdErr)
+
+
+loci <- read_tsv('data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt')
+}
+```
+
+### Get loci coordinates
+
+This section of the code is run only once.
+
+Get GWAS top SNPs 
+
+```{r,eval=FALSE}
+top_snps <- readxl::read_xlsx('data/gwas/pd/Table S2. Detailed summary statistics on all nominated risk variants, known and novel_.xlsx') %>% filter(!is.na(`Locus Number`),`Locus Number`!='NA')
+```
+
+```{r,eval=FALSE}
+proxy_snps <- lapply(top_snps$SNP,LDlinkR::LDproxy,pop = "EUR", r2d = "r2", token = '72edb9cc22c9', file = FALSE)
+```
+
+```{r,eval=FALSE}
+saveRDS(proxy_snps,'data/gwas/pd/loci_LDlinkR.allSNPs.EUR.rds')
+```
+
+```{r,eval=FALSE}
+loci <- lapply(proxy_snps,function(x){
+  if(nrow(x)>1){
+    x <- filter(x,R2>=0.1) 
+    chr <- x$Coord %>% gsub(':.+','',.) %>% unique()
+    pos <- x$Coord %>% gsub('chr[0-9]{1,2}:','',.) %>% as.numeric()
+    locus_name <- paste0(chr,':',min(pos),'_',max(pos))
+    top_snp_df <- filter(x,Distance==0) 
+    top_snp <- top_snp_df %>% pull(RS_Number)
+    top_snp_pos <- top_snp_df %>% pull(Coord)
+    locus <- tibble(GWAS_snp=top_snp,GWAS_snp_pos=top_snp_pos,locus_name=locus_name,chrom=chr,start=min(pos),end=max(pos))
+    return(locus)
+  }
+  else{
+    return(NULL)
+  }
+}) %>% bind_rows()
+write_tsv(loci,'data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt')
+```
+
+### Get closest gene
+
+This section of the code is run only once.
+
+```{r,eval=FALSE}
+sumstats_min <- sumstats %>% dplyr::select(chr,variant_id,bp_b37,beta)
+```
+
+```{r,eval=FALSE}
+gwas_snp <- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %>% 
+  separate(GWAS_SNP_pos,into=c('chr','bp_b37'),sep=':') %>% 
+  mutate(end=bp_b37) %>% 
+  mutate(bp_b37=as.numeric(bp_b37)) %>% 
+  left_join(.,sumstats_min,by=c('chr','bp_b37')) %>% 
+  arrange(chr,bp_b37) %>% 
+  write_tsv(.,'data/gwas/pd/pd_GWAS_index_snps.v2.bed',col_names = FALSE)
+```
+
+```{bash,eval=FALSE}
+cd data/gwas/pd
+ln -s ../../gencode/gencode.v39lift37.annotation.protein_coding.1_22.bed .
+
+ml bedtools/2.25.0-goolf-1.7.20
+bedtools closest -d -wa -a pd_GWAS_index_snps.v2.bed -b gencode.v39lift37.annotation.protein_coding.1_22.bed > closest.protein.coding.bed
+```
+
+# MS GWAS
+
+```{r}
+if(selected_trait=='ms'){
+sumstats <- vroom::vroom('data/gwas/ms/discovery_metav3.0.meta') %>% 
+  mutate(CHR=paste0('chr',CHR)) %>% 
+  filter(!is.na(P)) %>% 
+  mutate(beta=log(OR),
+         se=abs(beta/qnorm(P/2))) %>% 
+  dplyr::select(variant_id=SNP,p_value=P,chr=CHR,bp_b37=BP,effect_allele=A1,other_allele=A2,beta,se)
+
+
+loci <- read_tsv('data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt')
+}
+```
+
+### Get loci coordinates
+
+This section of the code is run only once.
+
+Get GWAS top SNPs 
+
+```{r,eval=FALSE}
+loci <- readxl::read_xlsx('data/gwas/ms/aav7188_Patsopoulos_Tables S1-S10.xlsx',sheet=8,skip=3)
+```
+
+```{r,eval=FALSE}
+proxy_snps <- lapply(loci$SNP,LDlinkR::LDproxy,pop = "EUR", r2d = "r2", token = '72edb9cc22c9', file = FALSE)
+saveRDS(proxy_snps,'data/gwas/ms/loci_LDlinkR.allSNPs.EUR.rds')
+```
+
+```{r,eval=FALSE}
+loci <- lapply(proxy_snps,function(x){
+  if(nrow(x)>1){
+    x <- filter(x,R2>=0.1) 
+    chr <- x$Coord %>% gsub(':.+','',.) %>% unique()
+    pos <- x$Coord %>% gsub('chr[0-9]{1,2}:','',.) %>% as.numeric()
+    locus_name <- paste0(chr,':',min(pos),'_',max(pos))
+    top_snp_df <- filter(x,Distance==0) 
+    top_snp <- top_snp_df %>% pull(RS_Number)
+    top_snp_pos <- top_snp_df %>% pull(Coord)
+    locus <- tibble(GWAS_snp=top_snp,GWAS_snp_pos=top_snp_pos,locus_name=locus_name,chrom=chr,start=min(pos),end=max(pos))
+    return(locus)
+  }
+  else{
+    return(NULL)
+  }
+}) %>% bind_rows()
+write_tsv(loci,'data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt')
+```
+
+### Get closest gene
+
+This section of the code is run only once.
+
+```{r,eval=FALSE}
+sumstats_min <- sumstats %>% dplyr::select(chr,variant_id,bp_b37,beta)
+```
+
+```{r,eval=FALSE}
+gwas_snp <- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %>% 
+  separate(GWAS_SNP_pos,into=c('chr','bp_b37'),sep=':') %>% 
+  mutate(end=bp_b37) %>% 
+  mutate(bp_b37=as.numeric(bp_b37)) %>% 
+  left_join(.,sumstats_min,by=c('chr','bp_b37')) %>% 
+  arrange(chr,bp_b37) %>% 
+  write_tsv(.,'data/gwas/ms/ms_GWAS_index_snps.v2.bed',col_names = FALSE)
+```
+
+```{bash,eval=FALSE}
+cd data/gwas/ms
+ln -s ../../gencode/gencode.v39lift37.annotation.protein_coding.1_22.bed .
+
+ml bedtools/2.25.0-goolf-1.7.20
+bedtools closest -d -wa -a ms_GWAS_index_snps.v2.bed -b gencode.v39lift37.annotation.protein_coding.1_22.bed > closest.protein.coding.bed
+```
+
+# SCZ GWAS
+
+```{r}
+if(selected_trait=='scz'){
+sumstats <- vroom::vroom('data/gwas/scz/PGC3_SCZ_wave3_public.v2.tsv.gz') %>%
+  mutate(CHR=paste0('chr',CHR)) %>% 
+  filter(!is.na(P)) %>% 
+  mutate(beta=log(OR),
+         se=SE) %>% 
+  dplyr::select(variant_id=SNP,p_value=P,chr=CHR,bp_b37=BP,effect_allele=A1,other_allele=A2,beta,se)
+
+
+loci <- read_tsv('data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt')
+}
+```
+
+### Get loci coordinates
+
+This section of the code is run only once.
+
+Get GWAS top SNPs 
+
+```{r,eval=FALSE}
+loci <- readxl::read_xlsx('data/gwas/scz/Supplementary Table 2 - Replication index.xlsx',sheet=2) %>% filter(`P-comb`<5e-8) %>% mutate(locus=paste0('chr',CHR,':',left,'-',right)) %>% dplyr::rename(locus_name=locus) %>% mutate(start=BP,end=BP) %>% mutate(GWAS_snp=SNP,GWAS_snp_pos=paste0('chr',CHR,':',BP))
+```
+
+```{r,eval=FALSE}
+proxy_snps <- lapply(loci$GWAS_snp_pos,LDlinkR::LDproxy,pop = "EUR", r2d = "r2", token = '72edb9cc22c9', file = FALSE)
+saveRDS(proxy_snps,'data/gwas/scz/loci_LDlinkR.allSNPs.EUR.rds')
+```
+
+```{r,eval=FALSE}
+loci <- lapply(proxy_snps,function(x){
+  if(nrow(x)>1){
+    x <- filter(x,R2>=0.1) 
+    chr <- x$Coord %>% gsub(':.+','',.) %>% unique()
+    pos <- x$Coord %>% gsub('chr[0-9]{1,2}:','',.) %>% as.numeric()
+    locus_name <- paste0(chr,':',min(pos),'_',max(pos))
+    top_snp_df <- filter(x,Distance==0) 
+    top_snp <- top_snp_df %>% pull(RS_Number)
+    top_snp_pos <- top_snp_df %>% pull(Coord)
+    locus <- tibble(GWAS_snp=top_snp,GWAS_snp_pos=top_snp_pos,locus_name=locus_name,chrom=chr,start=min(pos),end=max(pos))
+    return(locus)
+  }
+  else{
+    return(NULL)
+  }
+}) %>% bind_rows()
+write_tsv(loci,'data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt')
+```
+
+### Get closest gene
+
+This section of the code is run only once.
+
+```{r,eval=FALSE}
+sumstats_min <- sumstats %>% dplyr::select(chr,variant_id,bp_b37,beta)
+```
+
+```{r,eval=FALSE}
+gwas_snp <- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %>% 
+  separate(GWAS_SNP_pos,into=c('chr','bp_b37'),sep=':') %>% 
+  mutate(end=bp_b37) %>% 
+  mutate(bp_b37=as.numeric(bp_b37)) %>% 
+  left_join(.,sumstats_min,by=c('chr','bp_b37')) %>% 
+  arrange(chr,bp_b37) %>% 
+  write_tsv(.,'data/gwas/scz/scz_GWAS_index_snps.v2.bed',col_names = FALSE)
+```
+
+```{bash,eval=FALSE}
+cd data/gwas/scz
+ln -s ../../gencode/gencode.v39lift37.annotation.protein_coding.1_22.bed .
+
+ml bedtools/2.25.0-goolf-1.7.20
+bedtools closest -d -wa -a scz_GWAS_index_snps.v2.bed -b gencode.v39lift37.annotation.protein_coding.1_22.bed > closest.protein.coding.bed
+```
+
+# Add closest gene to loci
+
+```{r,eval=TRUE}
+closest <- read_tsv(paste0('data/gwas/',selected_trait,'/closest.protein.coding.bed'),col_names = FALSE) %>% 
+  setNames(c('chr_snp','start_snp','end_snp','GWAS_snp','beta','chr_gene','start_gene','end_gene','gene','distance')) %>% 
+  mutate(GWAS_snp_pos=paste0(chr_snp,':',start_snp)) %>% 
+  dplyr::select(GWAS_snp,GWAS_snp_pos,gene,beta,distance) %>% 
+  separate(gene,into=c('symbol','ensembl'),sep='_') %>% 
+  add_count(GWAS_snp) %>% 
+  group_by(GWAS_snp) %>% 
+  mutate(locus_name_gene=ifelse(n==1,symbol,paste0(symbol,collapse=' - '))) %>% 
+  ungroup() %>% 
+  dplyr::select(GWAS_snp_pos,locus_name_gene,beta_top_GWAS=beta) %>% 
+  unique() %>% arrange(-abs(beta_top_GWAS))
+loci <- left_join(loci,closest,by='GWAS_snp_pos')
+```
+
+# GET MAF for each SNP
+
+This section is run only once 
+
+```{bash,eval=FALSE}
+ml PLINK/1.90-goolf-1.7.20
+cd data_sensitive/genotypes/processed
+plink --bfile ../combined_7 --freq
+```
+
+# Get SNP position in hg19 - hg38
+
+Use: Match eQTL SNPs with GWAS SNPs (run only once)
+
+```{r,eval=TRUE}
+snp_pos <- data.table::fread('data_sensitive/genotypes/processed/snp_pos_hg38_hg19.mappings.txt',data.table = FALSE) %>% as_tibble()
+```
+
+Code below is run only once 
+
+```{bash,eval=FALSE}
+zcat data_sensitive/genotypes/processed/combined_final.vcf.gz | cut -f 1,2,3 | grep -v '^#' > data_sensitive/genotypes/processed/snp_pos_hg38.txt 
+```
+
+```{r,eval=FALSE}
+snp_pos <- data.table::fread('data_sensitive/genotypes/processed/snp_pos_hg38.txt',data.table = F) %>% mutate(end=V2) %>% 
+  setNames(c('chr','start','SNP_id','end'))
+snp_pos_gr <- makeGRangesFromDataFrame(snp_pos,keep.extra.columns=TRUE)
+```
+
+```{r,eval=FALSE}
+library(rtracklayer)
+path = system.file(package="liftOver", "extdata", "hg38ToHg19.over.chain")
+ch = import.chain(path)
+ch
+```
+
+```{r,eval=FALSE}
+seqlevelsStyle(snp_pos_gr) = "UCSC"  # necessary
+cur19 = liftOver(snp_pos_gr, ch)
+cur19 = unlist(cur19)
+genome(cur19) = "hg19"
+```
+
+Number of SNPs not lifted over: 33
+
+```{r,eval=FALSE}
+length(snp_pos_gr)-length(cur19)
+```
+
+```{r,eval=FALSE}
+cur19 <- as.data.frame(cur19) %>% 
+  as_tibble() %>% 
+  mutate(SNP2=paste0(seqnames,':',start)) %>% 
+  select(SNP_id,seqnames,start,end,SNP2)
+```
+
+```{r,eval=FALSE}
+snp_pos <- dplyr::select(snp_pos,chr,start,SNP_id) %>% 
+  left_join(.,cur19,by='SNP_id') %>% 
+  setNames(c('chr_hg38','start_hg38','SNP','chr_hg19','start_hg19','end_hg19','SNP_id_hg19')) %>% 
+  mutate(SNP_id_hg38=paste0('chr',chr_hg38,':',start_hg38)) %>% 
+  dplyr::select(SNP,chr_hg19,start_hg19,SNP_id_hg19,chr_hg38,start_hg38,SNP_id_hg38) %>% 
+  as_tibble()
+```
+
+```{r,eval=FALSE}
+maf <- data.table::fread('data_sensitive/genotypes/processed/plink.frq',data.table=FALSE) %>% dplyr::select(SNP,A1,A2,MAF) %>% as_tibble()
+```
+
+```{r,eval=FALSE}
+snp_pos <- inner_join(snp_pos,maf,by='SNP')
+```
+
+```{r,eval=FALSE}
+write_tsv(snp_pos,'data_sensitive/genotypes/processed/snp_pos_hg38_hg19.mappings.txt')
+```
+
+## Run Coloc for each locus
+
+Set location of nominal fastQTL result files:
+
+```{r}
+ms_eqtl_path <- 'data_sensitive/eqtl/PC70_nominal/'
+```
+
+```{r}
+ex <- paste0(ms_eqtl_path,'Excitatory.neurons.')
+inh <- paste0(ms_eqtl_path,'Inhibitory.neurons.')
+oli <- paste0(ms_eqtl_path,'Oligodendrocytes.')
+opc <- paste0(ms_eqtl_path,'OPCs...COPs.')
+micro <- paste0(ms_eqtl_path,'Microglia.')
+astro <- paste0(ms_eqtl_path,'Astrocytes.')
+endo <- paste0(ms_eqtl_path,'Endothelial.cells.')
+peri <- paste0(ms_eqtl_path,'Pericytes.')
+```
+
+### Functions
+
+```{r}
+# eqtl_ex <- prepare_eqtl(micro,chrom_locus,sumstats_locus)
+prepare_eqtl <- function(eqtl_path,chrom_locus,sumstats_locus){
+  file <- paste0(eqtl_path,gsub('chr','',chrom_locus),'.gz')
+  eqtl <- data.table::fread(file,header = FALSE,data.table=FALSE,nThread = 1) %>% 
+    dplyr::select(gene=V1,SNP=V2,p_eqtl=V4,beta_eqtl=V5) %>% # if using fastQTL output
+    #dplyr::select(gene=V1,SNP=V2,p_eqtl=V3,beta_eqtl=V4,se_eqtl=V5) %>% # if using QTLtools output
+    mutate(se_eqtl=abs(beta_eqtl/qnorm(p_eqtl/2))) %>% #compute standard error from pvalue and beta
+    inner_join(.,snp_pos,by='SNP') %>% 
+  filter(SNP_id_hg19%in%sumstats_locus$SNP_id_hg19) %>% 
+  add_count(gene) %>% 
+  filter(n>10) #Only keep genes with at least 10 SNPs
+}
+```
+
+```{r}
+run_coloc <- function(tissue_sumstats,tissue_name,sumstats_locus){
+  
+  if(nrow(tissue_sumstats)==0){
+    return (NULL)
+  }
+  
+  out <- lapply(unique(tissue_sumstats$gene),function(x){
+    
+    tissue_sumstats_gene <- filter(tissue_sumstats,gene==x)
+    sumstats_locus_gene <- sumstats_locus %>% inner_join(.,tissue_sumstats_gene,by='SNP_id_hg19')
+    
+    if (nrow(sumstats_locus_gene)>0){
+  
+     coloc_res_pval <- coloc.abf(
+       dataset1=list(beta=sumstats_locus_gene$beta,
+                     varbeta=sumstats_locus_gene$se^2,
+                     type="cc"),
+       dataset2=list(beta=sumstats_locus_gene$beta_eqtl,
+                     varbeta=sumstats_locus_gene$se_eqtl^2,
+                     sdY=rep(1,nrow(sumstats_locus_gene)),
+                     type="quant"))$summary %>% 
+       as.data.frame()
+    colnames(coloc_res_pval) <- x
+    
+    #Get direction of effect for all SNPs at the locus
+    sumstats_locus_gene <- sumstats_locus_gene %>% 
+      mutate(direction=case_when(
+      (effect_allele==A1 & other_allele==A2)  ~ sign(beta*beta_eqtl),
+      (effect_allele==A2 & other_allele==A1)  ~ -sign(beta*beta_eqtl),
+    TRUE ~ 0))
+   
+   #Get Proportion of positive direction
+   direction_prop <- sumstats_locus_gene %>% 
+     summarise(prop_pos_direction=sum(direction==1)/n()) %>% 
+     setNames(x) %>% 
+     as.data.frame()
+   rownames(direction_prop) <- 'prop_pos_direction'
+   
+   direction_sign <- sumstats_locus_gene %>% 
+     filter(p_eqtl==min(p_eqtl)) %>% #Take SNP with strongest evidence of an effect on gene expression
+     slice_min(n=1,p_value,with_ties=FALSE) %>% 
+     summarise(direction=direction,
+               beta_gwas=case_when(
+                    (effect_allele==A1 & other_allele==A2)  ~ beta,
+                    (effect_allele==A2 & other_allele==A1)  ~ -beta
+                    ),
+              beta_eqtl=beta_eqtl,
+               beta_smr=case_when(
+                    direction== 1  ~ abs(beta)/abs(beta_eqtl),
+                    direction== -1  ~ -(abs(beta)/abs(beta_eqtl))
+                 ),
+               ) %>% 
+     t() %>% 
+     as.data.frame()
+   colnames(direction_sign) <- x
+   
+   # #Add direction of effect to coloc results
+    coloc_res_pval <- rbind(coloc_res_pval,direction_sign,direction_prop)
+
+    return(coloc_res_pval)
+    }
+    else{
+      return (NULL)
+    }
+    
+})
+  
+  out_pvalue <- out %>% 
+    bind_cols() %>% 
+    t() %>% 
+    as.data.frame() %>% 
+    rownames_to_column('gene') %>% 
+    as_tibble() %>% 
+    arrange(-PP.H4.abf) %>% 
+    mutate(tissue=tissue_name)
+  
+  return(out_pvalue)
+}
+```
+
+### Run
+
+```{r}
+coloc_results_all <- mclapply(1:nrow(loci),function(i){
+
+  #Get coordinates from the GWAS locus
+  chrom_locus <- loci$chrom[i]
+  start <- loci$start[i] %>% as.numeric()
+  end <- loci$end[i] %>% as.numeric()
+  
+  closest_gene_locus <- loci$locus_name_gene[i]
+  beta_top_GWAS_locus <- loci$beta_top_GWAS[i]
+  GWAS_snp_name <- loci$GWAS_snp[i]
+  GWAS_snp_pos_name <- loci$GWAS_snp_pos[i]
+
+  #Keep GWAS sumstats of SNPs in the locus
+  sumstats_locus <- filter(sumstats,chr==chrom_locus) %>% 
+    filter(bp_b37>=start & bp_b37<=end) %>% 
+    dplyr::mutate(SNP_id_hg19=paste0(chr,':',bp_b37))
+
+  #Preparing eQTL files - keeping SNPs from the eQTL data that math SNPs in the GWAS locus
+  eqtl_ex <- prepare_eqtl(ex,chrom_locus,sumstats_locus)
+  eqtl_inh <- prepare_eqtl(inh,chrom_locus,sumstats_locus)
+  eqtl_oli <- prepare_eqtl(oli,chrom_locus,sumstats_locus)
+  eqtl_opc <- prepare_eqtl(opc,chrom_locus,sumstats_locus)
+  eqtl_micro <- prepare_eqtl(micro,chrom_locus,sumstats_locus)
+  eqtl_astro <- prepare_eqtl(astro,chrom_locus,sumstats_locus)
+  eqtl_endo <- prepare_eqtl(endo,chrom_locus,sumstats_locus)
+  eqtl_peri <- prepare_eqtl(peri,chrom_locus,sumstats_locus)
+
+  #Running colocalization analysis
+  ex_coloc <- run_coloc(eqtl_ex,'Excitatory neurons',sumstats_locus)
+  inh_coloc <- run_coloc(eqtl_inh,'Inhibitory neurons',sumstats_locus)
+  oli_coloc <- run_coloc(eqtl_oli,'Oligodendrocytes',sumstats_locus)
+  opc_coloc <- run_coloc(eqtl_opc,'OPCs / COPs',sumstats_locus)
+  micro_coloc <- run_coloc(eqtl_micro,'Microglia',sumstats_locus)
+  astro_coloc <- run_coloc(eqtl_astro,'Astrocytes',sumstats_locus)
+  endo_coloc <- run_coloc(eqtl_endo,'Endothelial cells',sumstats_locus)
+  peri_coloc <- run_coloc(eqtl_peri,'Pericytes',sumstats_locus)
+  
+  #
+  pval_eqtl <- rbind(ex_coloc,inh_coloc,oli_coloc,
+                     opc_coloc,micro_coloc,astro_coloc,endo_coloc,peri_coloc)
+  #
+  if(!is.null(pval_eqtl)){
+    pval_eqtl <- pval_eqtl %>% 
+      mutate(type='eQTL',
+           locus=loci$locus_name[i],
+           coloc_method='beta') %>% 
+      mutate(closest_gene=closest_gene_locus,
+             beta_top_GWAS=beta_top_GWAS_locus,
+             GWAS_snp=GWAS_snp_name,
+             GWAS_snp_pos=GWAS_snp_pos_name)
+  }
+  results <- pval_eqtl 
+  if(!is.null(results)){
+    results <- results %>% 
+      arrange(-PP.H4.abf) %>% 
+      dplyr::select(locus,closest_gene,GWAS_snp,GWAS_snp_pos,beta_top_GWAS,everything())
+  }
+  
+  return(results)
+},mc.cores = 36,mc.preschedule = FALSE)
+```
+
+```{r}
+coloc_results_all <- coloc_results_all %>% 
+  bind_rows() %>% 
+  arrange(-PP.H4.abf) %>% 
+  separate(gene,into=c('symbol','ensembl'),sep='_')
+```
+
+## Add LOEUF
+
+```{r}
+loeuf <- read_tsv('data/gnomad_loeuf/supplementary_dataset_11_full_constraint_metrics.tsv') %>% 
+  filter(canonical==TRUE) %>% 
+  dplyr::select(gene,gene_id,transcript,oe_lof_upper,p) %>% 
+  mutate(oe_lof_upper_bin = ntile(oe_lof_upper, 10)) %>% 
+  dplyr::rename(ensembl=gene_id,symbol=gene) %>% 
+  dplyr::select(ensembl,oe_lof_upper_bin)
+```
+
+```{r}
+coloc_results_all <- left_join(coloc_results_all,loeuf,by='ensembl')
+```
+
+## Write
+
+```{r}
+dir.create('output/Coloc',showWarnings = FALSE)
+write_tsv(coloc_results_all,paste0('output/Coloc/coloc.',selected_trait,'.txt'))
+```
