@@ -155,7 +155,7 @@ sumstats <- vroom::vroom('data/gwas/pd/ParkinsonMeta_Nalls2014_2019.tbl') %>%
   dplyr::select(variant_id=MarkerName,p_value=`P-value`,chr,bp_b37=bp,effect_allele=Allele1,other_allele=Allele2,beta=Effect,se=StdErr) %>%
   mutate(effect_allele=toupper(effect_allele),
          other_allele=toupper(other_allele)) %>% 
-  unique() #some lines are duplicated
+  unique() #some lines are duplicated in the
 
 loci <- read_tsv('data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt')
 }
@@ -208,7 +208,7 @@ sumstats_min <- sumstats %>% dplyr::select(chr,variant_id,bp_b37,beta)
 ```
 
 ```{r,eval=FALSE}
-c <- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %>% 
+gwas_snp <- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %>% 
   separate(GWAS_SNP_pos,into=c('chr','bp_b37'),sep=':') %>% 
   mutate(end=bp_b37) %>% 
   mutate(bp_b37=as.numeric(bp_b37)) %>% 
