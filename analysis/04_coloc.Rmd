@@ -26,7 +26,7 @@ library(GenomicRanges)
 ```
 
 ```{r}
-selected_trait <- 'ms'
+selected_trait <- 'pd'
 ```
 
 # Process GWAS
@@ -152,8 +152,9 @@ bedtools closest -d -wa -a ad_GWAS_index_snps.v2.bed -b gencode.v39lift37.annota
 ```{r}
 if(selected_trait=='pd'){
 sumstats <- vroom::vroom('data/gwas/pd/ParkinsonMeta_Nalls2014_2019.tbl') %>% 
-  dplyr::select(variant_id=MarkerName,p_value=`P-value`,chr,bp_b37=bp,effect_allele=Allele1,other_allele=Allele2,beta=Effect,se=StdErr)
-
+  dplyr::select(variant_id=MarkerName,p_value=`P-value`,chr,bp_b37=bp,effect_allele=Allele1,other_allele=Allele2,beta=Effect,se=StdErr) %>%
+  mutate(effect_allele=toupper(effect_allele),
+         other_allele=toupper(other_allele))
 
 loci <- read_tsv('data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt')
 }
@@ -631,10 +632,9 @@ coloc_results_all <- mclapply(1:nrow(loci),function(i){
   endo_coloc <- run_coloc(eqtl_endo,'Endothelial cells',sumstats_locus)
   peri_coloc <- run_coloc(eqtl_peri,'Pericytes',sumstats_locus)
   
-  #
   pval_eqtl <- rbind(ex_coloc,inh_coloc,oli_coloc,
                      opc_coloc,micro_coloc,astro_coloc,endo_coloc,peri_coloc)
-  #
+  
   if(!is.null(pval_eqtl)){
     pval_eqtl <- pval_eqtl %>% 
       mutate(type='eQTL',
