@@ -502,16 +502,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong4198c1d"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 4198c1d </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong8ef85a1"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 8ef85a1 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong4198c1d" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong8ef85a1" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 4198c1d. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 8ef85a1. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -584,6 +584,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+8ef85a1
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-16
+</td>
+<td>
+Coloc PD
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+a4a1ca2
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-16
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -846,7 +880,7 @@ sumstats &lt;- vroom::vroom(&#39;data/gwas/pd/ParkinsonMeta_Nalls2014_2019.tbl&#
   dplyr::select(variant_id=MarkerName,p_value=`P-value`,chr,bp_b37=bp,effect_allele=Allele1,other_allele=Allele2,beta=Effect,se=StdErr) %&gt;%
   mutate(effect_allele=toupper(effect_allele),
          other_allele=toupper(other_allele)) %&gt;% 
-  unique() #some lines are duplicated
+  unique() #some lines are duplicated in the
 
 loci &lt;- read_tsv(&#39;data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
 }</code></pre>
@@ -896,7 +930,7 @@ write_tsv(loci,&#39;data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt&#39;)</code></pre>
 <h3>Get closest gene</h3>
 <p>This section of the code is run only once.</p>
 <pre class="r"><code>sumstats_min &lt;- sumstats %&gt;% dplyr::select(chr,variant_id,bp_b37,beta)</code></pre>
-<pre class="r"><code>c &lt;- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %&gt;% 
+<pre class="r"><code>gwas_snp &lt;- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %&gt;% 
   separate(GWAS_SNP_pos,into=c(&#39;chr&#39;,&#39;bp_b37&#39;),sep=&#39;:&#39;) %&gt;% 
   mutate(end=bp_b37) %&gt;% 
   mutate(bp_b37=as.numeric(bp_b37)) %&gt;% 
