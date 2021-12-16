@@ -502,16 +502,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong4eef4d4"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 4eef4d4 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstronge0f0f51"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> e0f0f51 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong4eef4d4" class="panel-collapse collapse">
+<div id="strongRepositoryversionstronge0f0f51" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 4eef4d4. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version e0f0f51. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -584,6 +584,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+e0f0f51
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-16
+</td>
+<td>
+Coloc MS
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+8ddfc74
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-16
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -683,7 +717,7 @@ library(data.table)
 library(coloc)
 library(parallel)
 library(GenomicRanges)</code></pre>
-<pre class="r"><code>selected_trait &lt;- &#39;ms&#39;</code></pre>
+<pre class="r"><code>selected_trait &lt;- &#39;pd&#39;</code></pre>
 </div>
 <div id="process-gwas" class="section level1">
 <h1>Process GWAS</h1>
@@ -775,11 +809,29 @@ bedtools closest -d -wa -a ad_GWAS_index_snps.v2.bed -b gencode.v39lift37.annota
 <h2>PD meta-analysis</h2>
 <pre class="r"><code>if(selected_trait==&#39;pd&#39;){
 sumstats &lt;- vroom::vroom(&#39;data/gwas/pd/ParkinsonMeta_Nalls2014_2019.tbl&#39;) %&gt;% 
-  dplyr::select(variant_id=MarkerName,p_value=`P-value`,chr,bp_b37=bp,effect_allele=Allele1,other_allele=Allele2,beta=Effect,se=StdErr)
-
+  dplyr::select(variant_id=MarkerName,p_value=`P-value`,chr,bp_b37=bp,effect_allele=Allele1,other_allele=Allele2,beta=Effect,se=StdErr) %&gt;%
+  mutate(effect_allele=toupper(effect_allele),
+         other_allele=toupper(other_allele))
 
 loci &lt;- read_tsv(&#39;data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
 }</code></pre>
+<pre><code>Rows: 15,727,752
+Columns: 9
+Delimiter: &quot;\t&quot;
+chr [5]: MarkerName, Allele1, Allele2, Direction, chr
+dbl [4]: Effect, StdErr, P-value, bp
+
+Use `spec()` to retrieve the guessed column specification
+Pass a specification to the `col_types` argument to quiet this message</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  GWAS_snp = col_character(),
+  GWAS_snp_pos = col_character(),
+  locus_name = col_character(),
+  chrom = col_character(),
+  start = col_double(),
+  end = col_double()
+)</code></pre>
 <div id="get-loci-coordinates-1" class="section level3">
 <h3>Get loci coordinates</h3>
 <p>This section of the code is run only once.</p>
@@ -838,23 +890,6 @@ sumstats &lt;- vroom::vroom(&#39;data/gwas/ms/discovery_metav3.0.meta&#39;) %&gt
 
 loci &lt;- read_tsv(&#39;data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
 }</code></pre>
-<pre><code>Rows: 8,589,719
-Columns: 8
-Delimiter: &quot; &quot;
-chr [3]: SNP, A1, A2
-dbl [5]: CHR, BP, N, P, OR
-
-Use `spec()` to retrieve the guessed column specification
-Pass a specification to the `col_types` argument to quiet this message</code></pre>
-<pre><code>Parsed with column specification:
-cols(
-  GWAS_snp = col_character(),
-  GWAS_snp_pos = col_character(),
-  locus_name = col_character(),
-  chrom = col_character(),
-  start = col_double(),
-  end = col_double()
-)</code></pre>
 <div id="get-loci-coordinates-2" class="section level3">
 <h3>Get loci coordinates</h3>
 <p>This section of the code is run only once.</p>
@@ -1166,10 +1201,9 @@ run_coloc &lt;- function(tissue_sumstats,tissue_name,sumstats_locus){
   endo_coloc &lt;- run_coloc(eqtl_endo,&#39;Endothelial cells&#39;,sumstats_locus)
   peri_coloc &lt;- run_coloc(eqtl_peri,&#39;Pericytes&#39;,sumstats_locus)
   
-  #
   pval_eqtl &lt;- rbind(ex_coloc,inh_coloc,oli_coloc,
                      opc_coloc,micro_coloc,astro_coloc,endo_coloc,peri_coloc)
-  #
+  
   if(!is.null(pval_eqtl)){
     pval_eqtl &lt;- pval_eqtl %&gt;% 
       mutate(type=&#39;eQTL&#39;,
