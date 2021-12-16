@@ -26,7 +26,7 @@ library(GenomicRanges)
 ```
 
 ```{r}
-selected_trait <- 'ad'
+selected_trait <- 'scz'
 ```
 
 # Process GWAS
