@@ -26,7 +26,7 @@ library(GenomicRanges)
 ```
 
 ```{r}
-selected_trait <- 'scz'
+selected_trait <- 'ms'
 ```
 
 # Process GWAS
@@ -232,7 +232,8 @@ sumstats <- vroom::vroom('data/gwas/ms/discovery_metav3.0.meta') %>%
   filter(!is.na(P)) %>% 
   mutate(beta=log(OR),
          se=abs(beta/qnorm(P/2))) %>% 
-  dplyr::select(variant_id=SNP,p_value=P,chr=CHR,bp_b37=BP,effect_allele=A1,other_allele=A2,beta,se)
+  dplyr::select(variant_id=SNP,p_value=P,chr=CHR,bp_b37=BP,effect_allele=A1,other_allele=A2,beta,se) %>% 
+  filter(beta!=0) #Some SNPs have OR=1, so se estimate = 0, leading to issues in coloc, we exclude these here
 
 
 loci <- read_tsv('data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt')
@@ -509,6 +510,7 @@ prepare_eqtl <- function(eqtl_path,chrom_locus,sumstats_locus){
 ```
 
 ```{r}
+#  ex_coloc <- run_coloc(eqtl_ex,'Excitatory neurons',sumstats_locus)
 run_coloc <- function(tissue_sumstats,tissue_name,sumstats_locus){
   
   if(nrow(tissue_sumstats)==0){
@@ -516,7 +518,7 @@ run_coloc <- function(tissue_sumstats,tissue_name,sumstats_locus){
   }
   
   out <- lapply(unique(tissue_sumstats$gene),function(x){
-    
+    message(x)
     tissue_sumstats_gene <- filter(tissue_sumstats,gene==x)
     sumstats_locus_gene <- sumstats_locus %>% inner_join(.,tissue_sumstats_gene,by='SNP_id_hg19')
     
