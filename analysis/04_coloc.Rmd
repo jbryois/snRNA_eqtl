@@ -683,5 +683,5 @@ coloc_results_all <- left_join(coloc_results_all,loeuf,by='ensembl')
 
 ```{r}
 dir.create('output/Coloc',showWarnings = FALSE)
-write_tsv(coloc_results_all,paste0('output/Coloc/coloc.',selected_trait,'.old.txt'))
+write_tsv(coloc_results_all,paste0('output/Coloc/coloc.',selected_trait,'.preprint.txt'))
 ```
