@@ -480,7 +480,7 @@ write_tsv(snp_pos,'data_sensitive/genotypes/processed/snp_pos_hg38_hg19.mappings
 Set location of nominal fastQTL result files:
 
 ```{r}
-ms_eqtl_path <- '/pstore/home/bryoisj/nord_dta/Malhotra_lab/MS_snRNAseq_genetics/output/fastql/5percCells.10ind.cov3genoPCs90expPCs.ad_ms_rosmap.cpm_all_sumstats/'
+ms_eqtl_path <- 'data_sensitive/eqtl/PC70_nominal/'
 ```
 
 ```{r}
@@ -683,5 +683,5 @@ coloc_results_all <- left_join(coloc_results_all,loeuf,by='ensembl')
 
 ```{r}
 dir.create('output/Coloc',showWarnings = FALSE)
-write_tsv(coloc_results_all,paste0('output/Coloc/coloc.',selected_trait,'.preprint.txt'))
+write_tsv(coloc_results_all,paste0('output/Coloc/coloc.',selected_trait,'.txt'))
 ```
