@@ -502,16 +502,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong0bad9f7"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 0bad9f7 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong4ad463e"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 4ad463e </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong0bad9f7" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong4ad463e" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 0bad9f7. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 4ad463e. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -585,6 +585,23 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+4ad463e
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-17
+</td>
+<td>
+Coloc PD
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1197,7 +1214,7 @@ genome(cur19) = &quot;hg19&quot;</code></pre>
 <div id="run-coloc-for-each-locus" class="section level2">
 <h2>Run Coloc for each locus</h2>
 <p>Set location of nominal fastQTL result files:</p>
-<pre class="r"><code>ms_eqtl_path &lt;- &#39;/pstore/home/bryoisj/nord_dta/Malhotra_lab/MS_snRNAseq_genetics/output/fastql/5percCells.10ind.cov3genoPCs90expPCs.ad_ms_rosmap.cpm_all_sumstats/&#39;</code></pre>
+<pre class="r"><code>ms_eqtl_path &lt;- &#39;data_sensitive/eqtl/PC70_nominal/&#39;</code></pre>
 <pre class="r"><code>ex &lt;- paste0(ms_eqtl_path,&#39;Excitatory.neurons.&#39;)
 inh &lt;- paste0(ms_eqtl_path,&#39;Inhibitory.neurons.&#39;)
 oli &lt;- paste0(ms_eqtl_path,&#39;Oligodendrocytes.&#39;)
@@ -1394,7 +1411,7 @@ cols(
 <div id="write" class="section level2">
 <h2>Write</h2>
 <pre class="r"><code>dir.create(&#39;output/Coloc&#39;,showWarnings = FALSE)
-write_tsv(coloc_results_all,paste0(&#39;output/Coloc/coloc.&#39;,selected_trait,&#39;.preprint.txt&#39;))</code></pre>
+write_tsv(coloc_results_all,paste0(&#39;output/Coloc/coloc.&#39;,selected_trait,&#39;.txt&#39;))</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
