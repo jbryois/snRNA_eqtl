@@ -26,7 +26,7 @@ library(GenomicRanges)
 ```
 
 ```{r}
-selected_trait <- 'pd'
+selected_trait <- 'ad'
 ```
 
 # Process GWAS
@@ -480,7 +480,7 @@ write_tsv(snp_pos,'data_sensitive/genotypes/processed/snp_pos_hg38_hg19.mappings
 Set location of nominal fastQTL result files:
 
 ```{r}
-ms_eqtl_path <- 'data_sensitive/eqtl/PC70_nominal/'
+ms_eqtl_path <- '/pstore/home/bryoisj/nord_dta/Malhotra_lab/MS_snRNAseq_genetics/output/fastql/5percCells.10ind.cov3genoPCs90expPCs.ad_ms_rosmap.cpm_all_sumstats/'
 ```
 
 ```{r}
@@ -532,7 +532,7 @@ run_coloc <- function(tissue_sumstats,tissue_name,sumstats_locus){
                      type="cc"),
        dataset2=list(beta=sumstats_locus_gene$beta_eqtl,
                      varbeta=sumstats_locus_gene$se_eqtl^2,
-                     sdY=rep(1,nrow(sumstats_locus_gene)),
+                     sdY=1,
                      type="quant"))$summary %>% 
        as.data.frame()
     colnames(coloc_res_pval) <- x
@@ -683,5 +683,5 @@ coloc_results_all <- left_join(coloc_results_all,loeuf,by='ensembl')
 
 ```{r}
 dir.create('output/Coloc',showWarnings = FALSE)
-write_tsv(coloc_results_all,paste0('output/Coloc/coloc.',selected_trait,'.txt'))
+write_tsv(coloc_results_all,paste0('output/Coloc/coloc.',selected_trait,'.old.txt'))
 ```
