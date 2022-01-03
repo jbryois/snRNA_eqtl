@@ -171,7 +171,6 @@ dice_files <- tibble(files=c(dice_B_cell_naive,
 ### GTEx read
 
 ```{r}
-# gtex_eqtl_blood <- prepare_eqtl_gtex(gtex_eqtl_blood_path,chrom_locus,sumstats_locus)
 prepare_eqtl_gtex <- function(gtex_tissue_path,chrom_locus,sumstats_locus){
   gtex_file <- paste0(gtex_tissue_path,chrom_locus,'.parquet')
   gtex <- read_parquet(gtex_file,
@@ -299,6 +298,19 @@ run_coloc <- function(tissue_sumstats,tissue_name,sumstats_locus,dice=FALSE){
 }
 ```
 
+```{r}
+#Add metadata data for the type of colocalization analysis (if the coloc did not return a NULL value (for e.g. if there were no SNPs in common between the GWAS and the eQTL analaysis.))
+add_meta <- function(d,type_name,set_direction_to_0=FALSE){
+  if(!is.null(d)){
+    d <- d %>% mutate(type=type_name)
+    if(set_direction_to_0){
+      d <- d %>% mutate(direction=0)
+    }
+  }
+  return(d)
+}
+```
+
 ### Run
 
 ```{r}
@@ -327,31 +339,31 @@ coloc_results_all <- mclapply(1:nrow(loci),function(i){
   
   ### eQTL
   eqtl_blood <- prepare_eqtl_gtex(gtex_eqtl_blood_path,chrom_locus,sumstats_locus)
-  eqtl_blood_coloc <- run_coloc(eqtl_blood,'blood',sumstats_locus) %>% mutate(type='eQTL')
+  eqtl_blood_coloc <- run_coloc(eqtl_blood,'blood',sumstats_locus) %>% add_meta(type_name='eQTL')
   rm(eqtl_blood)
   
   eqtl_spleen <- prepare_eqtl_gtex(gtex_eqtl_spleen_path,chrom_locus,sumstats_locus)
-  eqtl_spleen_coloc <- run_coloc(eqtl_spleen,'spleen',sumstats_locus)  %>% mutate(type='eQTL')
+  eqtl_spleen_coloc <- run_coloc(eqtl_spleen,'spleen',sumstats_locus) %>% add_meta(type_name='eQTL')
   rm(eqtl_spleen)
   
   ### sQTL
   sqtl_blood <- prepare_eqtl_gtex(gtex_sqtl_blood_path,chrom_locus,sumstats_locus)
-  sqtl_blood_coloc <- run_coloc(sqtl_blood,'blood',sumstats_locus) %>% mutate(type='sQTL') %>% mutate(direction=0)
+  sqtl_blood_coloc <- run_coloc(sqtl_blood,'blood',sumstats_locus) %>% add_meta(type_name='sQTL',set_direction_to_0=TRUE)
   rm(sqtl_blood)
   
   sqtl_spleen <- prepare_eqtl_gtex(gtex_sqtl_spleen_path,chrom_locus,sumstats_locus)
-  sqtl_spleencoloc <- run_coloc(sqtl_spleen,'spleen',sumstats_locus) %>% mutate(type='sQTL') %>% mutate(direction=0)
+  sqtl_spleen_coloc <- run_coloc(sqtl_spleen,'spleen',sumstats_locus) %>% add_meta(type_name='sQTL',set_direction_to_0=TRUE)
   rm(sqtl_spleen)
 
   #Dice
   dice_res <- lapply(1:nrow(dice_files), function(j){
     dice_eqtl_file <- prepare_eqtl_dice(dice_files$files[j],chrom_locus,sumstats_locus)
-    dice_coloc <- run_coloc(dice_eqtl_B_cell_naive,dice_files$name[j],sumstats_locus,dice=TRUE) %>% mutate(type='eQTL')
+    dice_coloc <- run_coloc(dice_eqtl_file,dice_files$name[j],sumstats_locus,dice=TRUE) %>% add_meta(type_name='eQTL')
     rm(dice_eqtl_file)
     return(dice_coloc)
   }) %>% bind_rows()
   
-  pval_eqtl <- rbind(eqtl_blood_coloc,eqtl_spleen_coloc,sqtl_blood_coloc,sqtl_spleencoloc,dice_res)
+  pval_eqtl <- rbind(eqtl_blood_coloc,eqtl_spleen_coloc,sqtl_blood_coloc,sqtl_spleen_coloc,dice_res)
   
   if(!is.null(pval_eqtl)){
     pval_eqtl <- pval_eqtl %>% 
