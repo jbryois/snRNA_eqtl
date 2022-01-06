@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong0209d6a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 0209d6a </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong3c17a76"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 3c17a76 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong0209d6a" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong3c17a76" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 0209d6a. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 3c17a76. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -595,6 +595,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+3c17a76
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-06
+</td>
+<td>
+Coloc AD
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+b4cdba1
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-06
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -984,71 +1018,82 @@ loci &lt;- read_tsv(&#39;data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
 }</code></pre>
 <div id="get-loci-coordinates" class="section level3">
 <h3>Get loci coordinates</h3>
-<p>This section of the code is run only once.</p>
-<p>Get GWAS top SNPs</p>
-<pre class="r"><code>#Supplementary table file from Schwartzentruber et al.
-top_snps &lt;- readxl::read_xlsx(&#39;data/gwas/ad/41588_2020_776_MOESM3_ESM.xlsx&#39;,sheet=2) %&gt;% 
-  dplyr::select(Chr,SNP,`Lead SNP pos`) %&gt;% dplyr::rename(pos=`Lead SNP pos`) %&gt;% 
-  mutate(bp_37=paste0(&#39;chr&#39;,Chr,&#39;:&#39;,pos)) %&gt;% dplyr::select(-Chr) %&gt;% 
-  mutate(SNP=gsub(&#39;_.+&#39;,&#39;&#39;,SNP))
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt&#39;)){
+  #Supplementary table file from Schwartzentruber et al.
+  top_snps &lt;- readxl::read_xlsx(&#39;data/gwas/ad/41588_2020_776_MOESM3_ESM.xlsx&#39;,sheet=2) %&gt;% 
+    dplyr::select(Chr,SNP,`Lead SNP pos`) %&gt;% dplyr::rename(pos=`Lead SNP pos`) %&gt;% 
+    mutate(bp_37=paste0(&#39;chr&#39;,Chr,&#39;:&#39;,pos)) %&gt;% dplyr::select(-Chr) %&gt;% 
+    mutate(SNP=gsub(&#39;_.+&#39;,&#39;&#39;,SNP))
 
-#Add novel loci only observed in replication + discovery (not used for their downstream analysis)
-additional_snps &lt;- readxl::read_xlsx(&#39;data/gwas/ad/41588_2020_776_MOESM3_ESM.xlsx&#39;,sheet=4,skip=43) %&gt;%
-  dplyr::select(1,2,3) %&gt;% 
-  setNames(c(&#39;chr&#39;,&#39;pos&#39;,&#39;SNP&#39;)) %&gt;% 
-  filter(!is.na(SNP)) %&gt;% 
-  mutate(bp_37=paste0(&#39;chr&#39;,chr,&#39;:&#39;,pos)) %&gt;% 
-  dplyr::select(SNP,pos,bp_37)
+  #Add novel loci only observed in replication + discovery (not used for their downstream analysis)
+  additional_snps &lt;- readxl::read_xlsx(&#39;data/gwas/ad/41588_2020_776_MOESM3_ESM.xlsx&#39;,sheet=4,skip=43) %&gt;%
+    dplyr::select(1,2,3) %&gt;% 
+    setNames(c(&#39;chr&#39;,&#39;pos&#39;,&#39;SNP&#39;)) %&gt;% 
+    filter(!is.na(SNP)) %&gt;% 
+    mutate(bp_37=paste0(&#39;chr&#39;,chr,&#39;:&#39;,pos)) %&gt;% 
+    dplyr::select(SNP,pos,bp_37)
 
-top_snps &lt;- rbind(top_snps,additional_snps)</code></pre>
+  top_snps &lt;- rbind(top_snps,additional_snps)
+}</code></pre>
 <p>Get 1KG LD for the top GWAS SNPs at each loci</p>
-<pre class="r"><code>proxy_snps &lt;- lapply(top_snps$SNP,LDlinkR::LDproxy,pop = &quot;EUR&quot;, r2d = &quot;r2&quot;, token = &#39;72edb9cc22c9&#39;, file = FALSE)</code></pre>
-<pre class="r"><code>saveRDS(proxy_snps,&#39;data/gwas/ad/loci_LDlinkR.allSNPs.EUR.rds&#39;)</code></pre>
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt&#39;)){
+proxy_snps &lt;- lapply(top_snps$SNP,LDlinkR::LDproxy,pop = &quot;EUR&quot;, r2d = &quot;r2&quot;, token = &#39;72edb9cc22c9&#39;, file = FALSE)
+saveRDS(proxy_snps,&#39;data/gwas/ad/loci_LDlinkR.allSNPs.EUR.rds&#39;)
+}</code></pre>
 <p>Define each locus as the most extreme coordinates of SNPs in LD (r2&gt;=0.1) with the index GWAS SNP.</p>
-<pre class="r"><code>loci &lt;- lapply(proxy_snps,function(x){
-  if(nrow(x)&gt;1){
-    x &lt;- filter(x,R2&gt;=0.1) 
-    chr &lt;- x$Coord %&gt;% gsub(&#39;:.+&#39;,&#39;&#39;,.) %&gt;% unique()
-    pos &lt;- x$Coord %&gt;% gsub(&#39;chr[0-9]{1,2}:&#39;,&#39;&#39;,.) %&gt;% as.numeric()
-    locus_name &lt;- paste0(chr,&#39;:&#39;,min(pos),&#39;_&#39;,max(pos))
-    top_snp_df &lt;- filter(x,Distance==0) 
-    top_snp &lt;- top_snp_df %&gt;% pull(RS_Number)
-    top_snp_pos &lt;- top_snp_df %&gt;% pull(Coord)
-    locus &lt;- tibble(GWAS_snp=top_snp,
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt&#39;)){
+  loci &lt;- lapply(proxy_snps,function(x){
+    if(nrow(x)&gt;1){
+      x &lt;- filter(x,R2&gt;=0.1) 
+      chr &lt;- x$Coord %&gt;% gsub(&#39;:.+&#39;,&#39;&#39;,.) %&gt;% unique()
+      pos &lt;- x$Coord %&gt;% gsub(&#39;chr[0-9]{1,2}:&#39;,&#39;&#39;,.) %&gt;% as.numeric()
+      locus_name &lt;- paste0(chr,&#39;:&#39;,min(pos),&#39;_&#39;,max(pos))
+      top_snp_df &lt;- filter(x,Distance==0) 
+      top_snp &lt;- top_snp_df %&gt;% pull(RS_Number)
+      top_snp_pos &lt;- top_snp_df %&gt;% pull(Coord)
+      locus &lt;- tibble(GWAS_snp=top_snp,
                     GWAS_snp_pos=top_snp_pos,
                     locus_name=locus_name,
                     chrom=chr,
                     start=min(pos),
                     end=max(pos))
-    return(locus)
-  }
-  else{
-    return(NULL)
-  }
-}) %&gt;% 
-  bind_rows() %&gt;% 
-write_tsv(.,&#39;data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt&#39;)</code></pre>
+      return(locus)
+   }
+    else{
+      return(NULL)
+    }
+  }) %&gt;% 
+    bind_rows() %&gt;% 
+  write_tsv(.,&#39;data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
+}</code></pre>
 </div>
 <div id="get-closest-gene" class="section level3">
 <h3>Get closest gene</h3>
-<p>This section of the code is run only once.</p>
-<pre class="r"><code>sumstats_min &lt;- sumstats %&gt;% dplyr::select(chr,variant_id,bp_b37,beta)</code></pre>
-<pre class="r"><code>gwas_snp &lt;- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %&gt;% 
-  separate(GWAS_SNP_pos,into=c(&#39;chr&#39;,&#39;bp_b37&#39;),sep=&#39;:&#39;) %&gt;% 
-  mutate(end=bp_b37) %&gt;% 
-  mutate(bp_b37=as.numeric(bp_b37)) %&gt;% 
-  left_join(.,sumstats_min,by=c(&#39;chr&#39;,&#39;bp_b37&#39;)) %&gt;% 
-  arrange(chr,bp_b37) %&gt;% 
-  write_tsv(.,&#39;data/gwas/ad/ad_GWAS_index_snps.v2.bed&#39;,col_names = FALSE)</code></pre>
-<pre class="r"><code>gtf_b37 &lt;- rtracklayer::import(&#39;data/gencode/gencode.v39lift37.annotation.gtf.gz&#39;) %&gt;% as.data.frame() %&gt;% as_tibble()</code></pre>
-<pre class="r"><code>protein_coding &lt;- filter(gtf_b37,type==&#39;gene&#39;,gene_type==&#39;protein_coding&#39;) %&gt;% 
-  mutate(gene_label=paste0(gene_name,&#39;_&#39;,gsub(&#39;\\..+&#39;,&#39;&#39;,gene_id))) %&gt;% 
-  dplyr::select(seqnames,start,end,gene_label) %&gt;% 
-  filter(seqnames %in% paste0(&#39;chr&#39;,1:22)) %&gt;% 
-  mutate(seqnames=as.character(seqnames)) %&gt;% 
-  arrange(seqnames,start) %&gt;% 
-  write_tsv(&#39;data/gencode/gencode.v39lift37.annotation.protein_coding.1_22.bed&#39;,col_names = FALSE)</code></pre>
-<pre class="bash"><code>cd data/gwas/ad
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/ad/closest.protein.coding.bed&#39;)){
+  sumstats_min &lt;- sumstats %&gt;% dplyr::select(chr,variant_id,bp_b37,beta)
+
+  gwas_snp &lt;- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %&gt;% 
+    separate(GWAS_SNP_pos,into=c(&#39;chr&#39;,&#39;bp_b37&#39;),sep=&#39;:&#39;) %&gt;% 
+    mutate(end=bp_b37) %&gt;% 
+    mutate(bp_b37=as.numeric(bp_b37)) %&gt;% 
+    left_join(.,sumstats_min,by=c(&#39;chr&#39;,&#39;bp_b37&#39;)) %&gt;% 
+    arrange(chr,bp_b37) %&gt;% 
+    write_tsv(.,&#39;data/gwas/ad/ad_GWAS_index_snps.v2.bed&#39;,col_names = FALSE)
+}</code></pre>
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/ad/closest.protein.coding.bed&#39;)){
+  gtf_b37 &lt;- rtracklayer::import(&#39;data/gencode/gencode.v39lift37.annotation.gtf.gz&#39;) %&gt;% as.data.frame() %&gt;% as_tibble()
+}</code></pre>
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/ad/closest.protein.coding.bed&#39;)){
+  protein_coding &lt;- filter(gtf_b37,type==&#39;gene&#39;,gene_type==&#39;protein_coding&#39;) %&gt;% 
+    mutate(gene_label=paste0(gene_name,&#39;_&#39;,gsub(&#39;\\..+&#39;,&#39;&#39;,gene_id))) %&gt;% 
+    dplyr::select(seqnames,start,end,gene_label) %&gt;% 
+    filter(seqnames %in% paste0(&#39;chr&#39;,1:22)) %&gt;% 
+    mutate(seqnames=as.character(seqnames)) %&gt;% 
+    arrange(seqnames,start) %&gt;% 
+    write_tsv(&#39;data/gencode/gencode.v39lift37.annotation.protein_coding.1_22.bed&#39;,col_names = FALSE)
+}</code></pre>
+<pre class="bash"><code>source ~/.bashrc
+cd data/gwas/ad
 ln -s ../../gencode/gencode.v39lift37.annotation.protein_coding.1_22.bed .
 
 ml bedtools/2.25.0-goolf-1.7.20
@@ -1068,41 +1113,52 @@ loci &lt;- read_tsv(&#39;data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
 }</code></pre>
 <div id="get-loci-coordinates-1" class="section level3">
 <h3>Get loci coordinates</h3>
-<p>This section of the code is run only once.</p>
-<p>Get GWAS top SNPs</p>
-<pre class="r"><code>top_snps &lt;- readxl::read_xlsx(&#39;data/gwas/pd/Table S2. Detailed summary statistics on all nominated risk variants, known and novel_.xlsx&#39;) %&gt;% filter(!is.na(`Locus Number`),`Locus Number`!=&#39;NA&#39;)</code></pre>
-<pre class="r"><code>proxy_snps &lt;- lapply(top_snps$SNP,LDlinkR::LDproxy,pop = &quot;EUR&quot;, r2d = &quot;r2&quot;, token = &#39;72edb9cc22c9&#39;, file = FALSE)</code></pre>
-<pre class="r"><code>saveRDS(proxy_snps,&#39;data/gwas/pd/loci_LDlinkR.allSNPs.EUR.rds&#39;)</code></pre>
-<pre class="r"><code>loci &lt;- lapply(proxy_snps,function(x){
-  if(nrow(x)&gt;1){
-    x &lt;- filter(x,R2&gt;=0.1) 
-    chr &lt;- x$Coord %&gt;% gsub(&#39;:.+&#39;,&#39;&#39;,.) %&gt;% unique()
-    pos &lt;- x$Coord %&gt;% gsub(&#39;chr[0-9]{1,2}:&#39;,&#39;&#39;,.) %&gt;% as.numeric()
-    locus_name &lt;- paste0(chr,&#39;:&#39;,min(pos),&#39;_&#39;,max(pos))
-    top_snp_df &lt;- filter(x,Distance==0) 
-    top_snp &lt;- top_snp_df %&gt;% pull(RS_Number)
-    top_snp_pos &lt;- top_snp_df %&gt;% pull(Coord)
-    locus &lt;- tibble(GWAS_snp=top_snp,GWAS_snp_pos=top_snp_pos,locus_name=locus_name,chrom=chr,start=min(pos),end=max(pos))
-    return(locus)
-  }
-  else{
-    return(NULL)
-  }
-}) %&gt;% bind_rows()
-write_tsv(loci,&#39;data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt&#39;)</code></pre>
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt&#39;)){
+  top_snps &lt;- readxl::read_xlsx(&#39;data/gwas/pd/Table S2. Detailed summary statistics on all nominated risk variants, known and novel_.xlsx&#39;) %&gt;%
+    filter(!is.na(`Locus Number`),`Locus Number`!=&#39;NA&#39;)
+}</code></pre>
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt&#39;)){
+  proxy_snps &lt;- lapply(top_snps$SNP,LDlinkR::LDproxy,pop = &quot;EUR&quot;, r2d = &quot;r2&quot;, token = &#39;72edb9cc22c9&#39;, file = FALSE)
+  saveRDS(proxy_snps,&#39;data/gwas/pd/loci_LDlinkR.allSNPs.EUR.rds&#39;)
+}</code></pre>
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt&#39;)){
+  loci &lt;- lapply(proxy_snps,function(x){
+    if(nrow(x)&gt;1){
+      x &lt;- filter(x,R2&gt;=0.1) 
+      chr &lt;- x$Coord %&gt;% gsub(&#39;:.+&#39;,&#39;&#39;,.) %&gt;% unique()
+      pos &lt;- x$Coord %&gt;% gsub(&#39;chr[0-9]{1,2}:&#39;,&#39;&#39;,.) %&gt;% as.numeric()
+      locus_name &lt;- paste0(chr,&#39;:&#39;,min(pos),&#39;_&#39;,max(pos))
+      top_snp_df &lt;- filter(x,Distance==0) 
+      top_snp &lt;- top_snp_df %&gt;% pull(RS_Number)
+      top_snp_pos &lt;- top_snp_df %&gt;% pull(Coord)
+      locus &lt;- tibble(GWAS_snp=top_snp,GWAS_snp_pos=top_snp_pos,locus_name=locus_name,chrom=chr,start=min(pos),end=max(pos))
+      return(locus)
+    }
+    else{
+      return(NULL)
+    }
+  }) %&gt;% 
+    bind_rows()
+  write_tsv(loci,&#39;data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
+}</code></pre>
 </div>
 <div id="get-closest-gene-1" class="section level3">
 <h3>Get closest gene</h3>
-<p>This section of the code is run only once.</p>
-<pre class="r"><code>sumstats_min &lt;- sumstats %&gt;% dplyr::select(chr,variant_id,bp_b37,beta)</code></pre>
-<pre class="r"><code>gwas_snp &lt;- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %&gt;% 
-  separate(GWAS_SNP_pos,into=c(&#39;chr&#39;,&#39;bp_b37&#39;),sep=&#39;:&#39;) %&gt;% 
-  mutate(end=bp_b37) %&gt;% 
-  mutate(bp_b37=as.numeric(bp_b37)) %&gt;% 
-  left_join(.,sumstats_min,by=c(&#39;chr&#39;,&#39;bp_b37&#39;)) %&gt;% 
-  arrange(chr,bp_b37) %&gt;% 
-  write_tsv(.,&#39;data/gwas/pd/pd_GWAS_index_snps.v2.bed&#39;,col_names = FALSE)</code></pre>
-<pre class="bash"><code>cd data/gwas/pd
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/pd/closest.protein.coding.bed&#39;)){
+  sumstats_min &lt;- sumstats %&gt;% dplyr::select(chr,variant_id,bp_b37,beta)
+}</code></pre>
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/pd/closest.protein.coding.bed&#39;)){
+  gwas_snp &lt;- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %&gt;% 
+    separate(GWAS_SNP_pos,into=c(&#39;chr&#39;,&#39;bp_b37&#39;),sep=&#39;:&#39;) %&gt;% 
+    mutate(end=bp_b37) %&gt;% 
+    mutate(bp_b37=as.numeric(bp_b37)) %&gt;% 
+    left_join(.,sumstats_min,by=c(&#39;chr&#39;,&#39;bp_b37&#39;)) %&gt;% 
+    arrange(chr,bp_b37) %&gt;% 
+    write_tsv(.,&#39;data/gwas/pd/pd_GWAS_index_snps.v2.bed&#39;,col_names = FALSE)
+}</code></pre>
+<pre class="bash"><code>source ~/.bashrc
+
+cd data/gwas/pd
 ln -s ../../gencode/gencode.v39lift37.annotation.protein_coding.1_22.bed .
 
 ml bedtools/2.25.0-goolf-1.7.20
@@ -1126,41 +1182,50 @@ loci &lt;- read_tsv(&#39;data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
 }</code></pre>
 <div id="get-loci-coordinates-2" class="section level3">
 <h3>Get loci coordinates</h3>
-<p>This section of the code is run only once.</p>
-<p>Get GWAS top SNPs</p>
-<pre class="r"><code>loci &lt;- readxl::read_xlsx(&#39;data/gwas/ms/aav7188_Patsopoulos_Tables S1-S10.xlsx&#39;,sheet=8,skip=3)</code></pre>
-<pre class="r"><code>proxy_snps &lt;- lapply(loci$SNP,LDlinkR::LDproxy,pop = &quot;EUR&quot;, r2d = &quot;r2&quot;, token = &#39;72edb9cc22c9&#39;, file = FALSE)
-saveRDS(proxy_snps,&#39;data/gwas/ms/loci_LDlinkR.allSNPs.EUR.rds&#39;)</code></pre>
-<pre class="r"><code>loci &lt;- lapply(proxy_snps,function(x){
-  if(nrow(x)&gt;1){
-    x &lt;- filter(x,R2&gt;=0.1) 
-    chr &lt;- x$Coord %&gt;% gsub(&#39;:.+&#39;,&#39;&#39;,.) %&gt;% unique()
-    pos &lt;- x$Coord %&gt;% gsub(&#39;chr[0-9]{1,2}:&#39;,&#39;&#39;,.) %&gt;% as.numeric()
-    locus_name &lt;- paste0(chr,&#39;:&#39;,min(pos),&#39;_&#39;,max(pos))
-    top_snp_df &lt;- filter(x,Distance==0) 
-    top_snp &lt;- top_snp_df %&gt;% pull(RS_Number)
-    top_snp_pos &lt;- top_snp_df %&gt;% pull(Coord)
-    locus &lt;- tibble(GWAS_snp=top_snp,GWAS_snp_pos=top_snp_pos,locus_name=locus_name,chrom=chr,start=min(pos),end=max(pos))
-    return(locus)
-  }
-  else{
-    return(NULL)
-  }
-}) %&gt;% bind_rows()
-write_tsv(loci,&#39;data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt&#39;)</code></pre>
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt&#39;)){
+  loci &lt;- readxl::read_xlsx(&#39;data/gwas/ms/aav7188_Patsopoulos_Tables S1-S10.xlsx&#39;,sheet=8,skip=3)
+}</code></pre>
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt&#39;)){
+  proxy_snps &lt;- lapply(loci$SNP,LDlinkR::LDproxy,pop = &quot;EUR&quot;, r2d = &quot;r2&quot;, token = &#39;72edb9cc22c9&#39;, file = FALSE)
+  saveRDS(proxy_snps,&#39;data/gwas/ms/loci_LDlinkR.allSNPs.EUR.rds&#39;)
+}</code></pre>
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt&#39;)){
+  loci &lt;- lapply(proxy_snps,function(x){
+    if(nrow(x)&gt;1){
+      x &lt;- filter(x,R2&gt;=0.1) 
+      chr &lt;- x$Coord %&gt;% gsub(&#39;:.+&#39;,&#39;&#39;,.) %&gt;% unique()
+      pos &lt;- x$Coord %&gt;% gsub(&#39;chr[0-9]{1,2}:&#39;,&#39;&#39;,.) %&gt;% as.numeric()
+      locus_name &lt;- paste0(chr,&#39;:&#39;,min(pos),&#39;_&#39;,max(pos))
+      top_snp_df &lt;- filter(x,Distance==0) 
+      top_snp &lt;- top_snp_df %&gt;% pull(RS_Number)
+      top_snp_pos &lt;- top_snp_df %&gt;% pull(Coord)
+      locus &lt;- tibble(GWAS_snp=top_snp,GWAS_snp_pos=top_snp_pos,locus_name=locus_name,chrom=chr,start=min(pos),end=max(pos))
+      return(locus)
+    }
+    else{
+      return(NULL)
+    }
+  }) %&gt;% bind_rows()
+  write_tsv(loci,&#39;data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
+}</code></pre>
 </div>
 <div id="get-closest-gene-2" class="section level3">
 <h3>Get closest gene</h3>
-<p>This section of the code is run only once.</p>
-<pre class="r"><code>sumstats_min &lt;- sumstats %&gt;% dplyr::select(chr,variant_id,bp_b37,beta)</code></pre>
-<pre class="r"><code>gwas_snp &lt;- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %&gt;% 
-  separate(GWAS_SNP_pos,into=c(&#39;chr&#39;,&#39;bp_b37&#39;),sep=&#39;:&#39;) %&gt;% 
-  mutate(end=bp_b37) %&gt;% 
-  mutate(bp_b37=as.numeric(bp_b37)) %&gt;% 
-  left_join(.,sumstats_min,by=c(&#39;chr&#39;,&#39;bp_b37&#39;)) %&gt;% 
-  arrange(chr,bp_b37) %&gt;% 
-  write_tsv(.,&#39;data/gwas/ms/ms_GWAS_index_snps.v2.bed&#39;,col_names = FALSE)</code></pre>
-<pre class="bash"><code>cd data/gwas/ms
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/ms/closest.protein.coding.bed&#39;)){
+  sumstats_min &lt;- sumstats %&gt;% dplyr::select(chr,variant_id,bp_b37,beta)
+}</code></pre>
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/ms/closest.protein.coding.bed&#39;)){
+  gwas_snp &lt;- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %&gt;% 
+    separate(GWAS_SNP_pos,into=c(&#39;chr&#39;,&#39;bp_b37&#39;),sep=&#39;:&#39;) %&gt;% 
+    mutate(end=bp_b37) %&gt;% 
+    mutate(bp_b37=as.numeric(bp_b37)) %&gt;% 
+    left_join(.,sumstats_min,by=c(&#39;chr&#39;,&#39;bp_b37&#39;)) %&gt;% 
+    arrange(chr,bp_b37) %&gt;% 
+    write_tsv(.,&#39;data/gwas/ms/ms_GWAS_index_snps.v2.bed&#39;,col_names = FALSE)
+}</code></pre>
+<pre class="bash"><code>source ~/.bashrc
+
+cd data/gwas/ms
 ln -s ../../gencode/gencode.v39lift37.annotation.protein_coding.1_22.bed .
 
 ml bedtools/2.25.0-goolf-1.7.20
@@ -1182,41 +1247,52 @@ loci &lt;- read_tsv(&#39;data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
 }</code></pre>
 <div id="get-loci-coordinates-3" class="section level3">
 <h3>Get loci coordinates</h3>
-<p>This section of the code is run only once.</p>
-<p>Get GWAS top SNPs</p>
-<pre class="r"><code>loci &lt;- readxl::read_xlsx(&#39;data/gwas/scz/Supplementary Table 2 - Replication index.xlsx&#39;,sheet=2) %&gt;% filter(`P-comb`&lt;5e-8) %&gt;% mutate(locus=paste0(&#39;chr&#39;,CHR,&#39;:&#39;,left,&#39;-&#39;,right)) %&gt;% dplyr::rename(locus_name=locus) %&gt;% mutate(start=BP,end=BP) %&gt;% mutate(GWAS_snp=SNP,GWAS_snp_pos=paste0(&#39;chr&#39;,CHR,&#39;:&#39;,BP))</code></pre>
-<pre class="r"><code>proxy_snps &lt;- lapply(loci$GWAS_snp_pos,LDlinkR::LDproxy,pop = &quot;EUR&quot;, r2d = &quot;r2&quot;, token = &#39;72edb9cc22c9&#39;, file = FALSE)
-saveRDS(proxy_snps,&#39;data/gwas/scz/loci_LDlinkR.allSNPs.EUR.rds&#39;)</code></pre>
-<pre class="r"><code>loci &lt;- lapply(proxy_snps,function(x){
-  if(nrow(x)&gt;1){
-    x &lt;- filter(x,R2&gt;=0.1) 
-    chr &lt;- x$Coord %&gt;% gsub(&#39;:.+&#39;,&#39;&#39;,.) %&gt;% unique()
-    pos &lt;- x$Coord %&gt;% gsub(&#39;chr[0-9]{1,2}:&#39;,&#39;&#39;,.) %&gt;% as.numeric()
-    locus_name &lt;- paste0(chr,&#39;:&#39;,min(pos),&#39;_&#39;,max(pos))
-    top_snp_df &lt;- filter(x,Distance==0) 
-    top_snp &lt;- top_snp_df %&gt;% pull(RS_Number)
-    top_snp_pos &lt;- top_snp_df %&gt;% pull(Coord)
-    locus &lt;- tibble(GWAS_snp=top_snp,GWAS_snp_pos=top_snp_pos,locus_name=locus_name,chrom=chr,start=min(pos),end=max(pos))
-    return(locus)
-  }
-  else{
-    return(NULL)
-  }
-}) %&gt;% bind_rows()
-write_tsv(loci,&#39;data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt&#39;)</code></pre>
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt&#39;)){
+  loci &lt;- readxl::read_xlsx(&#39;data/gwas/scz/Supplementary Table 2 - Replication index.xlsx&#39;,sheet=2) %&gt;% filter(`P-comb`&lt;5e-8) %&gt;%  
+    mutate(locus=paste0(&#39;chr&#39;,CHR,&#39;:&#39;,left,&#39;-&#39;,right)) %&gt;% dplyr::rename(locus_name=locus) %&gt;% mutate(start=BP,end=BP) %&gt;%  
+    mutate(GWAS_snp=SNP,GWAS_snp_pos=paste0(&#39;chr&#39;,CHR,&#39;:&#39;,BP))
+}</code></pre>
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt&#39;)){
+  proxy_snps &lt;- lapply(loci$GWAS_snp_pos,LDlinkR::LDproxy,pop = &quot;EUR&quot;, r2d = &quot;r2&quot;, token = &#39;72edb9cc22c9&#39;, file = FALSE)
+  saveRDS(proxy_snps,&#39;data/gwas/scz/loci_LDlinkR.allSNPs.EUR.rds&#39;)
+}</code></pre>
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt&#39;)){
+  loci &lt;- lapply(proxy_snps,function(x){
+    if(nrow(x)&gt;1){
+      x &lt;- filter(x,R2&gt;=0.1) 
+      chr &lt;- x$Coord %&gt;% gsub(&#39;:.+&#39;,&#39;&#39;,.) %&gt;% unique()
+      pos &lt;- x$Coord %&gt;% gsub(&#39;chr[0-9]{1,2}:&#39;,&#39;&#39;,.) %&gt;% as.numeric()
+      locus_name &lt;- paste0(chr,&#39;:&#39;,min(pos),&#39;_&#39;,max(pos))
+      top_snp_df &lt;- filter(x,Distance==0) 
+      top_snp &lt;- top_snp_df %&gt;% pull(RS_Number)
+      top_snp_pos &lt;- top_snp_df %&gt;% pull(Coord)
+      locus &lt;- tibble(GWAS_snp=top_snp,GWAS_snp_pos=top_snp_pos,locus_name=locus_name,chrom=chr,start=min(pos),end=max(pos))
+      return(locus)
+    }
+    else{
+      return(NULL)
+    }
+  }) %&gt;% bind_rows()
+  write_tsv(loci,&#39;data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
+}</code></pre>
 </div>
 <div id="get-closest-gene-3" class="section level3">
 <h3>Get closest gene</h3>
-<p>This section of the code is run only once.</p>
-<pre class="r"><code>sumstats_min &lt;- sumstats %&gt;% dplyr::select(chr,variant_id,bp_b37,beta)</code></pre>
-<pre class="r"><code>gwas_snp &lt;- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %&gt;% 
-  separate(GWAS_SNP_pos,into=c(&#39;chr&#39;,&#39;bp_b37&#39;),sep=&#39;:&#39;) %&gt;% 
-  mutate(end=bp_b37) %&gt;% 
-  mutate(bp_b37=as.numeric(bp_b37)) %&gt;% 
-  left_join(.,sumstats_min,by=c(&#39;chr&#39;,&#39;bp_b37&#39;)) %&gt;% 
-  arrange(chr,bp_b37) %&gt;% 
-  write_tsv(.,&#39;data/gwas/scz/scz_GWAS_index_snps.v2.bed&#39;,col_names = FALSE)</code></pre>
-<pre class="bash"><code>cd data/gwas/scz
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/scz/closest.protein.coding.bed&#39;)){
+  sumstats_min &lt;- sumstats %&gt;% dplyr::select(chr,variant_id,bp_b37,beta)
+}</code></pre>
+<pre class="r"><code>if(!file.exists(&#39;data/gwas/scz/closest.protein.coding.bed&#39;)){
+  gwas_snp &lt;- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %&gt;% 
+    separate(GWAS_SNP_pos,into=c(&#39;chr&#39;,&#39;bp_b37&#39;),sep=&#39;:&#39;) %&gt;% 
+    mutate(end=bp_b37) %&gt;% 
+    mutate(bp_b37=as.numeric(bp_b37)) %&gt;% 
+    left_join(.,sumstats_min,by=c(&#39;chr&#39;,&#39;bp_b37&#39;)) %&gt;% 
+    arrange(chr,bp_b37) %&gt;% 
+    write_tsv(.,&#39;data/gwas/scz/scz_GWAS_index_snps.v2.bed&#39;,col_names = FALSE)
+}</code></pre>
+<pre class="bash"><code>source ~/.bashrc
+
+cd data/gwas/scz
 ln -s ../../gencode/gencode.v39lift37.annotation.protein_coding.1_22.bed .
 
 ml bedtools/2.25.0-goolf-1.7.20
@@ -1241,13 +1317,15 @@ loci &lt;- left_join(loci,closest,by=&#39;GWAS_snp_pos&#39;)</code></pre>
 <div id="get-maf-for-each-snp" class="section level1">
 <h1>GET MAF for each SNP</h1>
 <p>This section is run only once</p>
-<pre class="bash"><code>ml PLINK/1.90-goolf-1.7.20
+<pre class="bash"><code>source ~/.bashrc
+
+ml PLINK/1.90-goolf-1.7.20
 cd data_sensitive/genotypes/processed
 plink --bfile ../combined_7 --freq</code></pre>
 </div>
 <div id="get-snp-position-in-hg19---hg38" class="section level1">
 <h1>Get SNP position in hg19 - hg38</h1>
-<p>Use: Match eQTL SNPs with GWAS SNPs (run only once)</p>
+<p>Use: Match eQTL SNPs with GWAS SNPs</p>
 <pre class="r"><code>snp_pos &lt;- data.table::fread(&#39;data_sensitive/genotypes/processed/snp_pos_hg38_hg19.mappings.txt&#39;,data.table = FALSE) %&gt;% as_tibble()</code></pre>
 <p>Code below is run only once</p>
 <pre class="bash"><code>zcat data_sensitive/genotypes/processed/combined_final.vcf.gz | cut -f 1,2,3 | grep -v &#39;^#&#39; &gt; data_sensitive/genotypes/processed/snp_pos_hg38.txt </code></pre>
