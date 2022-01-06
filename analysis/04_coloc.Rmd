@@ -23,6 +23,7 @@ library(data.table)
 library(coloc)
 library(parallel)
 library(GenomicRanges)
+library(rtracklayer)
 ```
 
 ```{r}
@@ -33,7 +34,7 @@ selected_trait <- 'ad'
 
 ## AD Schwartzentruber
 
-```{r}
+```{r,message=FALSE}
 if(selected_trait=='ad'){
 sumstats <- vroom::vroom('data/gwas/ad/GCST90012877_buildGRCh37.tsv') %>% 
   mutate(chr=paste0('chr',chromosome)) %>% 
@@ -149,7 +150,7 @@ bedtools closest -d -wa -a ad_GWAS_index_snps.v2.bed -b gencode.v39lift37.annota
 
 ## PD meta-analysis
 
-```{r}
+```{r,message=FALSE}
 if(selected_trait=='pd'){
 sumstats <- vroom::vroom('data/gwas/pd/ParkinsonMeta_Nalls2014_2019.tbl') %>% 
   dplyr::select(variant_id=MarkerName,p_value=`P-value`,chr,bp_b37=bp,effect_allele=Allele1,other_allele=Allele2,beta=Effect,se=StdErr) %>%
@@ -227,7 +228,7 @@ bedtools closest -d -wa -a pd_GWAS_index_snps.v2.bed -b gencode.v39lift37.annota
 
 # MS GWAS
 
-```{r}
+```{r,message=FALSE}
 if(selected_trait=='ms'){
 sumstats <- vroom::vroom('data/gwas/ms/discovery_metav3.0.meta') %>% 
   mutate(CHR=paste0('chr',CHR)) %>% 
@@ -305,7 +306,7 @@ bedtools closest -d -wa -a ms_GWAS_index_snps.v2.bed -b gencode.v39lift37.annota
 
 # SCZ GWAS
 
-```{r}
+```{r,message=FALSE}
 if(selected_trait=='scz'){
 sumstats <- vroom::vroom('data/gwas/scz/PGC3_SCZ_wave3_public.v2.tsv.gz') %>%
   mutate(CHR=paste0('chr',CHR)) %>% 
@@ -382,7 +383,7 @@ bedtools closest -d -wa -a scz_GWAS_index_snps.v2.bed -b gencode.v39lift37.annot
 
 # Add closest gene to loci
 
-```{r,eval=TRUE}
+```{r,eval=TRUE,message=FALSE}
 closest <- read_tsv(paste0('data/gwas/',selected_trait,'/closest.protein.coding.bed'),col_names = FALSE) %>% 
   setNames(c('chr_snp','start_snp','end_snp','GWAS_snp','beta','chr_gene','start_gene','end_gene','gene','distance')) %>% 
   mutate(GWAS_snp_pos=paste0(chr_snp,':',start_snp)) %>% 
@@ -428,7 +429,6 @@ snp_pos_gr <- makeGRangesFromDataFrame(snp_pos,keep.extra.columns=TRUE)
 ```
 
 ```{r,eval=FALSE}
-library(rtracklayer)
 path = system.file(package="liftOver", "extdata", "hg38ToHg19.over.chain")
 ch = import.chain(path)
 ch
@@ -666,7 +666,7 @@ coloc_results_all <- coloc_results_all %>%
 
 ## Add LOEUF
 
-```{r}
+```{r,message=FALSE}
 loeuf <- read_tsv('data/gnomad_loeuf/supplementary_dataset_11_full_constraint_metrics.tsv') %>% 
   filter(canonical==TRUE) %>% 
   dplyr::select(gene,gene_id,transcript,oe_lof_upper,p) %>% 
