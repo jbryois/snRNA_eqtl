@@ -1,12 +1,12 @@
 ---
 title: "Colocalization analysis"
+site: workflowr::wflow_site
 author: "Julien Bryois"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output:
   workflowr::wflow_html:
-  toc: true
-toc_float: true
-number_sections: false
+   toc: true
+   toc_float: true
 editor_options:
   chunk_output_type: console
 ---
@@ -682,6 +682,6 @@ coloc_results_all <- left_join(coloc_results_all,loeuf,by='ensembl')
 ## Write
 
 ```{r}
-dir.create('output/Coloc',showWarnings = FALSE)
-write_tsv(coloc_results_all,paste0('output/Coloc/coloc.',selected_trait,'.txt'))
+dir.create('output/coloc',showWarnings = FALSE)
+write_tsv(coloc_results_all,paste0('output/coloc/coloc.',selected_trait,'.txt'))
 ```
