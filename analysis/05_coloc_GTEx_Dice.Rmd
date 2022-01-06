@@ -1,12 +1,12 @@
 ---
-title: "Colocalization analysis"
+title: "Colocalization analysis GTEx + Dice"
+site: workflowr::wflow_site
 author: "Julien Bryois"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output:
   workflowr::wflow_html:
-  toc: true
-toc_float: true
-number_sections: false
+   toc: true
+   toc_float: true
 editor_options:
   chunk_output_type: console
 ---
@@ -227,7 +227,7 @@ run_coloc <- function(tissue_sumstats,tissue_name,sumstats_locus,dice=FALSE){
        colnames(coloc_res_pval) <- x
     
     if (dice==TRUE){
-      #If dice dataset, the expression data was not inverse transformed. We will estimate sdY from N and MAF
+      #If dice dataset, the expression data was not inverse normal transformed. We will estimate sdY from N and MAF
       
        coloc_res_pval <- coloc.abf(
        dataset1=list(beta=sumstats_locus_gene$beta,
@@ -258,7 +258,7 @@ run_coloc <- function(tissue_sumstats,tissue_name,sumstats_locus,dice=FALSE){
    
    direction_sign <- sumstats_locus_gene %>% 
      filter(p_eqtl==min(p_eqtl)) %>% #Take SNP with strongest evidence of an effect on gene expression
-     slice_min(n=1,p_value,with_ties=FALSE) %>% 
+     slice_min(n=1,p_value,with_ties=FALSE) %>% #If there are ties, take SNPs with lowest GWAS association (at random of ties).
      summarise(direction=direction,
                beta_gwas=case_when(
                     (effect_allele==A1 & other_allele==A2)  ~ beta,
@@ -274,7 +274,7 @@ run_coloc <- function(tissue_sumstats,tissue_name,sumstats_locus,dice=FALSE){
      as.data.frame()
    colnames(direction_sign) <- x
    
-   # #Add direction of effect to coloc results
+   ## Add direction of effect to coloc results
     coloc_res_pval <- rbind(coloc_res_pval,direction_sign,direction_prop)
 
     return(coloc_res_pval)
@@ -316,8 +316,6 @@ add_meta <- function(d,type_name,set_direction_to_0=FALSE){
 ```{r}
 coloc_results_all <- mclapply(1:nrow(loci),function(i){
   
-  write(i,'coloc_n_genes_done.txt',append = TRUE)
-
   #Get coordinates from the GWAS locus
   chrom_locus <- loci$chrom[i]
   start <- loci$start[i] %>% as.numeric()
@@ -383,10 +381,6 @@ coloc_results_all <- mclapply(1:nrow(loci),function(i){
   
   return(results)
 },mc.cores = 10,mc.preschedule = FALSE)
-```
-
-```{r}
-saveRDS(coloc_results_all,'coloc_gtex_dice.tmp.rds')
 ```
 
 ```{r}
