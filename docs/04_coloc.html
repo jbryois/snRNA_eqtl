@@ -11,18 +11,21 @@
 
 <meta name="author" content="Julien Bryois" />
 
-<meta name="date" content="2021-12-17" />
+<meta name="date" content="2022-01-06" />
 
 <title>Colocalization analysis</title>
 
 <script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<link href="site_libs/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
 <script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
 <script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
 <script src="site_libs/navigation-1.1/tabsets.js"></script>
-<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
 <script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
 
 <link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
@@ -271,9 +274,6 @@ $(document).ready(function () {
 }
 
 @media print {
-#TOC {
-  display: none !important;
-}
 .toc-content {
   /* see https://github.com/w3c/csswg-drafts/issues/4434 */
   float: right;
@@ -320,12 +320,6 @@ div.tocify {
   border-radius: 0px;
 }
 
-.tocify-subheader {
-  display: inline;
-}
-.tocify-subheader .tocify-item {
-  font-size: 0.95em;
-}
 
 </style>
 
@@ -386,7 +380,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Colocalization analysis</h1>
 <h4 class="author">Julien Bryois</h4>
-<h4 class="date">December 17, 2021</h4>
+<h4 class="date">January 06, 2022</h4>
 
 </div>
 
@@ -411,7 +405,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-12-17
+<strong>Last updated:</strong> 2022-01-06
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -502,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong4ad463e"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 4ad463e </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong4c5ae3d"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 4c5ae3d </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong4ad463e" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong4c5ae3d" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 4ad463e. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 4c5ae3d. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -520,29 +514,45 @@ Note that you need to be careful to ensure that all relevant files for the analy
 Ignored files:
     Ignored:    .Rproj.user/
     Ignored:    data_sensitive/
+    Ignored:    mkdir/
+    Ignored:    results/
 
 Untracked files:
+    Untracked:  analysis/06_eqtl_epigenome_enrichment.Rmd
+    Untracked:  analysis/07_GWAS_epigenome_overlap.Rmd
+    Untracked:  analysis/08_prepare_Shiny.Rmd
     Untracked:  analysis/Alternatives/
+    Untracked:  analysis/Portfolio/
     Untracked:  analysis/get_tables.Rmd
     Untracked:  analysis/log_run_slurm_out
     Untracked:  analysis/log_run_slurm_stderr
     Untracked:  analysis/run_slurm.Rscript
     Untracked:  analysis/run_slurm.sbatch
+    Untracked:  data/dice/
+    Untracked:  data/epigenome_enrichment/
     Untracked:  data/gencode/
     Untracked:  data/gnomad_loeuf/
+    Untracked:  data/gtex/
     Untracked:  data/gwas/
+    Untracked:  data/gwas_epigenome_overlap/
     Untracked:  data/magma_interaction_eqtl/
+    Untracked:  data/magma_specific_genes/
     Untracked:  data/metabrain/
-    Untracked:  output/Coloc/
-    Untracked:  output/Figures/
+    Untracked:  data/umap/
+    Untracked:  output/coloc/
     Untracked:  output/eqtl/
     Untracked:  output/eqtl_specific/
+    Untracked:  output/figures/
+    Untracked:  output/gwas_epigenome_overlap/
+    Untracked:  output/shiny/
+    Untracked:  output/tables/
     Untracked:  output_tmp_QTLtools/
 
 Unstaged changes:
     Modified:   .gitignore
     Modified:   analysis/01_process_expression.Rmd
     Modified:   analysis/02_run_eQTL.Rmd
+    Modified:   analysis/05_coloc_GTEx_Dice.Rmd
     Modified:   analysis/_site.yml
     Modified:   analysis/index.Rmd
     Modified:   analysis/plot_figures.Rmd
@@ -585,6 +595,57 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+4c5ae3d
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-06
+</td>
+<td>
+Coloc AD
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+770527b
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-17
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+0be678f
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-17
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1410,8 +1471,8 @@ cols(
 </div>
 <div id="write" class="section level2">
 <h2>Write</h2>
-<pre class="r"><code>dir.create(&#39;output/Coloc&#39;,showWarnings = FALSE)
-write_tsv(coloc_results_all,paste0(&#39;output/Coloc/coloc.&#39;,selected_trait,&#39;.txt&#39;))</code></pre>
+<pre class="r"><code>dir.create(&#39;output/coloc&#39;,showWarnings = FALSE)
+write_tsv(coloc_results_all,paste0(&#39;output/coloc/coloc.&#39;,selected_trait,&#39;.txt&#39;))</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -1536,7 +1597,7 @@ $(document).ready(function ()  {
 
     // establish options
     var options = {
-      selectors: "",
+      selectors: "h1,h2,h3",
       theme: "bootstrap3",
       context: '.toc-content',
       hashGenerator: function (text) {
@@ -1545,8 +1606,8 @@ $(document).ready(function ()  {
       ignoreSelector: ".toc-ignore",
       scrollTo: 0
     };
-    options.showAndHide = false;
-    options.smoothScroll = false;
+    options.showAndHide = true;
+    options.smoothScroll = true;
 
     // tocify
     var toc = $("#TOC").tocify(options).data("toc-tocify");
