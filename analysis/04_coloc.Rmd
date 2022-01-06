@@ -12,7 +12,7 @@ editor_options:
 ---
   
 ```{r setup,include=FALSE}
-knitr::opts_chunk$set(autodep=FALSE, cache=FALSE, cache.lazy=FALSE, dev='png' )
+knitr::opts_chunk$set(engine.opts = list(bash="--login"))
 ```
 
 ## Libraries
@@ -48,99 +48,101 @@ loci <- read_tsv('data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt')
 
 ### Get loci coordinates
 
-This section of the code is run only once.
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt')){
+  #Supplementary table file from Schwartzentruber et al.
+  top_snps <- readxl::read_xlsx('data/gwas/ad/41588_2020_776_MOESM3_ESM.xlsx',sheet=2) %>% 
+    dplyr::select(Chr,SNP,`Lead SNP pos`) %>% dplyr::rename(pos=`Lead SNP pos`) %>% 
+    mutate(bp_37=paste0('chr',Chr,':',pos)) %>% dplyr::select(-Chr) %>% 
+    mutate(SNP=gsub('_.+','',SNP))
 
-Get GWAS top SNPs 
+  #Add novel loci only observed in replication + discovery (not used for their downstream analysis)
+  additional_snps <- readxl::read_xlsx('data/gwas/ad/41588_2020_776_MOESM3_ESM.xlsx',sheet=4,skip=43) %>%
+    dplyr::select(1,2,3) %>% 
+    setNames(c('chr','pos','SNP')) %>% 
+    filter(!is.na(SNP)) %>% 
+    mutate(bp_37=paste0('chr',chr,':',pos)) %>% 
+    dplyr::select(SNP,pos,bp_37)
 
-```{r,eval=FALSE}
-#Supplementary table file from Schwartzentruber et al.
-top_snps <- readxl::read_xlsx('data/gwas/ad/41588_2020_776_MOESM3_ESM.xlsx',sheet=2) %>% 
-  dplyr::select(Chr,SNP,`Lead SNP pos`) %>% dplyr::rename(pos=`Lead SNP pos`) %>% 
-  mutate(bp_37=paste0('chr',Chr,':',pos)) %>% dplyr::select(-Chr) %>% 
-  mutate(SNP=gsub('_.+','',SNP))
-
-#Add novel loci only observed in replication + discovery (not used for their downstream analysis)
-additional_snps <- readxl::read_xlsx('data/gwas/ad/41588_2020_776_MOESM3_ESM.xlsx',sheet=4,skip=43) %>%
-  dplyr::select(1,2,3) %>% 
-  setNames(c('chr','pos','SNP')) %>% 
-  filter(!is.na(SNP)) %>% 
-  mutate(bp_37=paste0('chr',chr,':',pos)) %>% 
-  dplyr::select(SNP,pos,bp_37)
-
-top_snps <- rbind(top_snps,additional_snps)
+  top_snps <- rbind(top_snps,additional_snps)
+}
 ```
 
 Get 1KG LD for the top GWAS SNPs at each loci
 
-```{r,eval=FALSE}
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt')){
 proxy_snps <- lapply(top_snps$SNP,LDlinkR::LDproxy,pop = "EUR", r2d = "r2", token = '72edb9cc22c9', file = FALSE)
-```
-
-```{r,eval=FALSE}
 saveRDS(proxy_snps,'data/gwas/ad/loci_LDlinkR.allSNPs.EUR.rds')
+}
 ```
 
 Define each locus as the most extreme coordinates of SNPs in LD (r2>=0.1) with the index GWAS SNP.
 
-```{r,eval=FALSE}
-loci <- lapply(proxy_snps,function(x){
-  if(nrow(x)>1){
-    x <- filter(x,R2>=0.1) 
-    chr <- x$Coord %>% gsub(':.+','',.) %>% unique()
-    pos <- x$Coord %>% gsub('chr[0-9]{1,2}:','',.) %>% as.numeric()
-    locus_name <- paste0(chr,':',min(pos),'_',max(pos))
-    top_snp_df <- filter(x,Distance==0) 
-    top_snp <- top_snp_df %>% pull(RS_Number)
-    top_snp_pos <- top_snp_df %>% pull(Coord)
-    locus <- tibble(GWAS_snp=top_snp,
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt')){
+  loci <- lapply(proxy_snps,function(x){
+    if(nrow(x)>1){
+      x <- filter(x,R2>=0.1) 
+      chr <- x$Coord %>% gsub(':.+','',.) %>% unique()
+      pos <- x$Coord %>% gsub('chr[0-9]{1,2}:','',.) %>% as.numeric()
+      locus_name <- paste0(chr,':',min(pos),'_',max(pos))
+      top_snp_df <- filter(x,Distance==0) 
+      top_snp <- top_snp_df %>% pull(RS_Number)
+      top_snp_pos <- top_snp_df %>% pull(Coord)
+      locus <- tibble(GWAS_snp=top_snp,
                     GWAS_snp_pos=top_snp_pos,
                     locus_name=locus_name,
                     chrom=chr,
                     start=min(pos),
                     end=max(pos))
-    return(locus)
-  }
-  else{
-    return(NULL)
-  }
-}) %>% 
-  bind_rows() %>% 
-write_tsv(.,'data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt')
+      return(locus)
+   }
+    else{
+      return(NULL)
+    }
+  }) %>% 
+    bind_rows() %>% 
+  write_tsv(.,'data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt')
+}
 ```
 
 ### Get closest gene
 
-This section of the code is run only once.
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/ad/closest.protein.coding.bed')){
+  sumstats_min <- sumstats %>% dplyr::select(chr,variant_id,bp_b37,beta)
 
-```{r,eval=FALSE}
-sumstats_min <- sumstats %>% dplyr::select(chr,variant_id,bp_b37,beta)
+  gwas_snp <- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %>% 
+    separate(GWAS_SNP_pos,into=c('chr','bp_b37'),sep=':') %>% 
+    mutate(end=bp_b37) %>% 
+    mutate(bp_b37=as.numeric(bp_b37)) %>% 
+    left_join(.,sumstats_min,by=c('chr','bp_b37')) %>% 
+    arrange(chr,bp_b37) %>% 
+    write_tsv(.,'data/gwas/ad/ad_GWAS_index_snps.v2.bed',col_names = FALSE)
+}
 ```
 
-```{r,eval=FALSE}
-gwas_snp <- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %>% 
-  separate(GWAS_SNP_pos,into=c('chr','bp_b37'),sep=':') %>% 
-  mutate(end=bp_b37) %>% 
-  mutate(bp_b37=as.numeric(bp_b37)) %>% 
-  left_join(.,sumstats_min,by=c('chr','bp_b37')) %>% 
-  arrange(chr,bp_b37) %>% 
-  write_tsv(.,'data/gwas/ad/ad_GWAS_index_snps.v2.bed',col_names = FALSE)
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/ad/closest.protein.coding.bed')){
+  gtf_b37 <- rtracklayer::import('data/gencode/gencode.v39lift37.annotation.gtf.gz') %>% as.data.frame() %>% as_tibble()
+}
 ```
 
-```{r,eval=FALSE}
-gtf_b37 <- rtracklayer::import('data/gencode/gencode.v39lift37.annotation.gtf.gz') %>% as.data.frame() %>% as_tibble()
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/ad/closest.protein.coding.bed')){
+  protein_coding <- filter(gtf_b37,type=='gene',gene_type=='protein_coding') %>% 
+    mutate(gene_label=paste0(gene_name,'_',gsub('\\..+','',gene_id))) %>% 
+    dplyr::select(seqnames,start,end,gene_label) %>% 
+    filter(seqnames %in% paste0('chr',1:22)) %>% 
+    mutate(seqnames=as.character(seqnames)) %>% 
+    arrange(seqnames,start) %>% 
+    write_tsv('data/gencode/gencode.v39lift37.annotation.protein_coding.1_22.bed',col_names = FALSE)
+}
 ```
 
-```{r,eval=FALSE}
-protein_coding <- filter(gtf_b37,type=='gene',gene_type=='protein_coding') %>% 
-  mutate(gene_label=paste0(gene_name,'_',gsub('\\..+','',gene_id))) %>% 
-  dplyr::select(seqnames,start,end,gene_label) %>% 
-  filter(seqnames %in% paste0('chr',1:22)) %>% 
-  mutate(seqnames=as.character(seqnames)) %>% 
-  arrange(seqnames,start) %>% 
-  write_tsv('data/gencode/gencode.v39lift37.annotation.protein_coding.1_22.bed',col_names = FALSE)
-```
-
-```{bash,eval=FALSE}
+```{bash,eval=FALSE,results=FALSE}
+source ~/.bashrc
 cd data/gwas/ad
 ln -s ../../gencode/gencode.v39lift37.annotation.protein_coding.1_22.bed .
 
@@ -164,61 +166,66 @@ loci <- read_tsv('data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt')
 
 ### Get loci coordinates
 
-This section of the code is run only once.
-
-Get GWAS top SNPs 
-
-```{r,eval=FALSE}
-top_snps <- readxl::read_xlsx('data/gwas/pd/Table S2. Detailed summary statistics on all nominated risk variants, known and novel_.xlsx') %>% filter(!is.na(`Locus Number`),`Locus Number`!='NA')
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt')){
+  top_snps <- readxl::read_xlsx('data/gwas/pd/Table S2. Detailed summary statistics on all nominated risk variants, known and novel_.xlsx') %>%
+    filter(!is.na(`Locus Number`),`Locus Number`!='NA')
+}
 ```
 
-```{r,eval=FALSE}
-proxy_snps <- lapply(top_snps$SNP,LDlinkR::LDproxy,pop = "EUR", r2d = "r2", token = '72edb9cc22c9', file = FALSE)
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt')){
+  proxy_snps <- lapply(top_snps$SNP,LDlinkR::LDproxy,pop = "EUR", r2d = "r2", token = '72edb9cc22c9', file = FALSE)
+  saveRDS(proxy_snps,'data/gwas/pd/loci_LDlinkR.allSNPs.EUR.rds')
+}
 ```
 
-```{r,eval=FALSE}
-saveRDS(proxy_snps,'data/gwas/pd/loci_LDlinkR.allSNPs.EUR.rds')
-```
-
-```{r,eval=FALSE}
-loci <- lapply(proxy_snps,function(x){
-  if(nrow(x)>1){
-    x <- filter(x,R2>=0.1) 
-    chr <- x$Coord %>% gsub(':.+','',.) %>% unique()
-    pos <- x$Coord %>% gsub('chr[0-9]{1,2}:','',.) %>% as.numeric()
-    locus_name <- paste0(chr,':',min(pos),'_',max(pos))
-    top_snp_df <- filter(x,Distance==0) 
-    top_snp <- top_snp_df %>% pull(RS_Number)
-    top_snp_pos <- top_snp_df %>% pull(Coord)
-    locus <- tibble(GWAS_snp=top_snp,GWAS_snp_pos=top_snp_pos,locus_name=locus_name,chrom=chr,start=min(pos),end=max(pos))
-    return(locus)
-  }
-  else{
-    return(NULL)
-  }
-}) %>% bind_rows()
-write_tsv(loci,'data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt')
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt')){
+  loci <- lapply(proxy_snps,function(x){
+    if(nrow(x)>1){
+      x <- filter(x,R2>=0.1) 
+      chr <- x$Coord %>% gsub(':.+','',.) %>% unique()
+      pos <- x$Coord %>% gsub('chr[0-9]{1,2}:','',.) %>% as.numeric()
+      locus_name <- paste0(chr,':',min(pos),'_',max(pos))
+      top_snp_df <- filter(x,Distance==0) 
+      top_snp <- top_snp_df %>% pull(RS_Number)
+      top_snp_pos <- top_snp_df %>% pull(Coord)
+      locus <- tibble(GWAS_snp=top_snp,GWAS_snp_pos=top_snp_pos,locus_name=locus_name,chrom=chr,start=min(pos),end=max(pos))
+      return(locus)
+    }
+    else{
+      return(NULL)
+    }
+  }) %>% 
+    bind_rows()
+  write_tsv(loci,'data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt')
+}
 ```
 
 ### Get closest gene
 
-This section of the code is run only once.
-
-```{r,eval=FALSE}
-sumstats_min <- sumstats %>% dplyr::select(chr,variant_id,bp_b37,beta)
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/pd/closest.protein.coding.bed')){
+  sumstats_min <- sumstats %>% dplyr::select(chr,variant_id,bp_b37,beta)
+}
 ```
 
-```{r,eval=FALSE}
-gwas_snp <- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %>% 
-  separate(GWAS_SNP_pos,into=c('chr','bp_b37'),sep=':') %>% 
-  mutate(end=bp_b37) %>% 
-  mutate(bp_b37=as.numeric(bp_b37)) %>% 
-  left_join(.,sumstats_min,by=c('chr','bp_b37')) %>% 
-  arrange(chr,bp_b37) %>% 
-  write_tsv(.,'data/gwas/pd/pd_GWAS_index_snps.v2.bed',col_names = FALSE)
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/pd/closest.protein.coding.bed')){
+  gwas_snp <- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %>% 
+    separate(GWAS_SNP_pos,into=c('chr','bp_b37'),sep=':') %>% 
+    mutate(end=bp_b37) %>% 
+    mutate(bp_b37=as.numeric(bp_b37)) %>% 
+    left_join(.,sumstats_min,by=c('chr','bp_b37')) %>% 
+    arrange(chr,bp_b37) %>% 
+    write_tsv(.,'data/gwas/pd/pd_GWAS_index_snps.v2.bed',col_names = FALSE)
+}
 ```
 
 ```{bash,eval=FALSE}
+source ~/.bashrc
+
 cd data/gwas/pd
 ln -s ../../gencode/gencode.v39lift37.annotation.protein_coding.1_22.bed .
 
@@ -245,58 +252,64 @@ loci <- read_tsv('data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt')
 
 ### Get loci coordinates
 
-This section of the code is run only once.
-
-Get GWAS top SNPs 
-
-```{r,eval=FALSE}
-loci <- readxl::read_xlsx('data/gwas/ms/aav7188_Patsopoulos_Tables S1-S10.xlsx',sheet=8,skip=3)
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt')){
+  loci <- readxl::read_xlsx('data/gwas/ms/aav7188_Patsopoulos_Tables S1-S10.xlsx',sheet=8,skip=3)
+}
 ```
 
-```{r,eval=FALSE}
-proxy_snps <- lapply(loci$SNP,LDlinkR::LDproxy,pop = "EUR", r2d = "r2", token = '72edb9cc22c9', file = FALSE)
-saveRDS(proxy_snps,'data/gwas/ms/loci_LDlinkR.allSNPs.EUR.rds')
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt')){
+  proxy_snps <- lapply(loci$SNP,LDlinkR::LDproxy,pop = "EUR", r2d = "r2", token = '72edb9cc22c9', file = FALSE)
+  saveRDS(proxy_snps,'data/gwas/ms/loci_LDlinkR.allSNPs.EUR.rds')
+}
 ```
 
-```{r,eval=FALSE}
-loci <- lapply(proxy_snps,function(x){
-  if(nrow(x)>1){
-    x <- filter(x,R2>=0.1) 
-    chr <- x$Coord %>% gsub(':.+','',.) %>% unique()
-    pos <- x$Coord %>% gsub('chr[0-9]{1,2}:','',.) %>% as.numeric()
-    locus_name <- paste0(chr,':',min(pos),'_',max(pos))
-    top_snp_df <- filter(x,Distance==0) 
-    top_snp <- top_snp_df %>% pull(RS_Number)
-    top_snp_pos <- top_snp_df %>% pull(Coord)
-    locus <- tibble(GWAS_snp=top_snp,GWAS_snp_pos=top_snp_pos,locus_name=locus_name,chrom=chr,start=min(pos),end=max(pos))
-    return(locus)
-  }
-  else{
-    return(NULL)
-  }
-}) %>% bind_rows()
-write_tsv(loci,'data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt')
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt')){
+  loci <- lapply(proxy_snps,function(x){
+    if(nrow(x)>1){
+      x <- filter(x,R2>=0.1) 
+      chr <- x$Coord %>% gsub(':.+','',.) %>% unique()
+      pos <- x$Coord %>% gsub('chr[0-9]{1,2}:','',.) %>% as.numeric()
+      locus_name <- paste0(chr,':',min(pos),'_',max(pos))
+      top_snp_df <- filter(x,Distance==0) 
+      top_snp <- top_snp_df %>% pull(RS_Number)
+      top_snp_pos <- top_snp_df %>% pull(Coord)
+      locus <- tibble(GWAS_snp=top_snp,GWAS_snp_pos=top_snp_pos,locus_name=locus_name,chrom=chr,start=min(pos),end=max(pos))
+      return(locus)
+    }
+    else{
+      return(NULL)
+    }
+  }) %>% bind_rows()
+  write_tsv(loci,'data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt')
+}
 ```
 
 ### Get closest gene
 
-This section of the code is run only once.
-
-```{r,eval=FALSE}
-sumstats_min <- sumstats %>% dplyr::select(chr,variant_id,bp_b37,beta)
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/ms/closest.protein.coding.bed')){
+  sumstats_min <- sumstats %>% dplyr::select(chr,variant_id,bp_b37,beta)
+}
 ```
 
-```{r,eval=FALSE}
-gwas_snp <- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %>% 
-  separate(GWAS_SNP_pos,into=c('chr','bp_b37'),sep=':') %>% 
-  mutate(end=bp_b37) %>% 
-  mutate(bp_b37=as.numeric(bp_b37)) %>% 
-  left_join(.,sumstats_min,by=c('chr','bp_b37')) %>% 
-  arrange(chr,bp_b37) %>% 
-  write_tsv(.,'data/gwas/ms/ms_GWAS_index_snps.v2.bed',col_names = FALSE)
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/ms/closest.protein.coding.bed')){
+  gwas_snp <- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %>% 
+    separate(GWAS_SNP_pos,into=c('chr','bp_b37'),sep=':') %>% 
+    mutate(end=bp_b37) %>% 
+    mutate(bp_b37=as.numeric(bp_b37)) %>% 
+    left_join(.,sumstats_min,by=c('chr','bp_b37')) %>% 
+    arrange(chr,bp_b37) %>% 
+    write_tsv(.,'data/gwas/ms/ms_GWAS_index_snps.v2.bed',col_names = FALSE)
+}
 ```
 
 ```{bash,eval=FALSE}
+source ~/.bashrc
+
 cd data/gwas/ms
 ln -s ../../gencode/gencode.v39lift37.annotation.protein_coding.1_22.bed .
 
@@ -322,58 +335,66 @@ loci <- read_tsv('data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt')
 
 ### Get loci coordinates
 
-This section of the code is run only once.
-
-Get GWAS top SNPs 
-
-```{r,eval=FALSE}
-loci <- readxl::read_xlsx('data/gwas/scz/Supplementary Table 2 - Replication index.xlsx',sheet=2) %>% filter(`P-comb`<5e-8) %>% mutate(locus=paste0('chr',CHR,':',left,'-',right)) %>% dplyr::rename(locus_name=locus) %>% mutate(start=BP,end=BP) %>% mutate(GWAS_snp=SNP,GWAS_snp_pos=paste0('chr',CHR,':',BP))
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt')){
+  loci <- readxl::read_xlsx('data/gwas/scz/Supplementary Table 2 - Replication index.xlsx',sheet=2) %>% filter(`P-comb`<5e-8) %>%  
+    mutate(locus=paste0('chr',CHR,':',left,'-',right)) %>% dplyr::rename(locus_name=locus) %>% mutate(start=BP,end=BP) %>%  
+    mutate(GWAS_snp=SNP,GWAS_snp_pos=paste0('chr',CHR,':',BP))
+}
 ```
 
-```{r,eval=FALSE}
-proxy_snps <- lapply(loci$GWAS_snp_pos,LDlinkR::LDproxy,pop = "EUR", r2d = "r2", token = '72edb9cc22c9', file = FALSE)
-saveRDS(proxy_snps,'data/gwas/scz/loci_LDlinkR.allSNPs.EUR.rds')
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt')){
+  proxy_snps <- lapply(loci$GWAS_snp_pos,LDlinkR::LDproxy,pop = "EUR", r2d = "r2", token = '72edb9cc22c9', file = FALSE)
+  saveRDS(proxy_snps,'data/gwas/scz/loci_LDlinkR.allSNPs.EUR.rds')
+}
 ```
 
-```{r,eval=FALSE}
-loci <- lapply(proxy_snps,function(x){
-  if(nrow(x)>1){
-    x <- filter(x,R2>=0.1) 
-    chr <- x$Coord %>% gsub(':.+','',.) %>% unique()
-    pos <- x$Coord %>% gsub('chr[0-9]{1,2}:','',.) %>% as.numeric()
-    locus_name <- paste0(chr,':',min(pos),'_',max(pos))
-    top_snp_df <- filter(x,Distance==0) 
-    top_snp <- top_snp_df %>% pull(RS_Number)
-    top_snp_pos <- top_snp_df %>% pull(Coord)
-    locus <- tibble(GWAS_snp=top_snp,GWAS_snp_pos=top_snp_pos,locus_name=locus_name,chrom=chr,start=min(pos),end=max(pos))
-    return(locus)
-  }
-  else{
-    return(NULL)
-  }
-}) %>% bind_rows()
-write_tsv(loci,'data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt')
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt')){
+  loci <- lapply(proxy_snps,function(x){
+    if(nrow(x)>1){
+      x <- filter(x,R2>=0.1) 
+      chr <- x$Coord %>% gsub(':.+','',.) %>% unique()
+      pos <- x$Coord %>% gsub('chr[0-9]{1,2}:','',.) %>% as.numeric()
+      locus_name <- paste0(chr,':',min(pos),'_',max(pos))
+      top_snp_df <- filter(x,Distance==0) 
+      top_snp <- top_snp_df %>% pull(RS_Number)
+      top_snp_pos <- top_snp_df %>% pull(Coord)
+      locus <- tibble(GWAS_snp=top_snp,GWAS_snp_pos=top_snp_pos,locus_name=locus_name,chrom=chr,start=min(pos),end=max(pos))
+      return(locus)
+    }
+    else{
+      return(NULL)
+    }
+  }) %>% bind_rows()
+  write_tsv(loci,'data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt')
+}
 ```
 
 ### Get closest gene
 
-This section of the code is run only once.
-
-```{r,eval=FALSE}
-sumstats_min <- sumstats %>% dplyr::select(chr,variant_id,bp_b37,beta)
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/scz/closest.protein.coding.bed')){
+  sumstats_min <- sumstats %>% dplyr::select(chr,variant_id,bp_b37,beta)
+}
 ```
 
-```{r,eval=FALSE}
-gwas_snp <- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %>% 
-  separate(GWAS_SNP_pos,into=c('chr','bp_b37'),sep=':') %>% 
-  mutate(end=bp_b37) %>% 
-  mutate(bp_b37=as.numeric(bp_b37)) %>% 
-  left_join(.,sumstats_min,by=c('chr','bp_b37')) %>% 
-  arrange(chr,bp_b37) %>% 
-  write_tsv(.,'data/gwas/scz/scz_GWAS_index_snps.v2.bed',col_names = FALSE)
+```{r,eval=TRUE}
+if(!file.exists('data/gwas/scz/closest.protein.coding.bed')){
+  gwas_snp <- tibble(GWAS_SNP_pos=unique(loci$GWAS_snp_pos)) %>% 
+    separate(GWAS_SNP_pos,into=c('chr','bp_b37'),sep=':') %>% 
+    mutate(end=bp_b37) %>% 
+    mutate(bp_b37=as.numeric(bp_b37)) %>% 
+    left_join(.,sumstats_min,by=c('chr','bp_b37')) %>% 
+    arrange(chr,bp_b37) %>% 
+    write_tsv(.,'data/gwas/scz/scz_GWAS_index_snps.v2.bed',col_names = FALSE)
+}
 ```
 
 ```{bash,eval=FALSE}
+source ~/.bashrc
+
 cd data/gwas/scz
 ln -s ../../gencode/gencode.v39lift37.annotation.protein_coding.1_22.bed .
 
@@ -403,6 +424,8 @@ loci <- left_join(loci,closest,by='GWAS_snp_pos')
 This section is run only once 
 
 ```{bash,eval=FALSE}
+source ~/.bashrc
+
 ml PLINK/1.90-goolf-1.7.20
 cd data_sensitive/genotypes/processed
 plink --bfile ../combined_7 --freq
@@ -410,7 +433,7 @@ plink --bfile ../combined_7 --freq
 
 # Get SNP position in hg19 - hg38
 
-Use: Match eQTL SNPs with GWAS SNPs (run only once)
+Use: Match eQTL SNPs with GWAS SNPs
 
 ```{r,eval=TRUE}
 snp_pos <- data.table::fread('data_sensitive/genotypes/processed/snp_pos_hg38_hg19.mappings.txt',data.table = FALSE) %>% as_tibble()
