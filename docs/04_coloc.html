@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong4c5ae3d"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 4c5ae3d </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong0209d6a"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 0209d6a </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong4c5ae3d" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong0209d6a" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 4c5ae3d. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 0209d6a. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -595,6 +595,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+0209d6a
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-06
+</td>
+<td>
+Coloc AD
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+820efe7
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-06
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -931,7 +965,8 @@ Coloc MS
 library(data.table)
 library(coloc)
 library(parallel)
-library(GenomicRanges)</code></pre>
+library(GenomicRanges)
+library(rtracklayer)</code></pre>
 <pre class="r"><code>selected_trait &lt;- &#39;ad&#39;</code></pre>
 </div>
 <div id="process-gwas" class="section level1">
@@ -947,23 +982,6 @@ sumstats &lt;- vroom::vroom(&#39;data/gwas/ad/GCST90012877_buildGRCh37.tsv&#39;)
 
 loci &lt;- read_tsv(&#39;data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
 }</code></pre>
-<pre><code>Rows: 10,687,077
-Columns: 20
-Delimiter: &quot;\t&quot;
-chr [ 5]: variant_id, effect_allele, other_allele, SNP_ID, DIRECT
-dbl [15]: p_value, chromosome, base_pair_location, effect_allele_frequency, beta, standard...
-
-Use `spec()` to retrieve the guessed column specification
-Pass a specification to the `col_types` argument to quiet this message</code></pre>
-<pre><code>Parsed with column specification:
-cols(
-  GWAS_snp = col_character(),
-  GWAS_snp_pos = col_character(),
-  locus_name = col_character(),
-  chrom = col_character(),
-  start = col_double(),
-  end = col_double()
-)</code></pre>
 <div id="get-loci-coordinates" class="section level3">
 <h3>Get loci coordinates</h3>
 <p>This section of the code is run only once.</p>
@@ -1217,21 +1235,8 @@ bedtools closest -d -wa -a scz_GWAS_index_snps.v2.bed -b gencode.v39lift37.annot
   mutate(locus_name_gene=ifelse(n==1,symbol,paste0(symbol,collapse=&#39; - &#39;))) %&gt;% 
   ungroup() %&gt;% 
   dplyr::select(GWAS_snp_pos,locus_name_gene,beta_top_GWAS=beta) %&gt;% 
-  unique() %&gt;% arrange(-abs(beta_top_GWAS))</code></pre>
-<pre><code>Parsed with column specification:
-cols(
-  X1 = col_character(),
-  X2 = col_double(),
-  X3 = col_double(),
-  X4 = col_character(),
-  X5 = col_double(),
-  X6 = col_character(),
-  X7 = col_double(),
-  X8 = col_double(),
-  X9 = col_character(),
-  X10 = col_double()
-)</code></pre>
-<pre class="r"><code>loci &lt;- left_join(loci,closest,by=&#39;GWAS_snp_pos&#39;)</code></pre>
+  unique() %&gt;% arrange(-abs(beta_top_GWAS))
+loci &lt;- left_join(loci,closest,by=&#39;GWAS_snp_pos&#39;)</code></pre>
 </div>
 <div id="get-maf-for-each-snp" class="section level1">
 <h1>GET MAF for each SNP</h1>
@@ -1249,8 +1254,7 @@ plink --bfile ../combined_7 --freq</code></pre>
 <pre class="r"><code>snp_pos &lt;- data.table::fread(&#39;data_sensitive/genotypes/processed/snp_pos_hg38.txt&#39;,data.table = F) %&gt;% mutate(end=V2) %&gt;% 
   setNames(c(&#39;chr&#39;,&#39;start&#39;,&#39;SNP_id&#39;,&#39;end&#39;))
 snp_pos_gr &lt;- makeGRangesFromDataFrame(snp_pos,keep.extra.columns=TRUE)</code></pre>
-<pre class="r"><code>library(rtracklayer)
-path = system.file(package=&quot;liftOver&quot;, &quot;extdata&quot;, &quot;hg38ToHg19.over.chain&quot;)
+<pre class="r"><code>path = system.file(package=&quot;liftOver&quot;, &quot;extdata&quot;, &quot;hg38ToHg19.over.chain&quot;)
 ch = import.chain(path)
 ch</code></pre>
 <pre class="r"><code>seqlevelsStyle(snp_pos_gr) = &quot;UCSC&quot;  # necessary
@@ -1453,20 +1457,6 @@ run_coloc &lt;- function(tissue_sumstats,tissue_name,sumstats_locus){
   mutate(oe_lof_upper_bin = ntile(oe_lof_upper, 10)) %&gt;% 
   dplyr::rename(ensembl=gene_id,symbol=gene) %&gt;% 
   dplyr::select(ensembl,oe_lof_upper_bin)</code></pre>
-<pre><code>Parsed with column specification:
-cols(
-  .default = col_double(),
-  gene = col_character(),
-  transcript = col_character(),
-  canonical = col_logical(),
-  constraint_flag = col_character(),
-  transcript_type = col_character(),
-  gene_id = col_character(),
-  gene_type = col_character(),
-  brain_expression = col_logical(),
-  chromosome = col_character()
-)</code></pre>
-<pre><code>See spec(...) for full column specifications.</code></pre>
 <pre class="r"><code>coloc_results_all &lt;- left_join(coloc_results_all,loeuf,by=&#39;ensembl&#39;)</code></pre>
 </div>
 <div id="write" class="section level2">
@@ -1501,40 +1491,57 @@ attached base packages:
 [8] methods   base     
 
 other attached packages:
- [1] GenomicRanges_1.40.0 GenomeInfoDb_1.24.0  IRanges_2.22.2      
- [4] S4Vectors_0.26.1     BiocGenerics_0.34.0  coloc_5.1.0         
- [7] data.table_1.12.8    forcats_0.5.0        stringr_1.4.0       
-[10] dplyr_1.0.0          purrr_0.3.4          readr_1.3.1         
-[13] tidyr_1.1.0          tibble_3.0.1         ggplot2_3.3.3       
-[16] tidyverse_1.3.0     
+ [1] rtracklayer_1.48.0   GenomicRanges_1.40.0 GenomeInfoDb_1.24.0 
+ [4] IRanges_2.22.2       S4Vectors_0.26.1     BiocGenerics_0.34.0 
+ [7] coloc_5.1.0          data.table_1.12.8    forcats_0.5.0       
+[10] stringr_1.4.0        dplyr_1.0.0          purrr_0.3.4         
+[13] readr_1.3.1          tidyr_1.1.0          tibble_3.0.1        
+[16] ggplot2_3.3.3        tidyverse_1.3.0     
 
 loaded via a namespace (and not attached):
- [1] nlme_3.1-148           bitops_1.0-6           fs_1.4.1              
- [4] lubridate_1.7.9        bit64_0.9-7            httr_1.4.1            
- [7] rprojroot_1.3-2        tools_4.0.1            backports_1.1.7       
-[10] R6_2.4.1               irlba_2.3.3            DBI_1.1.0             
-[13] colorspace_1.4-1       withr_2.2.0            tidyselect_1.1.0      
-[16] gridExtra_2.3          bit_1.1-15.2           compiler_4.0.1        
-[19] git2r_0.27.1           cli_2.0.2              rvest_0.3.5           
-[22] xml2_1.3.2             scales_1.1.1           mixsqp_0.3-43         
-[25] digest_0.6.25          rmarkdown_2.2          XVector_0.28.0        
-[28] pkgconfig_2.0.3        htmltools_0.5.1.1      dbplyr_1.4.4          
-[31] rlang_0.4.10           readxl_1.3.1           susieR_0.11.42        
-[34] rstudioapi_0.11        generics_0.0.2         jsonlite_1.6.1        
-[37] vroom_1.3.2            RCurl_1.98-1.2         magrittr_1.5          
-[40] GenomeInfoDbData_1.2.3 Matrix_1.2-18          Rcpp_1.0.6            
-[43] munsell_0.5.0          fansi_0.4.1            viridis_0.5.1         
-[46] lifecycle_0.2.0        stringi_1.4.6          whisker_0.4           
-[49] yaml_2.2.1             zlibbioc_1.34.0        plyr_1.8.6            
-[52] grid_4.0.1             blob_1.2.1             promises_1.1.1        
-[55] crayon_1.3.4           lattice_0.20-41        haven_2.3.1           
-[58] hms_0.5.3              knitr_1.28             pillar_1.4.4          
-[61] reprex_0.3.0           glue_1.4.1             evaluate_0.14         
-[64] modelr_0.1.8           vctrs_0.3.1            httpuv_1.5.4          
-[67] cellranger_1.1.0       gtable_0.3.0           reshape_0.8.8         
-[70] assertthat_0.2.1       xfun_0.14              broom_0.5.6           
-[73] later_1.1.0.1          viridisLite_0.3.0      workflowr_1.6.2       
-[76] ellipsis_0.3.1        </code></pre>
+ [1] nlme_3.1-148                matrixStats_0.56.0         
+ [3] bitops_1.0-6                fs_1.4.1                   
+ [5] bit64_0.9-7                 lubridate_1.7.9            
+ [7] httr_1.4.1                  rprojroot_1.3-2            
+ [9] tools_4.0.1                 backports_1.1.7            
+[11] R6_2.4.1                    irlba_2.3.3                
+[13] DBI_1.1.0                   colorspace_1.4-1           
+[15] withr_2.2.0                 tidyselect_1.1.0           
+[17] gridExtra_2.3               bit_1.1-15.2               
+[19] compiler_4.0.1              git2r_0.27.1               
+[21] Biobase_2.48.0              cli_2.0.2                  
+[23] rvest_0.3.5                 xml2_1.3.2                 
+[25] DelayedArray_0.14.0         scales_1.1.1               
+[27] mixsqp_0.3-43               Rsamtools_2.4.0            
+[29] digest_0.6.25               rmarkdown_2.2              
+[31] XVector_0.28.0              pkgconfig_2.0.3            
+[33] htmltools_0.5.1.1           dbplyr_1.4.4               
+[35] rlang_0.4.10                readxl_1.3.1               
+[37] susieR_0.11.42              rstudioapi_0.11            
+[39] generics_0.0.2              jsonlite_1.6.1             
+[41] vroom_1.3.2                 BiocParallel_1.22.0        
+[43] RCurl_1.98-1.2              magrittr_1.5               
+[45] GenomeInfoDbData_1.2.3      Matrix_1.2-18              
+[47] Rcpp_1.0.6                  munsell_0.5.0              
+[49] fansi_0.4.1                 viridis_0.5.1              
+[51] lifecycle_0.2.0             stringi_1.4.6              
+[53] whisker_0.4                 yaml_2.2.1                 
+[55] SummarizedExperiment_1.18.1 zlibbioc_1.34.0            
+[57] plyr_1.8.6                  grid_4.0.1                 
+[59] blob_1.2.1                  promises_1.1.1             
+[61] crayon_1.3.4                lattice_0.20-41            
+[63] Biostrings_2.56.0           haven_2.3.1                
+[65] hms_0.5.3                   knitr_1.28                 
+[67] pillar_1.4.4                reprex_0.3.0               
+[69] XML_3.99-0.3                glue_1.4.1                 
+[71] evaluate_0.14               modelr_0.1.8               
+[73] vctrs_0.3.1                 httpuv_1.5.4               
+[75] cellranger_1.1.0            gtable_0.3.0               
+[77] reshape_0.8.8               assertthat_0.2.1           
+[79] xfun_0.14                   broom_0.5.6                
+[81] later_1.1.0.1               viridisLite_0.3.0          
+[83] GenomicAlignments_1.24.0    workflowr_1.6.2            
+[85] ellipsis_0.3.1             </code></pre>
 </div>
 </div>
 </div>
