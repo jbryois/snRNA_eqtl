@@ -56,7 +56,8 @@ if(!file.exists('data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt')){
     mutate(bp_37=paste0('chr',Chr,':',pos)) %>% dplyr::select(-Chr) %>% 
     mutate(SNP=gsub('_.+','',SNP))
 
-  #Add novel loci only observed in replication + discovery (not used for their downstream analysis)
+  #Add novel loci only observed in replication 
+  #+ discovery (not used for their downstream analysis)
   additional_snps <- readxl::read_xlsx('data/gwas/ad/41588_2020_776_MOESM3_ESM.xlsx',sheet=4,skip=43) %>%
     dplyr::select(1,2,3) %>% 
     setNames(c('chr','pos','SNP')) %>% 
@@ -72,7 +73,8 @@ Get 1KG LD for the top GWAS SNPs at each loci
 
 ```{r,eval=TRUE}
 if(!file.exists('data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt')){
-proxy_snps <- lapply(top_snps$SNP,LDlinkR::LDproxy,pop = "EUR", r2d = "r2", token = '72edb9cc22c9', file = FALSE)
+proxy_snps <- lapply(top_snps$SNP,LDlinkR::LDproxy,pop = "EUR", r2d = "r2", 
+                     token = '72edb9cc22c9', file = FALSE)
 saveRDS(proxy_snps,'data/gwas/ad/loci_LDlinkR.allSNPs.EUR.rds')
 }
 ```
@@ -125,7 +127,9 @@ if(!file.exists('data/gwas/ad/closest.protein.coding.bed')){
 
 ```{r,eval=TRUE}
 if(!file.exists('data/gwas/ad/closest.protein.coding.bed')){
-  gtf_b37 <- rtracklayer::import('data/gencode/gencode.v39lift37.annotation.gtf.gz') %>% as.data.frame() %>% as_tibble()
+  gtf_b37 <- rtracklayer::import('data/gencode/gencode.v39lift37.annotation.gtf.gz') %>% 
+    as.data.frame() %>% 
+    as_tibble()
 }
 ```
 
@@ -575,7 +579,8 @@ run_coloc <- function(tissue_sumstats,tissue_name,sumstats_locus){
    rownames(direction_prop) <- 'prop_pos_direction'
    
    direction_sign <- sumstats_locus_gene %>% 
-     filter(p_eqtl==min(p_eqtl)) %>% #Take SNP with strongest evidence of an effect on gene expression
+     #Take SNP with strongest evidence of an effect on gene expression
+     filter(p_eqtl==min(p_eqtl)) %>% 
      slice_min(n=1,p_value,with_ties=FALSE) %>% 
      summarise(direction=direction,
                beta_gwas=case_when(
@@ -592,7 +597,7 @@ run_coloc <- function(tissue_sumstats,tissue_name,sumstats_locus){
      as.data.frame()
    colnames(direction_sign) <- x
    
-   # #Add direction of effect to coloc results
+    #Add direction of effect to coloc results
     coloc_res_pval <- rbind(coloc_res_pval,direction_sign,direction_prop)
 
     return(coloc_res_pval)
