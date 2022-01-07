@@ -11,7 +11,7 @@
 
 <meta name="author" content="Julien Bryois" />
 
-<meta name="date" content="2022-01-06" />
+<meta name="date" content="2022-01-07" />
 
 <title>Colocalization analysis</title>
 
@@ -380,7 +380,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Colocalization analysis</h1>
 <h4 class="author">Julien Bryois</h4>
-<h4 class="date">January 06, 2022</h4>
+<h4 class="date">January 07, 2022</h4>
 
 </div>
 
@@ -405,7 +405,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2022-01-06
+<strong>Last updated:</strong> 2022-01-07
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong3c17a76"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 3c17a76 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong22fe629"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 22fe629 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong3c17a76" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong22fe629" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 3c17a76. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 22fe629. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -514,10 +514,10 @@ Note that you need to be careful to ensure that all relevant files for the analy
 Ignored files:
     Ignored:    .Rproj.user/
     Ignored:    data_sensitive/
-    Ignored:    mkdir/
     Ignored:    results/
 
 Untracked files:
+    Untracked:  analysis/._index.Rmd
     Untracked:  analysis/06_eqtl_epigenome_enrichment.Rmd
     Untracked:  analysis/07_GWAS_epigenome_overlap.Rmd
     Untracked:  analysis/08_prepare_Shiny.Rmd
@@ -552,6 +552,7 @@ Unstaged changes:
     Modified:   .gitignore
     Modified:   analysis/01_process_expression.Rmd
     Modified:   analysis/02_run_eQTL.Rmd
+    Modified:   analysis/03_cell_type_specific_eQTL.Rmd
     Modified:   analysis/05_coloc_GTEx_Dice.Rmd
     Modified:   analysis/_site.yml
     Modified:   analysis/index.Rmd
@@ -595,6 +596,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+22fe629
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-07
+</td>
+<td>
+Coloc AD
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+5878783
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-06
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1025,7 +1060,8 @@ loci &lt;- read_tsv(&#39;data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
     mutate(bp_37=paste0(&#39;chr&#39;,Chr,&#39;:&#39;,pos)) %&gt;% dplyr::select(-Chr) %&gt;% 
     mutate(SNP=gsub(&#39;_.+&#39;,&#39;&#39;,SNP))
 
-  #Add novel loci only observed in replication + discovery (not used for their downstream analysis)
+  #Add novel loci only observed in replication 
+  #+ discovery (not used for their downstream analysis)
   additional_snps &lt;- readxl::read_xlsx(&#39;data/gwas/ad/41588_2020_776_MOESM3_ESM.xlsx&#39;,sheet=4,skip=43) %&gt;%
     dplyr::select(1,2,3) %&gt;% 
     setNames(c(&#39;chr&#39;,&#39;pos&#39;,&#39;SNP&#39;)) %&gt;% 
@@ -1037,7 +1073,8 @@ loci &lt;- read_tsv(&#39;data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
 }</code></pre>
 <p>Get 1KG LD for the top GWAS SNPs at each loci</p>
 <pre class="r"><code>if(!file.exists(&#39;data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt&#39;)){
-proxy_snps &lt;- lapply(top_snps$SNP,LDlinkR::LDproxy,pop = &quot;EUR&quot;, r2d = &quot;r2&quot;, token = &#39;72edb9cc22c9&#39;, file = FALSE)
+proxy_snps &lt;- lapply(top_snps$SNP,LDlinkR::LDproxy,pop = &quot;EUR&quot;, r2d = &quot;r2&quot;, 
+                     token = &#39;72edb9cc22c9&#39;, file = FALSE)
 saveRDS(proxy_snps,&#39;data/gwas/ad/loci_LDlinkR.allSNPs.EUR.rds&#39;)
 }</code></pre>
 <p>Define each locus as the most extreme coordinates of SNPs in LD (r2&gt;=0.1) with the index GWAS SNP.</p>
@@ -1081,7 +1118,9 @@ saveRDS(proxy_snps,&#39;data/gwas/ad/loci_LDlinkR.allSNPs.EUR.rds&#39;)
     write_tsv(.,&#39;data/gwas/ad/ad_GWAS_index_snps.v2.bed&#39;,col_names = FALSE)
 }</code></pre>
 <pre class="r"><code>if(!file.exists(&#39;data/gwas/ad/closest.protein.coding.bed&#39;)){
-  gtf_b37 &lt;- rtracklayer::import(&#39;data/gencode/gencode.v39lift37.annotation.gtf.gz&#39;) %&gt;% as.data.frame() %&gt;% as_tibble()
+  gtf_b37 &lt;- rtracklayer::import(&#39;data/gencode/gencode.v39lift37.annotation.gtf.gz&#39;) %&gt;% 
+    as.data.frame() %&gt;% 
+    as_tibble()
 }</code></pre>
 <pre class="r"><code>if(!file.exists(&#39;data/gwas/ad/closest.protein.coding.bed&#39;)){
   protein_coding &lt;- filter(gtf_b37,type==&#39;gene&#39;,gene_type==&#39;protein_coding&#39;) %&gt;% 
@@ -1420,7 +1459,8 @@ run_coloc &lt;- function(tissue_sumstats,tissue_name,sumstats_locus){
    rownames(direction_prop) &lt;- &#39;prop_pos_direction&#39;
    
    direction_sign &lt;- sumstats_locus_gene %&gt;% 
-     filter(p_eqtl==min(p_eqtl)) %&gt;% #Take SNP with strongest evidence of an effect on gene expression
+     #Take SNP with strongest evidence of an effect on gene expression
+     filter(p_eqtl==min(p_eqtl)) %&gt;% 
      slice_min(n=1,p_value,with_ties=FALSE) %&gt;% 
      summarise(direction=direction,
                beta_gwas=case_when(
@@ -1437,7 +1477,7 @@ run_coloc &lt;- function(tissue_sumstats,tissue_name,sumstats_locus){
      as.data.frame()
    colnames(direction_sign) &lt;- x
    
-   # #Add direction of effect to coloc results
+    #Add direction of effect to coloc results
     coloc_res_pval &lt;- rbind(coloc_res_pval,direction_sign,direction_prop)
 
     return(coloc_res_pval)
