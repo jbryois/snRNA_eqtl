@@ -11,7 +11,7 @@
 
 <meta name="author" content="Julien Bryois" />
 
-<meta name="date" content="2022-01-07" />
+<meta name="date" content="2022-01-25" />
 
 <title>Colocalization analysis</title>
 
@@ -380,7 +380,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Colocalization analysis</h1>
 <h4 class="author">Julien Bryois</h4>
-<h4 class="date">January 07, 2022</h4>
+<h4 class="date">January 25, 2022</h4>
 
 </div>
 
@@ -405,7 +405,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2022-01-07
+<strong>Last updated:</strong> 2022-01-25
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong22fe629"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 22fe629 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong81a42b2"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 81a42b2 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong22fe629" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong81a42b2" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 22fe629. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 81a42b2. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -514,18 +514,19 @@ Note that you need to be careful to ensure that all relevant files for the analy
 Ignored files:
     Ignored:    .Rproj.user/
     Ignored:    data_sensitive/
-    Ignored:    results/
 
 Untracked files:
     Untracked:  analysis/._index.Rmd
     Untracked:  analysis/06_eqtl_epigenome_enrichment.Rmd
     Untracked:  analysis/07_GWAS_epigenome_overlap.Rmd
     Untracked:  analysis/08_prepare_Shiny.Rmd
-    Untracked:  analysis/Alternatives/
-    Untracked:  analysis/Portfolio/
+    Untracked:  analysis/additional/
+    Untracked:  analysis/alternatives/
+    Untracked:  analysis/clean_analysis.Rmd
     Untracked:  analysis/get_tables.Rmd
     Untracked:  analysis/log_run_slurm_out
     Untracked:  analysis/log_run_slurm_stderr
+    Untracked:  analysis/portfolio/
     Untracked:  analysis/run_slurm.Rscript
     Untracked:  analysis/run_slurm.sbatch
     Untracked:  data/dice/
@@ -539,20 +540,13 @@ Untracked files:
     Untracked:  data/magma_specific_genes/
     Untracked:  data/metabrain/
     Untracked:  data/umap/
-    Untracked:  output/coloc/
     Untracked:  output/eqtl/
-    Untracked:  output/eqtl_specific/
-    Untracked:  output/figures/
-    Untracked:  output/gwas_epigenome_overlap/
-    Untracked:  output/shiny/
-    Untracked:  output/tables/
     Untracked:  output_tmp_QTLtools/
+    Untracked:  output_tmp_fastQTL_sample_ambient_removed/
 
 Unstaged changes:
     Modified:   .gitignore
-    Modified:   analysis/01_process_expression.Rmd
     Modified:   analysis/02_run_eQTL.Rmd
-    Modified:   analysis/03_cell_type_specific_eQTL.Rmd
     Modified:   analysis/05_coloc_GTEx_Dice.Rmd
     Modified:   analysis/_site.yml
     Modified:   analysis/index.Rmd
@@ -596,6 +590,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+81a42b2
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-25
+</td>
+<td>
+coloc
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+8281c18
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-07
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1049,7 +1077,9 @@ sumstats &lt;- vroom::vroom(&#39;data/gwas/ad/GCST90012877_buildGRCh37.tsv&#39;)
   dplyr::select(variant_id,p_value,chr,bp_b37,effect_allele,other_allele,beta,se=standard_error) %&gt;% 
   filter(!is.na(p_value))
 
-loci &lt;- read_tsv(&#39;data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
+  if(file.exists(&#39;data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt&#39;)) {
+    loci &lt;- read_tsv(&#39;data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
+  }
 }</code></pre>
 <div id="get-loci-coordinates" class="section level3">
 <h3>Get loci coordinates</h3>
@@ -1122,7 +1152,7 @@ saveRDS(proxy_snps,&#39;data/gwas/ad/loci_LDlinkR.allSNPs.EUR.rds&#39;)
     as.data.frame() %&gt;% 
     as_tibble()
 }</code></pre>
-<pre class="r"><code>if(!file.exists(&#39;data/gwas/ad/closest.protein.coding.bed&#39;)){
+<pre class="r"><code>if(!file.exists(&#39;data/gencode/gencode.v39lift37.annotation.protein_coding.1_22.bed&#39;)){
   protein_coding &lt;- filter(gtf_b37,type==&#39;gene&#39;,gene_type==&#39;protein_coding&#39;) %&gt;% 
     mutate(gene_label=paste0(gene_name,&#39;_&#39;,gsub(&#39;\\..+&#39;,&#39;&#39;,gene_id))) %&gt;% 
     dplyr::select(seqnames,start,end,gene_label) %&gt;% 
@@ -1148,7 +1178,9 @@ sumstats &lt;- vroom::vroom(&#39;data/gwas/pd/ParkinsonMeta_Nalls2014_2019.tbl&#
          other_allele=toupper(other_allele)) %&gt;% 
   unique() #some lines are duplicated in the
 
-loci &lt;- read_tsv(&#39;data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
+  if(file.exists(&#39;data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt&#39;)) {
+    loci &lt;- read_tsv(&#39;data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
+  }
 }</code></pre>
 <div id="get-loci-coordinates-1" class="section level3">
 <h3>Get loci coordinates</h3>
@@ -1217,7 +1249,9 @@ sumstats &lt;- vroom::vroom(&#39;data/gwas/ms/discovery_metav3.0.meta&#39;) %&gt
   filter(beta!=0) #Some SNPs have OR=1, so se estimate = 0, leading to issues in coloc, we exclude these here
 
 
-loci &lt;- read_tsv(&#39;data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
+  if(file.exists(&#39;data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt&#39;)) {
+    loci &lt;- read_tsv(&#39;data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
+  }
 }</code></pre>
 <div id="get-loci-coordinates-2" class="section level3">
 <h3>Get loci coordinates</h3>
@@ -1282,7 +1316,9 @@ sumstats &lt;- vroom::vroom(&#39;data/gwas/scz/PGC3_SCZ_wave3_public.v2.tsv.gz&#
   dplyr::select(variant_id=SNP,p_value=P,chr=CHR,bp_b37=BP,effect_allele=A1,other_allele=A2,beta,se)
 
 
-loci &lt;- read_tsv(&#39;data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
+  if(file.exists(&#39;data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt&#39;)) {
+    loci &lt;- read_tsv(&#39;data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt&#39;)
+  }
 }</code></pre>
 <div id="get-loci-coordinates-3" class="section level3">
 <h3>Get loci coordinates</h3>
