@@ -1,0 +1,436 @@
+---
+title: "GWAS - epigenome enrichment"
+site: workflowr::wflow_site
+author: "Julien Bryois"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output:
+  workflowr::wflow_html:
+   toc: true
+   toc_float: true
+editor_options:
+  chunk_output_type: console
+---
+  
+```{r setup,include=FALSE}
+knitr::opts_chunk$set(engine.opts = list(bash="--login"))
+```
+
+## Libraries
+
+```{r,message=FALSE}
+library(tidyverse)
+library(liftOver)
+```
+
+```{r}
+path <-  system.file(package="liftOver", "extdata", "hg38ToHg19.over.chain")
+ch <-  import.chain(path)
+```
+
+```{r}
+r2_threshold <- 0.8
+```
+
+## Get GWAS linked SNPs
+
+```{r}
+get_gwas_linked_snps <- function(x,threshold=r2_threshold){
+  if(nrow(x)>1){
+    x <- filter(x,R2>=0.1) %>% 
+      mutate(chr_snp=Coord %>% gsub(':.+','',.) %>% unique(),
+             chr_numeric=gsub('chr','',chr_snp),
+             start_snp=Coord %>% gsub('chr[0-9]{1,2}:','',.) %>% as.numeric(),
+             end_snp=start_snp) %>% 
+      dplyr::select(chr_snp,start_snp,end_snp,everything()) %>% 
+      dplyr::select(-Correlated_Alleles,-Dprime,-Alleles,-Coord) %>% 
+      mutate(locus_name=paste0(chr_snp,':',min(start_snp),'_',max(end_snp))) %>% 
+      dplyr::rename(Distance_from_index_SNP=Distance)
+    
+    top_snp_df <- filter(x,Distance_from_index_SNP==0) 
+    top_snp_pos <- top_snp_df %>% mutate(Coord=paste0(chr_snp,':',start_snp)) %>%  pull(Coord)
+
+    x <- filter(x,R2>=threshold) %>%  
+      mutate(GWAS_snp_pos=top_snp_pos) %>% 
+      mutate(RS_Number=ifelse(RS_Number=='.',paste0(chr_snp,':',start_snp,'-',end_snp),RS_Number))
+    
+    return(x)
+  }
+  else{
+    return(NULL)
+  }
+}
+```
+
+### PD
+
+```{r,eval=TRUE}
+proxy_snps_pd <- readRDS('data/gwas/pd/loci_LDlinkR.allSNPs.EUR.rds')
+```
+
+```{r,eval=TRUE}
+potential_causal_snps_pd <- mclapply(proxy_snps_pd,get_gwas_linked_snps,mc.cores=20) %>% 
+  bind_rows() %>% 
+  arrange(chr_numeric,start_snp) %>% 
+  dplyr::select(-chr_numeric)  %>% 
+  mutate(trait='pd')
+```
+
+### AD
+
+```{r,eval=TRUE}
+proxy_snps_ad <- readRDS('data/gwas/ad/loci_LDlinkR.allSNPs.EUR.rds')
+```
+
+```{r,eval=TRUE}
+potential_causal_snps_ad <- mclapply(proxy_snps_ad,get_gwas_linked_snps,mc.cores=20) %>% 
+  bind_rows() %>% 
+  arrange(chr_numeric,start_snp) %>% 
+  dplyr::select(-chr_numeric)  %>% 
+  mutate(trait='ad')
+```
+
+### MS
+
+```{r,eval=TRUE}
+proxy_snps_ms <- readRDS('data/gwas/ms/loci_LDlinkR.allSNPs.EUR.rds')
+```
+
+```{r,eval=TRUE}
+potential_causal_snps_ms <- mclapply(proxy_snps_ms,get_gwas_linked_snps,mc.cores=20) %>% 
+  bind_rows() %>% 
+  arrange(chr_numeric,start_snp) %>% 
+  dplyr::select(-chr_numeric)  %>% 
+  mutate(trait='ms')
+```
+
+### SCZ 
+
+```{r,eval=TRUE}
+proxy_snps_scz <- readRDS('data/gwas/scz/loci_LDlinkR.allSNPs.EUR.rds')
+```
+
+```{r,eval=TRUE}
+potential_causal_snps_scz <- mclapply(proxy_snps_scz,get_gwas_linked_snps,mc.cores=20) %>% 
+  bind_rows() %>% 
+  arrange(chr_numeric,start_snp) %>% 
+  dplyr::select(-chr_numeric)  %>% 
+  mutate(trait='scz')
+```
+
+### Write
+
+```{r,eval=TRUE}
+potential_causal_snps <- rbind(potential_causal_snps_pd,potential_causal_snps_ad,potential_causal_snps_ms,potential_causal_snps_scz)
+write_tsv(potential_causal_snps,paste0('data/gwas_epigenome_overlap/GWAS_1kg_linked_SNPs_r',r2_threshold,'.bed'),col_names = FALSE)
+```
+
+## Prepare Annotation
+
+### Process data from Corces et al.
+
+```{r,eval=TRUE}
+corces_hg38 <- readxl::read_xlsx('data/epigenome_enrichment/external_data/corces/Corces_etal_Nat_Neuro_2020_TableS4.xlsx',skip=16)
+```
+
+```{r,eval=TRUE}
+corces_hg38 <- corces_hg38 %>% 
+  gather(cell_type,present,ExcitatoryNeurons:OPCs) %>% 
+  group_by(Peak_ID) %>% 
+  mutate(count_present=sum(present)) %>% 
+  ungroup() %>% 
+  mutate(specific=ifelse(present==1 & count_present==1,1,0)) %>% 
+  filter(present==1) %>% 
+  mutate(study='Corces') %>% 
+  dplyr::select(hg38_Chromosome,hg38_Start,hg38_Stop,study,cell_type,specific,Annotation) %>% 
+  makeGRangesFromDataFrame(., TRUE)
+```
+
+Lift to hg19
+
+```{r,eval=TRUE}
+corces_hg19 <- liftOver(corces_hg38,ch) %>% 
+  unlist() %>% 
+  as.data.frame() %>% 
+  as_tibble() %>% 
+  dplyr::select(seqnames:end,study,cell_type,specific,Annotation) %>% 
+  write_tsv(.,'data/gwas_epigenome_overlap/corces_hg19.bed',col_names=FALSE)
+```
+
+### Process data from Nott et al.
+
+Hg19
+
+```{r,eval=TRUE}
+process_nott <- function(df,cell_type,Annotation){
+  df <- setNames(df,c('chr','start','end')) %>% filter(!is.na(chr))
+  df <- df %>% 
+    filter(chr%in%paste0('chr',1:22)) %>%
+    arrange(chr,start) %>% 
+    unique() %>% 
+    mutate(study='Nott',cell_type=cell_type, Annotation=Annotation) %>% 
+    write_tsv(.,paste0('data/epigenome_enrichment/external_data/nott/',cell_type,'.',Annotation,'.bed'),col_names = FALSE)
+}
+```
+
+```{r,eval=TRUE,message=FALSE}
+astro_enh <- readxl::read_xlsx('data/epigenome_enrichment/external_data/nott/Nott_etal_Science2019_Table_S5.xlsx',skip=0,sheet=5) %>% 
+  process_nott(.,cell_type='Astrocytes',Annotation='Enhancer')
+```
+
+```{r,eval=TRUE,message=FALSE}
+astro_promoter <- readxl::read_xlsx('data/epigenome_enrichment/external_data/nott/Nott_etal_Science2019_Table_S5.xlsx',skip=0,sheet=6) %>% 
+  process_nott(.,cell_type='Astrocytes',Annotation='Promoter')
+```
+
+```{r,eval=TRUE,message=FALSE}
+neuronal_enh <- readxl::read_xlsx('data/epigenome_enrichment/external_data/nott/Nott_etal_Science2019_Table_S5.xlsx',skip=0,sheet=7) %>% 
+  process_nott(.,cell_type='Neurons',Annotation='Enhancer')
+```
+
+```{r,eval=TRUE,message=FALSE}
+neuronal_promoter <- readxl::read_xlsx('data/epigenome_enrichment/external_data/nott/Nott_etal_Science2019_Table_S5.xlsx',skip=0,sheet=8) %>% 
+  process_nott(.,cell_type='Neurons',Annotation='Promoter')
+```
+
+```{r,eval=TRUE,message=FALSE}
+oligo_enh <- readxl::read_xlsx('data/epigenome_enrichment/external_data/nott/Nott_etal_Science2019_Table_S5.xlsx',skip=0,sheet=9) %>% 
+  process_nott(.,cell_type='Oligodendrocytes',Annotation='Enhancer')
+```
+
+```{r,eval=TRUE,message=FALSE}
+oligo_promoter <- readxl::read_xlsx('data/epigenome_enrichment/external_data/nott/Nott_etal_Science2019_Table_S5.xlsx',skip=0,sheet=10) %>% 
+  process_nott(.,cell_type='Oligodendrocytes',Annotation='Promoter')
+```
+
+```{r,eval=TRUE,message=FALSE}
+micro_enhancer <- readxl::read_xlsx('data/epigenome_enrichment/external_data/nott/Nott_etal_Science2019_Table_S5.xlsx',skip=0,sheet=11) %>% 
+  process_nott(.,cell_type='Microglia',Annotation='Enhancer')
+```
+
+```{r,eval=TRUE,message=FALSE}
+micro_promoter <- readxl::read_xlsx('data/epigenome_enrichment/external_data/nott/Nott_etal_Science2019_Table_S5.xlsx',skip=0,sheet=12) %>% 
+  process_nott(.,cell_type='Microglia',Annotation='Promoter')
+```
+
+#### Promoter and enhancer specific peaks
+
+```{bash,eval=TRUE}
+source ~/.bashrc
+cd data/epigenome_enrichment/external_data/nott
+
+ml bedtools/2.25.0-goolf-1.7.20
+bedtools intersect -v -a Astrocytes.Enhancer.bed -b Microglia.Enhancer.bed Neurons.Enhancer.bed Oligodendrocytes.Enhancer.bed > Astrocytes.Enhancer_specific.bed
+bedtools intersect -v -a Microglia.Enhancer.bed -b Astrocytes.Enhancer.bed Neurons.Enhancer.bed Oligodendrocytes.Enhancer.bed > Microglia.Enhancer_specific.bed
+bedtools intersect -v -a Neurons.Enhancer.bed -b Astrocytes.Enhancer.bed Microglia.Enhancer.bed Oligodendrocytes.Enhancer.bed > Neurons.Enhancer_specific.bed
+bedtools intersect -v -a Oligodendrocytes.Enhancer.bed -b Astrocytes.Enhancer.bed Microglia.Enhancer.bed Neurons.Enhancer.bed > Oligodendrocytes.Enhancer_specific.bed
+```
+
+```{bash,eval=TRUE}
+source ~/.bashrc
+cd data/epigenome_enrichment/external_data/nott
+
+ml bedtools/2.25.0-goolf-1.7.20
+bedtools intersect -v -a Astrocytes.Promoter.bed -b Microglia.Promoter.bed Neurons.Promoter.bed Oligodendrocytes.Promoter.bed > Astrocytes.Promoter_specific.bed
+bedtools intersect -v -a Microglia.Promoter.bed -b Astrocytes.Promoter.bed Neurons.Promoter.bed Oligodendrocytes.Promoter.bed > Microglia.Promoter_specific.bed
+bedtools intersect -v -a Neurons.Promoter.bed -b Astrocytes.Promoter.bed Microglia.Promoter.bed Oligodendrocytes.Promoter.bed > Neurons.Promoter_specific.bed
+bedtools intersect -v -a Oligodendrocytes.Promoter.bed -b Astrocytes.Promoter.bed Microglia.Promoter.bed Neurons.Promoter.bed > Oligodendrocytes.Promoter_specific.bed
+```
+
+```{r,eval=TRUE,message=FALSE}
+specific_files <- list.files('data/epigenome_enrichment/external_data/nott',pattern='specific.bed',full.names = TRUE)
+Nott_specific_hg19 <- tibble(files=specific_files) %>% 
+  mutate(file_content=map(files,read_tsv,col_names=FALSE)) %>% 
+  unnest(file_content) %>% 
+  dplyr::select(-files) %>% 
+  mutate(id=paste0(X1,':',X2,'-',X3,'-',X5,'-',X6))
+```
+
+```{r,eval=TRUE,message=FALSE}
+nott_files <- list.files('data/epigenome_enrichment/external_data/nott',pattern='.bed',full.names = TRUE) %>% grep('specific',.,value=TRUE,invert=TRUE)
+nott_hg19 <- tibble(files=nott_files) %>% 
+  mutate(file_content=map(files,read_tsv,col_names=FALSE)) %>% 
+  unnest(file_content) %>% 
+  dplyr::select(-files) %>% 
+  mutate(id=paste0(X1,':',X2,'-',X3,'-',X5,'-',X6)) %>% 
+  mutate(specific=ifelse(id%in%Nott_specific_hg19$id,1,0)) %>% 
+  setNames(c('seqnames','start','end','study','cell_type','Annotation','id','specific')) %>% 
+  dplyr::select(seqnames,start,end,study,cell_type,specific,Annotation)
+```
+
+# Run Overlap
+
+Get all peaks discovered in corces et al. and nott et al.
+
+```{r,eval=TRUE}
+bed <- rbind(corces_hg19,nott_hg19) %>% 
+  arrange(seqnames,start) %>% 
+  write_tsv(.,'data/gwas_epigenome_overlap/epigenomic_marks.bed',col_names=FALSE)
+```
+
+Add distance from enhancer to closest TSS
+
+```{r,eval=TRUE}
+gtf <- rtracklayer::import('data/gencode/gencode.v39lift37.annotation.gtf.gz') %>% 
+  as.data.frame() %>% 
+  dplyr::filter(type=='gene',gene_type=='protein_coding') %>% 
+  dplyr::select(seqnames,start,end,strand,gene_id,gene_name) %>% 
+  mutate(TSS_start=ifelse(strand=='+',start,end),
+         TSS_end=ifelse(strand=='+',start,end)) %>% 
+  as_tibble() %>% 
+  mutate(gene=paste0(gene_name,'_',gsub('\\..+','',gene_id))) %>% 
+  filter(seqnames %in% paste0('chr',1:22)) %>% 
+  mutate(seqnames=as.character(seqnames)) %>% 
+  arrange(seqnames,start) %>% 
+  dplyr::select(seqnames,TSS_start,TSS_end,gene) %>% 
+  write_tsv(.,'data/gwas_epigenome_overlap/gencode.v39lift37.annotation.protein_coding.1_22.TSS.bed',col_names = FALSE)
+```
+
+```{bash,eval=TRUE}
+source ~/.bashrc
+
+ml bedtools/2.25.0-goolf-1.7.20
+
+cd data/gwas_epigenome_overlap
+bedtools intersect -wa -wb -a epigenomic_marks.bed -b GWAS_1kg_linked_SNPs_r0.8.bed > GWAS_epigenomic_marks.bed
+sort -k1,1V -k2,2n GWAS_epigenomic_marks.bed > GWAS_epigenomic_marks.sorted.bed
+sort -k1,1V -k2,2n -k3,3n gencode.v39lift37.annotation.protein_coding.1_22.TSS.bed > gencode.v39lift37.annotation.protein_coding.1_22.TSS.sorted.bed
+bedtools closest -d -t first -wa -a GWAS_epigenomic_marks.sorted.bed -b gencode.v39lift37.annotation.protein_coding.1_22.TSS.sorted.bed > GWAS_epigenomic_marks.closest_gene.bed
+```
+
+Add distance to coloc genes
+
+# Coloc load
+
+```{r,eval=TRUE}
+read_coloc <- function(path){
+  coloc <- read_tsv(path) %>% 
+    dplyr::select(locus,ensembl,symbol,tissue,PP.H4.abf) %>% 
+    dplyr::rename(phenotype=ensembl,hgnc_symbol=symbol,locus_name=locus) %>% 
+    filter(PP.H4.abf>0.7)
+  
+  #If coloc was performed for the same genes located in loci in close proximity, take the best
+  coloc <- coloc %>% group_by(phenotype,tissue) %>% 
+  slice_max(n=1,order_by=PP.H4.abf,with_ties=FALSE) %>% 
+  ungroup()
+  
+  return(coloc)
+}
+```
+
+```{r,eval=TRUE,message=FALSE}
+coloc_ms <- read_coloc('output/coloc/coloc.ms.txt') %>% mutate(trait='ms') 
+coloc_ad <- read_coloc('output/coloc/coloc.ad.txt') %>% mutate(trait='ad')
+coloc_scz <- read_coloc('output/coloc/coloc.scz.txt') %>% mutate(trait='scz')
+coloc_pd <- read_coloc('output/coloc/coloc.pd.txt') %>% mutate(trait='pd')
+```
+
+```{r,eval=TRUE}
+coloc <- rbind(coloc_ms,coloc_ad,coloc_scz,coloc_pd) %>% 
+  arrange(-PP.H4.abf) %>% 
+  mutate(gene=paste0(hgnc_symbol,'_',phenotype)) %>% 
+  dplyr::select(gene,tissue,PP.H4.abf,trait)
+```
+
+```{r,eval=TRUE,message=FALSE}
+gtf_coloc <- inner_join(gtf,coloc,by='gene') %>% 
+  mutate(chr_numeric = as.numeric(gsub('chr','',seqnames))) %>% 
+  arrange(chr_numeric,TSS_start) %>% 
+  dplyr::select(-chr_numeric) %>% 
+  write_tsv('data/gwas_epigenome_overlap/coloc_genes.bed',col_names = FALSE)
+```
+
+```{bash,eval=TRUE}
+source ~/.bashrc
+
+ml bedtools/2.25.0-goolf-1.7.20
+cd data/gwas_epigenome_overlap
+bedtools closest -d -t all -wa -a GWAS_epigenomic_marks.closest_gene.bed -b coloc_genes.bed > GWAS_epigenomic_marks.closest_gene.closest_coloc.bed
+```
+
+# Results
+
+```{r,message=FALSE,warning=FALSE}
+dir.create('output/gwas_epigenome_overlap',showWarnings = FALSE)
+res <- read_tsv('data/gwas_epigenome_overlap/GWAS_epigenomic_marks.closest_gene.closest_coloc.bed',col_names = FALSE) %>% 
+  setNames(c(colnames(bed),colnames(potential_causal_snps),'chr_gene','start_gene','end_gene','closest_TSS_from_regulatory_region','distance_to_closest_TSS','chr_coloc_gene','start_coloc_gene','end_coloc_gene','closest_coloc_TSS_from_regulatory_region','cell_type_coloc','PP.H4.abf','trait_coloc','distance_to_closest_coloc_TSS')) %>% 
+  dplyr::select(-MAF,-chr_gene,-start_gene,-end_gene,-chr_coloc_gene,-start_coloc_gene,-end_coloc_gene) %>% 
+  #add_count(RS_Number,name = 'n_SNP_overlap') %>% 
+  dplyr::rename(chr_epigenome=seqnames,start_epigenome=start,end_epigenome=end,study_epigenome=study,Annotation_study=Annotation) %>% 
+  arrange(chr_epigenome,start_epigenome) %>% 
+  write_tsv(.,'output/gwas_epigenome_overlap/GWAS_epigenomic_marks.closest_gene.closest_coloc.txt')
+```
+
+```{r,echo=FALSE,eval=FALSE}
+#res <- read_tsv('output/gwas_epigenome_overlap/GWAS_epigenomic_marks.closest_gene.closest_coloc.txt')
+```
+
+Get regions of interest
+
+```{r}
+res <- res %>% mutate(cell_type_coloc_parsed = case_when(
+  cell_type_coloc %in% c('Excitatory neurons','Inhibitory neurons') ~'Neurons',
+  cell_type_coloc %in% c('OPCs / COPs') ~'OPCs',
+  TRUE ~ cell_type_coloc
+)) %>% 
+  mutate(cell_type_parsed = case_when(
+    cell_type %in% c('ExcitatoryNeurons','InhibitoryNeurons') ~ 'Neurons',
+    TRUE ~cell_type
+  )) %>% 
+  mutate(width=end_epigenome-start_epigenome+1)
+```
+
+Only keep SNPs overlaping epigenomic marks that are located less than 100kb from the TSS of a coloc gene, for which the epigenomic mark was detected in the coloc cell types.
+
+```{r}
+potential_sequences_of_interest <- filter(res,distance_to_closest_coloc_TSS<100000,trait==trait_coloc,cell_type_coloc_parsed==cell_type_parsed)
+```
+
+```{r}
+eqtl_files_to_read <- potential_sequences_of_interest %>% 
+  dplyr::select(chr_epigenome,cell_type_coloc) %>% unique()
+```
+
+```{r}
+get_eqtl_pvalue <- function(i){
+  df <- data.table::fread(paste0('data_sensitive/eqtl/PC70_nominal/',make.names(eqtl_files_to_read$cell_type_coloc[i]),'.',gsub('chr','',eqtl_files_to_read$chr_epigenome[i]),'.gz')) %>% 
+    filter(V2%in%potential_sequences_of_interest$RS_Number,
+           V1%in%potential_sequences_of_interest$closest_coloc_TSS_from_regulatory_region) %>% 
+    dplyr::select(closest_coloc_TSS_from_regulatory_region=V1,RS_Number=V2,p_eqtl=V4,beta_eqtl=V5) %>% 
+    as_tibble() %>% 
+    mutate(cell_type_coloc=eqtl_files_to_read$cell_type_coloc[i])
+}
+```
+
+```{r}
+eqtl_pvalues <- mclapply(1:nrow(eqtl_files_to_read),get_eqtl_pvalue,mc.cores=20) %>% bind_rows()
+```
+
+```{r}
+potential_sequences_of_interest <- left_join(potential_sequences_of_interest,eqtl_pvalues,by=c('closest_coloc_TSS_from_regulatory_region','RS_Number','cell_type_coloc'))
+```
+
+```{r}
+potential_sequences_of_interest <- potential_sequences_of_interest %>% dplyr::select(chr_epigenome:study_epigenome,cell_type_epigenome=cell_type,specific,RS_Number,R2,RegulomeDB,Function,locus_name,trait_coloc,closest_coloc_TSS_from_regulatory_region,distance_to_closest_coloc_TSS,cell_type_coloc,PP.H4.abf,p_eqtl) %>% 
+  write_csv('data/gwas_epigenome_overlap/GWAS_epigenomic_marks.closest_gene.closest_coloc.filtered.csv')
+```
+
+### Add SNP2TFBS information
+
+```{bash,eval=TRUE}
+cd data/gwas_epigenome_overlap
+cut -d ',' -f 7 GWAS_epigenomic_marks.closest_gene.closest_coloc.filtered.csv | sort -u |grep -v 'RS_Number' > snps_4_SNP2TFBS.txt
+```
+
+Use webtool at: https://ccg.epfl.ch/snp2tfbs/snpselect.php
+
+```{r,message=FALSE}
+if(file.exists('data/gwas_epigenome_overlap/SNP2TFBS_out.txt')){
+  snp2tfbs <- read_tsv('data/gwas_epigenome_overlap/SNP2TFBS_out.txt',col_names = FALSE) %>% 
+    dplyr::select(RS_Number=X7,X6) %>% mutate(SNP2TFBS_disrupted_TFmotif=gsub('.+TF=|;Score.+','',X6)) %>% 
+    dplyr::select(-X6)
+  
+  potential_sequences_of_interest <- left_join(potential_sequences_of_interest,snp2tfbs,by='RS_Number')
+  
+  write_csv(potential_sequences_of_interest,'output/gwas_epigenome_overlap/GWAS_epigenomic_marks.closest_gene.closest_coloc.filtered.SNP2TFBS.txt')
+}
+```
