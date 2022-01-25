@@ -11,6 +11,8 @@ editor_options:
   chunk_output_type: console
 ---
 
+Use fastQTL for permutation pass and nominal pass. QTL tools for independent pass
+
 ```{r,echo=FALSE}
 #Necessary for module load to work
 knitr::opts_chunk$set(engine.opts = list(bash="--login"))
@@ -22,7 +24,7 @@ library(qvalue)
 library(parallel)
 ```
 
-Set path for genotype data
+Set path for eqtl data
 
 ```{r,eval=TRUE}
 Sys.setenv(eqtl_path='data_sensitive/eqtl')
@@ -102,7 +104,9 @@ fastqtl_out_files <- list.files('data_sensitive/eqtl/',pattern='.gz.[0-9]',full.
 ```{r,eval=FALSE}
 d <- tibble(files=fastqtl_out_files,
             cell_type=basename(files) %>% 
-              gsub('.quantile.txt.gz..+','',.) %>% gsub('\\.',' ',.)) %>% 
+              gsub('.quantile.txt.gz..+','',.) %>% 
+              gsub('\\.',' ',.) %>% 
+              gsub('OPCs   COPs','OPCs / COPs',.)) %>% 
   mutate(PCs=dirname(files) %>% basename(.)) %>% 
   mutate(file_content=map(files,read.table,header=F)) %>% 
   unnest(file_content) %>% 
@@ -120,6 +124,7 @@ d <- tibble(files=fastqtl_out_files,
 Write eQTL results with different number of expression principal components
 
 ```{r,eval=FALSE}
+dir.create('output/eqtl/',showWarnings = FALSE)
 write_tsv(d,'output/eqtl/eqtl.allPCs.txt')
 ```
 
@@ -134,7 +139,10 @@ selected_pcs <- d %>%
 Write eQTL results with selected number of PCs
 
 ```{r,eval=FALSE}
-d %>% filter(PCs==selected_pcs$PCs) %>% dplyr::select(-PCs) %>% write_tsv(.,paste0('output/eqtl/eqtl.',selected_pcs$PCs,'.txt'))
+d %>% 
+  filter(PCs==selected_pcs$PCs) %>% 
+  dplyr::select(-PCs) %>% 
+  write_tsv(.,paste0('output/eqtl/eqtl.',selected_pcs$PCs,'.txt'))
 ```
 
 ## Clean
@@ -156,9 +164,9 @@ done
 
 We now run a nominal pass to get pvalues for all SNPs (necessary for colocalization analysis).
 
-We will use 80 PCs as this maximised the number of eQTL discoveries using permutations.
+We will use 70 PCs as this maximised the number of eQTL discoveries using permutations.
 
-```{bash,eval=FALSE}
+```{bash,eval=FALSE,message=FALSE}
 source ~/.bashrc
 cd $eqtl_path
 
@@ -169,13 +177,13 @@ ml Eigen/3.3.7
 ml Boost/1.67.0-foss-2018b
 
 
-mkdir -p 'PC80_nominal'
-cd PC80_nominal
-ln -s ../PC80/*.bed.gz .
-ln -s ../PC80/*.bed.gz.tbi .
-ln -s ../PC80/*.cov.txt.gz .
-ln -s ../PC80/combined_final.vcf.gz .
-ln -s ../PC80/combined_final.vcf.gz.tbi .
+mkdir -p 'PC70_nominal'
+cd PC70_nominal
+ln -s ../PC70/*.bed.gz .
+ln -s ../PC70/*.bed.gz.tbi .
+ln -s ../PC70/*.cov.txt.gz .
+ln -s ../PC70/combined_final.vcf.gz .
+ln -s ../PC70/combined_final.vcf.gz.tbi .
 
 for bed in *.bed.gz
 do
@@ -188,7 +196,7 @@ done
 ```
 
 ```{bash,eval=TRUE}
-cd $eqtl_path'/PC80_nominal'
+cd $eqtl_path'/PC70_nominal'
 grep 'Running time' slurm-* | wc -l
 ```
 
@@ -197,7 +205,7 @@ grep 'Running time' slurm-* | wc -l
 Now let's gzip the association files and give them a nice name.
 
 ```{bash,eval=FALSE}
-cd $eqtl_path'/PC80_nominal'
+cd $eqtl_path'/PC70_nominal'
 rm *quantile.txt.gz
 rm *.bed.gz
 rm *.bed.gz.tbi  
@@ -227,13 +235,13 @@ bed_files_fastqtl <- list.files('data_sensitive/eqtl',pattern='.bed.gz$',full.na
 ```{r,eval=FALSE}
 read_fastQTL_write_QTLtools <- function(i){
   output_file_name <- gsub('bed.gz','qtltools.bed',bed_files_fastqtl[i]) %>% 
-    gsub('data_sensitive/eqtl/','data_sensitive/eqtl/PC80_indep/',.)
+    gsub('data_sensitive/eqtl/','data_sensitive/eqtl/PC70_indep/',.)
   
   fasqtl <- read_tsv(bed_files_fastqtl[i]) %>% 
     mutate(pid='.',strand='+') %>% 
     dplyr::select(`#Chr`:ID,pid,strand,everything())
  
-  dir.create('data_sensitive/eqtl/PC80_indep',recursive = TRUE,showWarnings = FALSE)
+  dir.create('data_sensitive/eqtl/PC70_indep',recursive = TRUE,showWarnings = FALSE)
   write_tsv(fasqtl,output_file_name) 
 }
 ```
@@ -243,7 +251,7 @@ mclapply(1:length(bed_files_fastqtl),read_fastQTL_write_QTLtools,mc.cores = 8)
 ```
 
 ```{bash,eval=FALSE}
-cd $eqtl_path'/PC80_indep'
+cd $eqtl_path'/PC70_indep'
 ml tabix/0.2.6-goolf-1.7.20
 
 for f in *.qtltools.bed
@@ -255,7 +263,7 @@ done
 2. Perform permutation pass on all phenotypes
 
 ```{bash,eval=FALSE}
-cd $eqtl_path'/PC80_indep'
+cd $eqtl_path'/PC70_indep'
 source ~/.bashrc
 
 ml foss/2018b
@@ -279,7 +287,7 @@ done
 ```
 
 ```{bash,eval=FALSE}
-cd $eqtl_path'/PC80_indep'
+cd $eqtl_path'/PC70_indep'
 source ~/.bashrc
 
 ml foss/2018b
@@ -292,9 +300,9 @@ ml zlib/1.2.11-GCCcore-7.3.0
 ml lzma/4.32.7-GCCcore-7.3.0
 ml cURL/7.60.0-GCCcore-7.3.0
 
-ln -s ../PC80/combined_final.vcf.gz .
-ln -s ../PC80/combined_final.vcf.gz.tbi .
-ln -s ../PC80/*.cov.txt.gz  .
+ln -s ../PC70/combined_final.vcf.gz .
+ln -s ../PC70/combined_final.vcf.gz.tbi .
+ln -s ../PC70/*.cov.txt.gz  .
 
 for f in *.commands.cond.permutation.22.txt
 do
@@ -302,8 +310,8 @@ sh $f
 done
 ```
 
-```{bash,eval=TRUE}
-cd $eqtl_path'/PC80_indep'
+```{bash,eval=FALSE}
+cd $eqtl_path'/PC70_indep'
 grep 'Running time' slurm-* | wc -l
 ```
 
@@ -312,7 +320,7 @@ All good!
 Gather all output
 
 ```{bash,eval=FALSE}
-cd $eqtl_path'/PC80_indep'
+cd $eqtl_path'/PC70_indep'
 
 for bed in *.qtltools.bed.gz
 do
@@ -324,8 +332,8 @@ rm *.conditional_permute_*
 
 3. Extract significant phenotypes
 
-```{bash,eval=FALSE}
-cd $eqtl_path'/PC80_indep'
+```{bash,eval=FALSE,message=FALSE}
+cd $eqtl_path'/PC70_indep'
 ml  R/4.0.1-foss-2018b
 wget https://raw.githubusercontent.com/qtltools/qtltools/master/scripts/qtltools_runFDR_cis.R .
 for f in *.conditional.permute.txt
@@ -338,7 +346,7 @@ done
 Read bed files and only retain significant genes.
 
 ```{r,eval=FALSE}
-bed_files <- list.files('data_sensitive/eqtl/PC80_indep',pattern='.qtltools.bed.gz$',full.names = T)
+bed_files <- list.files('data_sensitive/eqtl/PC70_indep',pattern='.qtltools.bed.gz$',full.names = T)
 ```
 
 ```{r,eval=FALSE}
@@ -364,7 +372,7 @@ mclapply(1:length(bed_files),read_fastQTL_write_QTLtools_conditional,mc.cores=8)
 ```
 
 ```{bash,eval=FALSE}
-cd $eqtl_path'/PC80_indep'
+cd $eqtl_path'/PC70_indep'
 ml tabix/0.2.6-goolf-1.7.20
 
 for f in *.qtltools.conditional.bed
@@ -376,7 +384,7 @@ done
 4. Run conditional analysis
 
 ```{bash,eval=FALSE}
-cd $eqtl_path'/PC80_indep'
+cd $eqtl_path'/PC70_indep'
 source ~/.bashrc
 
 ml foss/2018b
@@ -404,17 +412,18 @@ done
 ```
 
 ```{bash,eval=TRUE}
-cd $eqtl_path'/PC80_indep'
+cd $eqtl_path'/PC70_indep'
 grep 'Running time' slurm-* | wc -l
 ```
 
 8 cell types successfully ran. All good!
 
 ## Write
+
 Get conditional results
 
 ```{r,eval=FALSE}
-conditional_files <- list.files('data_sensitive/eqtl/PC80_indep',pattern='*conditional.txt',full.names = T)
+conditional_files <- list.files('data_sensitive/eqtl/PC70_indep',pattern='*conditional.txt',full.names = T)
 ```
 
 ```{r,eval=FALSE}
@@ -435,7 +444,7 @@ d <- tibble(files=conditional_files,
 ```
 
 ```{r,eval=FALSE}
-write_tsv(d,'output/eqtl/eqtl.80PCs.indep.txt')
+write_tsv(d,'output/eqtl/eqtl.70PCs.indep.txt')
 ```
 
 # Fine-mapping
@@ -445,7 +454,7 @@ We will use CaVEMan for fine-mapping
 1. Get bed files for significant cis-eQTL
 
 ```{r,message=FALSE,eval=FALSE}
-d <- read_tsv('output/eqtl/eqtl.PC80.txt') %>% 
+d <- read_tsv('output/eqtl/eqtl.PC70.txt') %>% 
   mutate(cell_type=make.names(cell_type)) %>% 
   filter(adj_p<0.05)
 ```
@@ -456,7 +465,7 @@ bed_files_fastqtl <- list.files('data_sensitive/eqtl',pattern='.bed.gz$',full.na
 
 ```{r,eval=FALSE,results=FALSE}
 read_fastQTL_write_caveman <- function(i){
-  output_file_name <- gsub('bed.gz','caveman.bed',bed_files_fastqtl[i]) %>% gsub('eqtl','eqtl/PC80_caveman',.)
+  output_file_name <- gsub('bed.gz','caveman.bed',bed_files_fastqtl[i]) %>% gsub('eqtl','eqtl/PC70_caveman',.)
   cell_type_file <- basename(bed_files_fastqtl[i]) %>% gsub('.bed.gz','',.)
 
   genes_to_keep <- filter(d,cell_type==cell_type_file) %>% pull(pid)
@@ -464,7 +473,7 @@ read_fastQTL_write_caveman <- function(i){
   fasqtl <- read_tsv(bed_files_fastqtl[i]) %>% 
     filter(ID%in%genes_to_keep)
  
-  dir.create('data_sensitive/eqtl/PC80_caveman',showWarnings = FALSE)
+  dir.create('data_sensitive/eqtl/PC70_caveman',showWarnings = FALSE)
   write_tsv(fasqtl,output_file_name) 
 }
 ```
@@ -476,19 +485,19 @@ mclapply(1:length(bed_files_fastqtl),read_fastQTL_write_caveman,mc.cores=8)
 2. Get bed files adjusted for covariates
 
 ```{r,eval=FALSE}
-write_tsv(d[,'sid',drop=FALSE],'data_sensitive/eqtl/PC80_caveman/sig_eQTL_snps.txt',col_names = FALSE)
+write_tsv(d[,'sid',drop=FALSE],'data_sensitive/eqtl/PC70_caveman/sig_eQTL_snps.txt',col_names = FALSE)
 ```
 
 ```{bash,eval=FALSE}
-cd $eqtl_path'/PC80_caveman'
-ln -s ../PC80/combined_final.vcf.gz .
-ln -s ../PC80/combined_final.vcf.gz.tbi .
+cd $eqtl_path'/PC70_caveman'
+ln -s ../PC70/combined_final.vcf.gz .
+ln -s ../PC70/combined_final.vcf.gz.tbi .
 
 zgrep -Fw -f sig_eQTL_snps.txt combined_final.vcf.gz | grep -v '#' | cut -f 1,2,3,4,5 > sig_eQTL_snps_alleles.txt
 ```
 
 ```{r,eval=FALSE}
-genotypes_selected <- read_tsv('data_sensitive/eqtl/PC80_caveman/sig_eQTL_snps_alleles.txt',col_names = FALSE) %>% 
+genotypes_selected <- read_tsv('data_sensitive/eqtl/PC70_caveman/sig_eQTL_snps_alleles.txt',col_names = FALSE) %>% 
   setNames(c('chr','pos','sid','A1','A2'))
 ```
 
@@ -503,7 +512,7 @@ get_eqtl_cov <- function(i){
     left_join(.,genotypes_selected,by='sid') %>% 
     dplyr::select(pid,chr,pos,A1,A2)
   
-  write_tsv(eqtl_cell_type,paste0('data_sensitive/eqtl/PC80_caveman/',make.names(cell_types[i]),'.eqtl.list'),col_names = FALSE)
+  write_tsv(eqtl_cell_type,paste0('data_sensitive/eqtl/PC70_caveman/',make.names(cell_types[i]),'.eqtl.list'),col_names = FALSE)
 }
 ```
 
@@ -514,13 +523,13 @@ lapply(1:length(cell_types),get_eqtl_cov)
 Now get covariates
 
 ```{r,eval=FALSE}
-cov_files <- list.files('data_sensitive/eqtl/PC80',pattern = 'cov.txt.gz',full.names = TRUE) 
+cov_files <- list.files('data_sensitive/eqtl/PC70',pattern = 'cov.txt.gz',full.names = TRUE) 
 ```
 
 ```{r,eval=FALSE}
 read_cov_write <- function(i){
   cov <- read_tsv(cov_files[i])
-  out <- gsub('.txt.gz','.caveman.txt',cov_files[i]) %>% gsub('PC80','PC80_caveman',.)
+  out <- gsub('.txt.gz','.caveman.txt',cov_files[i]) %>% gsub('PC70','PC70_caveman',.)
   
   study <- cov[4,][,-1] %>% t() %>% as.data.frame()
   study_model_matrix <-  model.matrix(~0+V1,data=study) %>% as.data.frame() %>% t() %>%
@@ -541,7 +550,7 @@ lapply(1:length(cov_files),read_cov_write)
 ```
 
 ```{bash,eval=FALSE}
-cd $eqtl_path'/PC80_caveman'
+cd $eqtl_path'/PC70_caveman'
 source ~/.bashrc
 
 ml tabix/0.2.6-goolf-1.7.20
@@ -555,7 +564,7 @@ done
 ```
 
 ```{bash,eval=FALSE}
-cd $eqtl_path'/PC80_caveman'
+cd $eqtl_path'/PC70_caveman'
 source ~/.bashrc
 mkdir -p results
 
@@ -577,7 +586,7 @@ done
 ```
 
 ```{bash,eval=FALSE}
-cd $eqtl_path'/PC80_caveman'/results
+cd $eqtl_path'/PC70_caveman'/results
 
 awk 'FNR>1||NR==1' Astrocytes_* > Astrocytes.all
 awk 'FNR>1||NR==1' Endothelial.cells_* > Endothelial.cells.all
@@ -590,7 +599,7 @@ awk 'FNR>1||NR==1' Pericytes_* > Pericytes.all
 ```
 
 ```{bash,eval=FALSE}
-cd $eqtl_path'/PC80_caveman'/results
+cd $eqtl_path'/PC70_caveman'/results
 source ~/.bashrc
 
 ml tabix/0.2.6-goolf-1.7.20
@@ -603,7 +612,7 @@ rm *_*
 ```
 
 ```{r,eval=FALSE}
-files <- list.files('data_sensitive/eqtl/PC80_caveman/results',pattern='.best',full.names = TRUE)
+files <- list.files('data_sensitive/eqtl/PC70_caveman/results',pattern='.best',full.names = TRUE)
 ```
 
 ```{r,eval=FALSE}
@@ -617,5 +626,5 @@ d <- tibble(files) %>% mutate(file_content=map(files,read_tsv)) %>%
 ```
 
 ```{r,eval=FALSE}
-write_tsv(d,'output/eqtl/eqtl.80PCs.caveman.txt')
+write_tsv(d,'output/eqtl/eqtl.70PCs.caveman.txt')
 ```
