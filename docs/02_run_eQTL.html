@@ -11,7 +11,7 @@
 
 <meta name="author" content="Julien Bryois" />
 
-<meta name="date" content="2021-12-01" />
+<meta name="date" content="2022-01-25" />
 
 <title>Run eQTL analysis</title>
 
@@ -380,7 +380,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Run eQTL analysis</h1>
 <h4 class="author">Julien Bryois</h4>
-<h4 class="date">December 01, 2021</h4>
+<h4 class="date">January 25, 2022</h4>
 
 </div>
 
@@ -405,7 +405,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2021-12-01
+<strong>Last updated:</strong> 2022-01-25
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongb1d314e"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> b1d314e </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong2f8e71b"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 2f8e71b </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongb1d314e" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong2f8e71b" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version b1d314e. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 2f8e71b. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -513,27 +513,43 @@ Note that you need to be careful to ensure that all relevant files for the analy
 <pre><code>
 Ignored files:
     Ignored:    .Rproj.user/
+    Ignored:    data/magma_interaction_eqtl/
+    Ignored:    data/magma_specific_genes/
     Ignored:    data_sensitive/
-    Ignored:    output/tables/
+    Ignored:    results/
 
 Untracked files:
-    Untracked:  analysis/01_process_expression.Rscript
-    Untracked:  analysis/01_process_expression.sbatch
-    Untracked:  analysis/log_01_exp_stderr
-    Untracked:  analysis/log_01_exp_stdout
+    Untracked:  analysis/._index.Rmd
+    Untracked:  analysis/08_prepare_Shiny.Rmd
+    Untracked:  analysis/additional/
+    Untracked:  analysis/alternatives/
+    Untracked:  analysis/clean_analysis.Rmd
+    Untracked:  analysis/get_tables.Rmd
     Untracked:  analysis/log_run_slurm_out
     Untracked:  analysis/log_run_slurm_stderr
+    Untracked:  analysis/portfolio/
     Untracked:  analysis/run_slurm.Rscript
     Untracked:  analysis/run_slurm.sbatch
+    Untracked:  data/dice/
+    Untracked:  data/epigenome_enrichment/
     Untracked:  data/gencode/
     Untracked:  data/gnomad_loeuf/
+    Untracked:  data/gtex/
+    Untracked:  data/gwas/
+    Untracked:  data/gwas_epigenome_overlap/
     Untracked:  data/metabrain/
-    Untracked:  output/Figures/
+    Untracked:  data/umap/
+    Untracked:  output/coloc/
     Untracked:  output/eqtl/
+    Untracked:  output/gwas_epigenome_overlap/
+    Untracked:  output_tmp_QTLtools/
+    Untracked:  output_tmp_fastQTL_sample_ambient_removed/
 
 Unstaged changes:
     Modified:   .gitignore
     Modified:   analysis/_site.yml
+    Modified:   analysis/plot_figures.Rmd
+    Deleted:    output/README.md
 
 </code></pre>
 <p>
@@ -577,6 +593,40 @@ Message
 Rmd
 </td>
 <td>
+2f8e71b
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-25
+</td>
+<td>
+run eQTL
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+d2896af
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 b1d314e
 </td>
 <td>
@@ -596,10 +646,11 @@ eqtl_code_added, figures added
 </div>
 </div>
 </div>
+<p>Use fastQTL for permutation pass and nominal pass. QTL tools for independent pass</p>
 <pre class="r"><code>library(tidyverse)
 library(qvalue)
 library(parallel)</code></pre>
-<p>Set path for genotype data</p>
+<p>Set path for eqtl data</p>
 <pre class="r"><code>Sys.setenv(eqtl_path=&#39;data_sensitive/eqtl&#39;)</code></pre>
 <div id="generate-commands-for-fastqtl" class="section level1">
 <h1>Generate commands for fastQTL</h1>
@@ -685,7 +736,9 @@ PC120
 <pre class="r"><code>fastqtl_out_files &lt;- list.files(&#39;data_sensitive/eqtl/&#39;,pattern=&#39;.gz.[0-9]&#39;,full.names = T,recursive = TRUE)</code></pre>
 <pre class="r"><code>d &lt;- tibble(files=fastqtl_out_files,
             cell_type=basename(files) %&gt;% 
-              gsub(&#39;.quantile.txt.gz..+&#39;,&#39;&#39;,.) %&gt;% gsub(&#39;\\.&#39;,&#39; &#39;,.)) %&gt;% 
+              gsub(&#39;.quantile.txt.gz..+&#39;,&#39;&#39;,.) %&gt;% 
+              gsub(&#39;\\.&#39;,&#39; &#39;,.) %&gt;% 
+              gsub(&#39;OPCs   COPs&#39;,&#39;OPCs / COPs&#39;,.)) %&gt;% 
   mutate(PCs=dirname(files) %&gt;% basename(.)) %&gt;% 
   mutate(file_content=map(files,read.table,header=F)) %&gt;% 
   unnest(file_content) %&gt;% 
@@ -699,13 +752,17 @@ PC120
 <div id="write" class="section level2">
 <h2>Write</h2>
 <p>Write eQTL results with different number of expression principal components</p>
-<pre class="r"><code>write_tsv(d,&#39;output/eqtl/eqtl.allPCs.txt&#39;)</code></pre>
+<pre class="r"><code>dir.create(&#39;output/eqtl/&#39;,showWarnings = FALSE)
+write_tsv(d,&#39;output/eqtl/eqtl.allPCs.txt&#39;)</code></pre>
 <p>Get number of PCs maximising the number of eQTL discoveries</p>
 <pre class="r"><code>selected_pcs &lt;- d %&gt;% 
   filter(adj_p&lt;0.05) %&gt;% 
   dplyr::count(PCs) %&gt;% filter(n==max(n))</code></pre>
 <p>Write eQTL results with selected number of PCs</p>
-<pre class="r"><code>d %&gt;% filter(PCs==selected_pcs$PCs) %&gt;% dplyr::select(-PCs) %&gt;% write_tsv(.,paste0(&#39;output/eqtl/eqtl.&#39;,selected_pcs$PCs,&#39;.txt&#39;))</code></pre>
+<pre class="r"><code>d %&gt;% 
+  filter(PCs==selected_pcs$PCs) %&gt;% 
+  dplyr::select(-PCs) %&gt;% 
+  write_tsv(.,paste0(&#39;output/eqtl/eqtl.&#39;,selected_pcs$PCs,&#39;.txt&#39;))</code></pre>
 </div>
 <div id="clean" class="section level2">
 <h2>Clean</h2>
@@ -723,7 +780,7 @@ done</code></pre>
 <div id="nominal-pass" class="section level1">
 <h1>Nominal pass</h1>
 <p>We now run a nominal pass to get pvalues for all SNPs (necessary for colocalization analysis).</p>
-<p>We will use 80 PCs as this maximised the number of eQTL discoveries using permutations.</p>
+<p>We will use 70 PCs as this maximised the number of eQTL discoveries using permutations.</p>
 <pre class="bash"><code>source ~/.bashrc
 cd $eqtl_path
 
@@ -734,13 +791,13 @@ ml Eigen/3.3.7
 ml Boost/1.67.0-foss-2018b
 
 
-mkdir -p &#39;PC80_nominal&#39;
-cd PC80_nominal
-ln -s ../PC80/*.bed.gz .
-ln -s ../PC80/*.bed.gz.tbi .
-ln -s ../PC80/*.cov.txt.gz .
-ln -s ../PC80/combined_final.vcf.gz .
-ln -s ../PC80/combined_final.vcf.gz.tbi .
+mkdir -p &#39;PC70_nominal&#39;
+cd PC70_nominal
+ln -s ../PC70/*.bed.gz .
+ln -s ../PC70/*.bed.gz.tbi .
+ln -s ../PC70/*.cov.txt.gz .
+ln -s ../PC70/combined_final.vcf.gz .
+ln -s ../PC70/combined_final.vcf.gz.tbi .
 
 for bed in *.bed.gz
 do
@@ -750,12 +807,12 @@ sed &#39;s/^ /sbatch --wrap=&quot;/; s/$/&quot;/&#39; $cell.commands.22.tmp &gt;
 sh $cell.commands.22.txt
 rm $cell.commands.22.tmp
 done</code></pre>
-<pre class="bash"><code>cd $eqtl_path&#39;/PC80_nominal&#39;
+<pre class="bash"><code>cd $eqtl_path&#39;/PC70_nominal&#39;
 grep &#39;Running time&#39; slurm-* | wc -l</code></pre>
 <pre><code>176</code></pre>
 <p>176 files successfully completed. All good!</p>
 <p>Now let’s gzip the association files and give them a nice name.</p>
-<pre class="bash"><code>cd $eqtl_path&#39;/PC80_nominal&#39;
+<pre class="bash"><code>cd $eqtl_path&#39;/PC70_nominal&#39;
 rm *quantile.txt.gz
 rm *.bed.gz
 rm *.bed.gz.tbi  
@@ -780,17 +837,17 @@ done</code></pre>
 <pre class="r"><code>bed_files_fastqtl &lt;- list.files(&#39;data_sensitive/eqtl&#39;,pattern=&#39;.bed.gz$&#39;,full.names = T)</code></pre>
 <pre class="r"><code>read_fastQTL_write_QTLtools &lt;- function(i){
   output_file_name &lt;- gsub(&#39;bed.gz&#39;,&#39;qtltools.bed&#39;,bed_files_fastqtl[i]) %&gt;% 
-    gsub(&#39;data_sensitive/eqtl/&#39;,&#39;data_sensitive/eqtl/PC80_indep/&#39;,.)
+    gsub(&#39;data_sensitive/eqtl/&#39;,&#39;data_sensitive/eqtl/PC70_indep/&#39;,.)
   
   fasqtl &lt;- read_tsv(bed_files_fastqtl[i]) %&gt;% 
     mutate(pid=&#39;.&#39;,strand=&#39;+&#39;) %&gt;% 
     dplyr::select(`#Chr`:ID,pid,strand,everything())
  
-  dir.create(&#39;data_sensitive/eqtl/PC80_indep&#39;,recursive = TRUE,showWarnings = FALSE)
+  dir.create(&#39;data_sensitive/eqtl/PC70_indep&#39;,recursive = TRUE,showWarnings = FALSE)
   write_tsv(fasqtl,output_file_name) 
 }</code></pre>
 <pre class="r"><code>mclapply(1:length(bed_files_fastqtl),read_fastQTL_write_QTLtools,mc.cores = 8)</code></pre>
-<pre class="bash"><code>cd $eqtl_path&#39;/PC80_indep&#39;
+<pre class="bash"><code>cd $eqtl_path&#39;/PC70_indep&#39;
 ml tabix/0.2.6-goolf-1.7.20
 
 for f in *.qtltools.bed
@@ -800,7 +857,7 @@ done</code></pre>
 <ol start="2" style="list-style-type: decimal">
 <li>Perform permutation pass on all phenotypes</li>
 </ol>
-<pre class="bash"><code>cd $eqtl_path&#39;/PC80_indep&#39;
+<pre class="bash"><code>cd $eqtl_path&#39;/PC70_indep&#39;
 source ~/.bashrc
 
 ml foss/2018b
@@ -821,7 +878,7 @@ do
 echo &#39;sbatch --mem=4000MB --wrap=&quot;QTLtools cis --vcf combined_final.vcf.gz --bed &#39;$bed&#39; --cov &#39;$cell&#39;.cov.txt.gz --permute 1000 --normal --chunk &#39;$i&#39; 22 --out &#39;$cell&#39;.conditional_permute_&#39;$i&#39;_22&quot;&#39; &gt;&gt; $cell.commands.cond.permutation.22.txt
 done
 done</code></pre>
-<pre class="bash"><code>cd $eqtl_path&#39;/PC80_indep&#39;
+<pre class="bash"><code>cd $eqtl_path&#39;/PC70_indep&#39;
 source ~/.bashrc
 
 ml foss/2018b
@@ -834,20 +891,19 @@ ml zlib/1.2.11-GCCcore-7.3.0
 ml lzma/4.32.7-GCCcore-7.3.0
 ml cURL/7.60.0-GCCcore-7.3.0
 
-ln -s ../PC80/combined_final.vcf.gz .
-ln -s ../PC80/combined_final.vcf.gz.tbi .
-ln -s ../PC80/*.cov.txt.gz  .
+ln -s ../PC70/combined_final.vcf.gz .
+ln -s ../PC70/combined_final.vcf.gz.tbi .
+ln -s ../PC70/*.cov.txt.gz  .
 
 for f in *.commands.cond.permutation.22.txt
 do
 sh $f
 done</code></pre>
-<pre class="bash"><code>cd $eqtl_path&#39;/PC80_indep&#39;
+<pre class="bash"><code>cd $eqtl_path&#39;/PC70_indep&#39;
 grep &#39;Running time&#39; slurm-* | wc -l</code></pre>
-<pre><code>8</code></pre>
 <p>All good!</p>
 <p>Gather all output</p>
-<pre class="bash"><code>cd $eqtl_path&#39;/PC80_indep&#39;
+<pre class="bash"><code>cd $eqtl_path&#39;/PC70_indep&#39;
 
 for bed in *.qtltools.bed.gz
 do
@@ -858,7 +914,7 @@ rm *.conditional_permute_*</code></pre>
 <ol start="3" style="list-style-type: decimal">
 <li>Extract significant phenotypes</li>
 </ol>
-<pre class="bash"><code>cd $eqtl_path&#39;/PC80_indep&#39;
+<pre class="bash"><code>cd $eqtl_path&#39;/PC70_indep&#39;
 ml  R/4.0.1-foss-2018b
 wget https://raw.githubusercontent.com/qtltools/qtltools/master/scripts/qtltools_runFDR_cis.R .
 for f in *.conditional.permute.txt
@@ -867,7 +923,7 @@ cell=`echo $f | sed &#39;s/.conditional.permute.txt//&#39;`
 Rscript qtltools_runFDR_cis.R $f 0.05 $cell.permutations_all
 done</code></pre>
 <p>Read bed files and only retain significant genes.</p>
-<pre class="r"><code>bed_files &lt;- list.files(&#39;data_sensitive/eqtl/PC80_indep&#39;,pattern=&#39;.qtltools.bed.gz$&#39;,full.names = T)</code></pre>
+<pre class="r"><code>bed_files &lt;- list.files(&#39;data_sensitive/eqtl/PC70_indep&#39;,pattern=&#39;.qtltools.bed.gz$&#39;,full.names = T)</code></pre>
 <pre class="r"><code>read_fastQTL_write_QTLtools_conditional &lt;- function(i){
   output_file_name &lt;- gsub(&#39;qtltools.bed.gz&#39;,&#39;qtltools.conditional.bed&#39;,bed_files[i])
   
@@ -884,7 +940,7 @@ done</code></pre>
   write_delim(threshold,gsub(&#39;qtltools.bed.gz&#39;,&#39;permutations_all.thresholds.txt&#39;,bed_files[i]),col_names=FALSE,delim = &#39; &#39;) 
 }</code></pre>
 <pre class="r"><code>mclapply(1:length(bed_files),read_fastQTL_write_QTLtools_conditional,mc.cores=8)</code></pre>
-<pre class="bash"><code>cd $eqtl_path&#39;/PC80_indep&#39;
+<pre class="bash"><code>cd $eqtl_path&#39;/PC70_indep&#39;
 ml tabix/0.2.6-goolf-1.7.20
 
 for f in *.qtltools.conditional.bed
@@ -894,7 +950,7 @@ done</code></pre>
 <ol start="4" style="list-style-type: decimal">
 <li>Run conditional analysis</li>
 </ol>
-<pre class="bash"><code>cd $eqtl_path&#39;/PC80_indep&#39;
+<pre class="bash"><code>cd $eqtl_path&#39;/PC70_indep&#39;
 source ~/.bashrc
 
 ml foss/2018b
@@ -919,14 +975,14 @@ for f in *.commands.cond.txt
 do
 sh $f
 done</code></pre>
-<pre class="bash"><code>cd $eqtl_path&#39;/PC80_indep&#39;
+<pre class="bash"><code>cd $eqtl_path&#39;/PC70_indep&#39;
 grep &#39;Running time&#39; slurm-* | wc -l</code></pre>
 <pre><code>8</code></pre>
 <p>8 cell types successfully ran. All good!</p>
 <div id="write-1" class="section level2">
 <h2>Write</h2>
 <p>Get conditional results</p>
-<pre class="r"><code>conditional_files &lt;- list.files(&#39;data_sensitive/eqtl/PC80_indep&#39;,pattern=&#39;*conditional.txt&#39;,full.names = T)</code></pre>
+<pre class="r"><code>conditional_files &lt;- list.files(&#39;data_sensitive/eqtl/PC70_indep&#39;,pattern=&#39;*conditional.txt&#39;,full.names = T)</code></pre>
 <pre class="r"><code>header &lt;- c(&#39;phe_id&#39;,&#39;phe_chr&#39;,&#39;phe_from&#39;,&#39;phe_to&#39;,&#39;phe_strd&#39;,&#39;n_var_in_cis&#39;,&#39;dist_phe_var&#39;,&#39;var_id&#39;, &#39;var_chr&#39;,&#39;var_from&#39;,&#39;var_to&#39;,&#39;rank&#39;,&#39;fwd_pval&#39;,&#39;fwd_r_squared&#39;,&#39;fwd_slope&#39;,&#39;fwd_best_hit&#39;,&#39;fwd_sig&#39;, &#39;bwd_pval&#39;,&#39;bwd_r_squared&#39;,&#39;bwd_slope&#39;,&#39;bwd_best_hit&#39;,&#39;bwd_sig&#39;)</code></pre>
 <pre class="r"><code>d &lt;- tibble(files=conditional_files,
             cell_type=gsub(&#39;.conditional.txt&#39;,&#39;&#39;,basename(conditional_files)) %&gt;% 
@@ -938,7 +994,7 @@ grep &#39;Running time&#39; slurm-* | wc -l</code></pre>
   unnest(file_content) %&gt;% 
   setNames(c(&#39;cell_type&#39;,header)) %&gt;% 
   filter(bwd_best_hit==1)</code></pre>
-<pre class="r"><code>write_tsv(d,&#39;output/eqtl/eqtl.80PCs.indep.txt&#39;)</code></pre>
+<pre class="r"><code>write_tsv(d,&#39;output/eqtl/eqtl.70PCs.indep.txt&#39;)</code></pre>
 </div>
 </div>
 <div id="fine-mapping" class="section level1">
@@ -947,12 +1003,12 @@ grep &#39;Running time&#39; slurm-* | wc -l</code></pre>
 <ol style="list-style-type: decimal">
 <li>Get bed files for significant cis-eQTL</li>
 </ol>
-<pre class="r"><code>d &lt;- read_tsv(&#39;output/eqtl/eqtl.PC80.txt&#39;) %&gt;% 
+<pre class="r"><code>d &lt;- read_tsv(&#39;output/eqtl/eqtl.PC70.txt&#39;) %&gt;% 
   mutate(cell_type=make.names(cell_type)) %&gt;% 
   filter(adj_p&lt;0.05)</code></pre>
 <pre class="r"><code>bed_files_fastqtl &lt;- list.files(&#39;data_sensitive/eqtl&#39;,pattern=&#39;.bed.gz$&#39;,full.names = T)</code></pre>
 <pre class="r"><code>read_fastQTL_write_caveman &lt;- function(i){
-  output_file_name &lt;- gsub(&#39;bed.gz&#39;,&#39;caveman.bed&#39;,bed_files_fastqtl[i]) %&gt;% gsub(&#39;eqtl&#39;,&#39;eqtl/PC80_caveman&#39;,.)
+  output_file_name &lt;- gsub(&#39;bed.gz&#39;,&#39;caveman.bed&#39;,bed_files_fastqtl[i]) %&gt;% gsub(&#39;eqtl&#39;,&#39;eqtl/PC70_caveman&#39;,.)
   cell_type_file &lt;- basename(bed_files_fastqtl[i]) %&gt;% gsub(&#39;.bed.gz&#39;,&#39;&#39;,.)
 
   genes_to_keep &lt;- filter(d,cell_type==cell_type_file) %&gt;% pull(pid)
@@ -960,20 +1016,20 @@ grep &#39;Running time&#39; slurm-* | wc -l</code></pre>
   fasqtl &lt;- read_tsv(bed_files_fastqtl[i]) %&gt;% 
     filter(ID%in%genes_to_keep)
  
-  dir.create(&#39;data_sensitive/eqtl/PC80_caveman&#39;,showWarnings = FALSE)
+  dir.create(&#39;data_sensitive/eqtl/PC70_caveman&#39;,showWarnings = FALSE)
   write_tsv(fasqtl,output_file_name) 
 }</code></pre>
 <pre class="r"><code>mclapply(1:length(bed_files_fastqtl),read_fastQTL_write_caveman,mc.cores=8)</code></pre>
 <ol start="2" style="list-style-type: decimal">
 <li>Get bed files adjusted for covariates</li>
 </ol>
-<pre class="r"><code>write_tsv(d[,&#39;sid&#39;,drop=FALSE],&#39;data_sensitive/eqtl/PC80_caveman/sig_eQTL_snps.txt&#39;,col_names = FALSE)</code></pre>
-<pre class="bash"><code>cd $eqtl_path&#39;/PC80_caveman&#39;
-ln -s ../PC80/combined_final.vcf.gz .
-ln -s ../PC80/combined_final.vcf.gz.tbi .
+<pre class="r"><code>write_tsv(d[,&#39;sid&#39;,drop=FALSE],&#39;data_sensitive/eqtl/PC70_caveman/sig_eQTL_snps.txt&#39;,col_names = FALSE)</code></pre>
+<pre class="bash"><code>cd $eqtl_path&#39;/PC70_caveman&#39;
+ln -s ../PC70/combined_final.vcf.gz .
+ln -s ../PC70/combined_final.vcf.gz.tbi .
 
 zgrep -Fw -f sig_eQTL_snps.txt combined_final.vcf.gz | grep -v &#39;#&#39; | cut -f 1,2,3,4,5 &gt; sig_eQTL_snps_alleles.txt</code></pre>
-<pre class="r"><code>genotypes_selected &lt;- read_tsv(&#39;data_sensitive/eqtl/PC80_caveman/sig_eQTL_snps_alleles.txt&#39;,col_names = FALSE) %&gt;% 
+<pre class="r"><code>genotypes_selected &lt;- read_tsv(&#39;data_sensitive/eqtl/PC70_caveman/sig_eQTL_snps_alleles.txt&#39;,col_names = FALSE) %&gt;% 
   setNames(c(&#39;chr&#39;,&#39;pos&#39;,&#39;sid&#39;,&#39;A1&#39;,&#39;A2&#39;))</code></pre>
 <pre class="r"><code>cell_types &lt;- unique(d$cell_type)</code></pre>
 <pre class="r"><code>get_eqtl_cov &lt;- function(i){
@@ -982,14 +1038,14 @@ zgrep -Fw -f sig_eQTL_snps.txt combined_final.vcf.gz | grep -v &#39;#&#39; | cut
     left_join(.,genotypes_selected,by=&#39;sid&#39;) %&gt;% 
     dplyr::select(pid,chr,pos,A1,A2)
   
-  write_tsv(eqtl_cell_type,paste0(&#39;data_sensitive/eqtl/PC80_caveman/&#39;,make.names(cell_types[i]),&#39;.eqtl.list&#39;),col_names = FALSE)
+  write_tsv(eqtl_cell_type,paste0(&#39;data_sensitive/eqtl/PC70_caveman/&#39;,make.names(cell_types[i]),&#39;.eqtl.list&#39;),col_names = FALSE)
 }</code></pre>
 <pre class="r"><code>lapply(1:length(cell_types),get_eqtl_cov)</code></pre>
 <p>Now get covariates</p>
-<pre class="r"><code>cov_files &lt;- list.files(&#39;data_sensitive/eqtl/PC80&#39;,pattern = &#39;cov.txt.gz&#39;,full.names = TRUE) </code></pre>
+<pre class="r"><code>cov_files &lt;- list.files(&#39;data_sensitive/eqtl/PC70&#39;,pattern = &#39;cov.txt.gz&#39;,full.names = TRUE) </code></pre>
 <pre class="r"><code>read_cov_write &lt;- function(i){
   cov &lt;- read_tsv(cov_files[i])
-  out &lt;- gsub(&#39;.txt.gz&#39;,&#39;.caveman.txt&#39;,cov_files[i]) %&gt;% gsub(&#39;PC80&#39;,&#39;PC80_caveman&#39;,.)
+  out &lt;- gsub(&#39;.txt.gz&#39;,&#39;.caveman.txt&#39;,cov_files[i]) %&gt;% gsub(&#39;PC70&#39;,&#39;PC70_caveman&#39;,.)
   
   study &lt;- cov[4,][,-1] %&gt;% t() %&gt;% as.data.frame()
   study_model_matrix &lt;-  model.matrix(~0+V1,data=study) %&gt;% as.data.frame() %&gt;% t() %&gt;%
@@ -1004,7 +1060,7 @@ zgrep -Fw -f sig_eQTL_snps.txt combined_final.vcf.gz | grep -v &#39;#&#39; | cut
   write_tsv(cov_out,out)
 }</code></pre>
 <pre class="r"><code>lapply(1:length(cov_files),read_cov_write)</code></pre>
-<pre class="bash"><code>cd $eqtl_path&#39;/PC80_caveman&#39;
+<pre class="bash"><code>cd $eqtl_path&#39;/PC70_caveman&#39;
 source ~/.bashrc
 
 ml tabix/0.2.6-goolf-1.7.20
@@ -1015,7 +1071,7 @@ cell=`echo $f | sed &#39;s/.caveman.bed//&#39;`
 CaVEMaN --single-signal --eqtl &quot;$cell&quot;.eqtl.list --bed &quot;$f&quot; --vcf combined_final.vcf.gz \
      --out &quot;$cell&quot;.caveman.corrected.expression.bed --cov &quot;$cell&quot;.cov.caveman.txt
 done</code></pre>
-<pre class="bash"><code>cd $eqtl_path&#39;/PC80_caveman&#39;
+<pre class="bash"><code>cd $eqtl_path&#39;/PC70_caveman&#39;
 source ~/.bashrc
 mkdir -p results
 
@@ -1034,7 +1090,7 @@ sbatch --wrap=&quot;CaVEMaN --bed &#39;$f&#39; --vcf combined_final.vcf.gz --gen
      --job-number &#39;$i&#39; --normal --out results/&#39;$cell&#39;_&#39;$i&#39; --verbose&quot;
 done 
 done</code></pre>
-<pre class="bash"><code>cd $eqtl_path&#39;/PC80_caveman&#39;/results
+<pre class="bash"><code>cd $eqtl_path&#39;/PC70_caveman&#39;/results
 
 awk &#39;FNR&gt;1||NR==1&#39; Astrocytes_* &gt; Astrocytes.all
 awk &#39;FNR&gt;1||NR==1&#39; Endothelial.cells_* &gt; Endothelial.cells.all
@@ -1044,7 +1100,7 @@ awk &#39;FNR&gt;1||NR==1&#39; Microglia_* &gt; Microglia.all
 awk &#39;FNR&gt;1||NR==1&#39; Oligodendrocytes_* &gt; Oligodendrocytes.all
 awk &#39;FNR&gt;1||NR==1&#39; OPCs...COPs_* &gt; OPCs...COPs.all
 awk &#39;FNR&gt;1||NR==1&#39; Pericytes_* &gt; Pericytes.all</code></pre>
-<pre class="bash"><code>cd $eqtl_path&#39;/PC80_caveman&#39;/results
+<pre class="bash"><code>cd $eqtl_path&#39;/PC70_caveman&#39;/results
 source ~/.bashrc
 
 ml tabix/0.2.6-goolf-1.7.20
@@ -1054,7 +1110,7 @@ do
 CaVEMaN --best $f --out $f.best --verbose
 done
 rm *_*</code></pre>
-<pre class="r"><code>files &lt;- list.files(&#39;data_sensitive/eqtl/PC80_caveman/results&#39;,pattern=&#39;.best&#39;,full.names = TRUE)</code></pre>
+<pre class="r"><code>files &lt;- list.files(&#39;data_sensitive/eqtl/PC70_caveman/results&#39;,pattern=&#39;.best&#39;,full.names = TRUE)</code></pre>
 <pre class="r"><code>d &lt;- tibble(files) %&gt;% mutate(file_content=map(files,read_tsv)) %&gt;% 
   unnest(file_content) %&gt;% 
   mutate(cell_type=basename(files) %&gt;% gsub(&#39;\\.all.best&#39;,&#39;&#39;,.)) %&gt;% 
@@ -1062,7 +1118,7 @@ rm *_*</code></pre>
   mutate(cell_type=gsub(&#39;\\.&#39;,&#39; &#39;,cell_type)) %&gt;% 
   mutate(cell_type=gsub(&#39;OPCs   COPs&#39;,&#39;OPCs / COPs&#39;,cell_type)) %&gt;% 
   arrange(-Probability)</code></pre>
-<pre class="r"><code>write_tsv(d,&#39;output/eqtl/eqtl.80PCs.caveman.txt&#39;)</code></pre>
+<pre class="r"><code>write_tsv(d,&#39;output/eqtl/eqtl.70PCs.caveman.txt&#39;)</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
