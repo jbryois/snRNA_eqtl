@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong81a42b2"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 81a42b2 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstronge9917b0"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> e9917b0 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong81a42b2" class="panel-collapse collapse">
+<div id="strongRepositoryversionstronge9917b0" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 81a42b2. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version e9917b0. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -540,6 +540,7 @@ Untracked files:
     Untracked:  data/magma_specific_genes/
     Untracked:  data/metabrain/
     Untracked:  data/umap/
+    Untracked:  output/coloc/
     Untracked:  output/eqtl/
     Untracked:  output_tmp_QTLtools/
     Untracked:  output_tmp_fastQTL_sample_ambient_removed/
@@ -590,6 +591,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+e9917b0
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-25
+</td>
+<td>
+coloc
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+e0e499a
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-25
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1064,7 +1099,7 @@ library(coloc)
 library(parallel)
 library(GenomicRanges)
 library(rtracklayer)</code></pre>
-<pre class="r"><code>selected_trait &lt;- &#39;ad&#39;</code></pre>
+<pre class="r"><code>selected_trait &lt;- &#39;scz&#39;</code></pre>
 </div>
 <div id="process-gwas" class="section level1">
 <h1>Process GWAS</h1>
