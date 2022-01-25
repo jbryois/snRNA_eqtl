@@ -34,16 +34,23 @@ selected_trait <- 'ms'
 
 # MS GWAS
 
-```{r}
+```{r,message=FALSE}
 if(selected_trait=='ms'){
 sumstats <- vroom::vroom('data/gwas/ms/discovery_metav3.0.meta') %>% 
   mutate(CHR=paste0('chr',CHR)) %>% 
   filter(!is.na(P)) %>% 
   mutate(beta=log(OR),
          se=abs(beta/qnorm(P/2))) %>% 
-  dplyr::select(variant_id=SNP,p_value=P,chr=CHR,bp_b37=BP,effect_allele=A1,other_allele=A2,beta,se) %>% 
-  filter(beta!=0) #Some SNPs have OR=1, so se estimate = 0, leading to issues in coloc, we exclude these here
-
+  dplyr::select(variant_id=SNP,
+                p_value=P,
+                chr=CHR,
+                bp_b37=BP,
+                effect_allele=A1,
+                other_allele=A2,
+                beta,
+                se) %>% 
+  filter(beta!=0) %>% #Some SNPs have OR=1, so se estimate = 0, leading to issues in coloc, we exclude these here
+    dplyr::mutate(SNP_id_hg19=paste0(chr,':',bp_b37))
 
 loci <- read_tsv('data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt')
 }
@@ -51,7 +58,7 @@ loci <- read_tsv('data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt')
 
 # Load MAF
 
-We will later add the MAF of SNPs in our study to the MS sumstats as this is required by coloc to estimate sdY when the expression data was not standard normalized (which is the case for DICE). We make the assumption that MAF in DICE is similar to the MAF in our samples.
+We will later add the MAF of SNPs in our study to the MS sumstats as this is required by coloc to estimate sdY when the expression data was not standard normalized (which is the case for DICE). We make the assumption that MAF in DICE is similar to the MAF in our european eQTL study.
 
 ```{r,eval=TRUE}
 snp_pos <- data.table::fread('data_sensitive/genotypes/processed/snp_pos_hg38_hg19.mappings.txt',data.table = FALSE) %>% as_tibble() %>% 
@@ -60,7 +67,7 @@ snp_pos <- data.table::fread('data_sensitive/genotypes/processed/snp_pos_hg38_hg
 
 # Add closest gene to loci
 
-```{r,eval=TRUE}
+```{r,eval=TRUE,message=FALSE}
 closest <- read_tsv(paste0('data/gwas/',selected_trait,'/closest.protein.coding.bed'),col_names = FALSE) %>% 
   setNames(c('chr_snp','start_snp','end_snp','GWAS_snp','beta','chr_gene','start_gene','end_gene','gene','distance')) %>% 
   mutate(GWAS_snp_pos=paste0(chr_snp,':',start_snp)) %>% 
@@ -77,35 +84,31 @@ loci <- left_join(loci,closest,by='GWAS_snp_pos')
 
 ## GTEx Mappings
 
-```{r}
-mappings <- readRDS('data/gtex/variant_id_SNP_mapping.rds')
-```
-
-Code below - Run only once
-
-```{r,eval=FALSE}
-mappings <- fread('data/gtex/GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_Analysis_Freeze.lookup_table.txt',
-                  data.table = FALSE) %>% 
-  filter(num_alt_per_site==1) %>% 
-  filter(chr!='chrX') %>%
-  dplyr::select(id=variant_id,rs_id_dbSNP151_GRCh38p7,A1=alt,A2=ref,variant_id_b37) %>% 
-  dplyr::rename(variant_id=rs_id_dbSNP151_GRCh38p7) %>% 
-  filter(variant_id%in%sumstats$variant_id) %>% 
-  mutate(chr_hg19=sapply(str_split(variant_id_b37,'_'),"[", 1)) %>% 
-  mutate(pos_hg19=sapply(str_split(variant_id_b37,'_'),"[", 2)) %>% 
-  mutate(SNP_id_hg19=paste0('chr',chr_hg19,':',pos_hg19)) %>% 
-  dplyr::select(-chr_hg19,-pos_hg19,-variant_id_b37)
-```
-
-```{r,eval=FALSE}
-saveRDS(mappings,'data/gtex/variant_id_SNP_mapping.rds')
+```{r,eval=TRUE}
+if(!file.exists(paste0('data/gtex/variant_id_SNP_mapping.',selected_trait,'.rds'))){
+  mappings <- fread('data/gtex/GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_Analysis_Freeze.lookup_table.txt',
+                    data.table = FALSE) %>% 
+    filter(num_alt_per_site==1) %>% 
+    filter(chr!='chrX') %>%
+    dplyr::select(id=variant_id,rs_id_dbSNP151_GRCh38p7,A1=alt,A2=ref,variant_id_b37) %>% 
+    dplyr::rename(variant_id=rs_id_dbSNP151_GRCh38p7) %>% 
+    filter(variant_id%in%sumstats$variant_id) %>% 
+    mutate(chr_hg19=sapply(str_split(variant_id_b37,'_'),"[", 1)) %>% 
+    mutate(pos_hg19=sapply(str_split(variant_id_b37,'_'),"[", 2)) %>% 
+    mutate(SNP_id_hg19=paste0('chr',chr_hg19,':',pos_hg19)) %>% 
+    dplyr::select(-chr_hg19,-pos_hg19,-variant_id_b37)
+  
+saveRDS(mappings,paste0('data/gtex/variant_id_SNP_mapping.',selected_trait,'.rds'))
+} else{
+  mappings <- readRDS(paste0('data/gtex/variant_id_SNP_mapping.',selected_trait,'.rds'))
+}
 ```
 
 ## eQTL sumstats Locations
 
 ### GTEx
 
-Set location of nominal result files:
+Set location of nominal results files:
 
 ```{r}
 gtex_eqtl_path <- 'data/gtex/GTEx_Analysis_v8_EUR_eQTL_all_associations/'
@@ -176,9 +179,13 @@ prepare_eqtl_gtex <- function(gtex_tissue_path,chrom_locus,sumstats_locus){
   gtex <- read_parquet(gtex_file,
                        as_tibble = TRUE,
                        props=ParquetReaderProperties$create(use_threads=FALSE)) %>%
-    dplyr::select(gene=phenotype_id,id=variant_id,p_eqtl=pval_nominal,beta_eqtl=slope,se_eqtl=slope_se) %>% 
+    dplyr::select(gene=phenotype_id,
+                  id=variant_id,
+                  p_eqtl=pval_nominal,
+                  beta_eqtl=slope,
+                  se_eqtl=slope_se) %>% 
     inner_join(.,mappings,by='id') %>%
-    filter(variant_id%in%sumstats_locus$variant_id) %>% 
+    filter(SNP_id_hg19%in%sumstats_locus$SNP_id_hg19) %>% 
     filter(!is.na(beta_eqtl)) %>% 
     add_count(gene) %>% 
     filter(n>10) #Only keep genes with at least 10 SNPs
@@ -191,7 +198,12 @@ prepare_eqtl_gtex <- function(gtex_tissue_path,chrom_locus,sumstats_locus){
 prepare_eqtl_dice <- function(eqtl_path,chrom_locus,sumstats_locus){
   file <- paste0(eqtl_path,chrom_locus,'.gz')
   eqtl <- fread(file,header = FALSE,data.table=FALSE) %>% 
-    dplyr::select(gene=V3,p_eqtl=V7,beta_eqtl=V6,SNP_id_hg19=V2,A1=V5,A2=V4) %>% 
+    dplyr::select(gene=V3,
+                  p_eqtl=V7,
+                  beta_eqtl=V6,
+                  SNP_id_hg19=V2,
+                  A1=V5,
+                  A2=V4) %>% 
     mutate(se_eqtl=abs(beta_eqtl/qnorm(p_eqtl/2))) %>% #compute standard error from pvalue and beta
     filter(SNP_id_hg19%in%sumstats_locus$SNP_id_hg19) %>% 
   add_count(gene) %>% 
@@ -227,7 +239,8 @@ run_coloc <- function(tissue_sumstats,tissue_name,sumstats_locus,dice=FALSE){
        colnames(coloc_res_pval) <- x
     
     if (dice==TRUE){
-      #If dice dataset, the expression data was not inverse normal transformed. We will estimate sdY from N and MAF
+      #If dice dataset, the expression data was not inverse normal transformed. 
+      #We will estimate sdY from N and MAF
       
        coloc_res_pval <- coloc.abf(
        dataset1=list(beta=sumstats_locus_gene$beta,
@@ -257,8 +270,10 @@ run_coloc <- function(tissue_sumstats,tissue_name,sumstats_locus,dice=FALSE){
    rownames(direction_prop) <- 'prop_pos_direction'
    
    direction_sign <- sumstats_locus_gene %>% 
-     filter(p_eqtl==min(p_eqtl)) %>% #Take SNP with strongest evidence of an effect on gene expression
-     slice_min(n=1,p_value,with_ties=FALSE) %>% #If there are ties, take SNPs with lowest GWAS association (at random of ties).
+     #Take SNP with strongest evidence of an effect on gene expression
+     filter(p_eqtl==min(p_eqtl)) %>% 
+     #If there are ties, take SNPs with lowest GWAS association (at random of ties).
+     slice_min(n=1,p_value,with_ties=FALSE) %>% 
      summarise(direction=direction,
                beta_gwas=case_when(
                     (effect_allele==A1 & other_allele==A2)  ~ beta,
@@ -272,9 +287,9 @@ run_coloc <- function(tissue_sumstats,tissue_name,sumstats_locus,dice=FALSE){
                ) %>% 
      t() %>% 
      as.data.frame()
-   colnames(direction_sign) <- x
+    colnames(direction_sign) <- x
    
-   ## Add direction of effect to coloc results
+    #Add direction of effect to coloc results
     coloc_res_pval <- rbind(coloc_res_pval,direction_sign,direction_prop)
 
     return(coloc_res_pval)
@@ -328,8 +343,7 @@ coloc_results_all <- mclapply(1:nrow(loci),function(i){
 
   #Keep GWAS sumstats of SNPs in the locus
   sumstats_locus <- filter(sumstats,chr==chrom_locus) %>% 
-    filter(bp_b37>=start & bp_b37<=end) %>% 
-    dplyr::mutate(SNP_id_hg19=paste0(chr,':',bp_b37))
+    filter(bp_b37>=start & bp_b37<=end)
 
   #Running colocalization analysis
   
@@ -337,27 +351,37 @@ coloc_results_all <- mclapply(1:nrow(loci),function(i){
   
   ### eQTL
   eqtl_blood <- prepare_eqtl_gtex(gtex_eqtl_blood_path,chrom_locus,sumstats_locus)
-  eqtl_blood_coloc <- run_coloc(eqtl_blood,'blood',sumstats_locus) %>% add_meta(type_name='eQTL')
+  eqtl_blood_coloc <- run_coloc(eqtl_blood,'blood',sumstats_locus) %>% 
+    add_meta(type_name='eQTL')
   rm(eqtl_blood)
+  gc()
   
   eqtl_spleen <- prepare_eqtl_gtex(gtex_eqtl_spleen_path,chrom_locus,sumstats_locus)
-  eqtl_spleen_coloc <- run_coloc(eqtl_spleen,'spleen',sumstats_locus) %>% add_meta(type_name='eQTL')
+  eqtl_spleen_coloc <- run_coloc(eqtl_spleen,'spleen',sumstats_locus) %>% 
+    add_meta(type_name='eQTL')
   rm(eqtl_spleen)
+  gc()
   
   ### sQTL
   sqtl_blood <- prepare_eqtl_gtex(gtex_sqtl_blood_path,chrom_locus,sumstats_locus)
-  sqtl_blood_coloc <- run_coloc(sqtl_blood,'blood',sumstats_locus) %>% add_meta(type_name='sQTL',set_direction_to_0=TRUE)
+  sqtl_blood_coloc <- run_coloc(sqtl_blood,'blood',sumstats_locus) %>% 
+    add_meta(type_name='sQTL',set_direction_to_0=TRUE)
   rm(sqtl_blood)
+  gc()
   
   sqtl_spleen <- prepare_eqtl_gtex(gtex_sqtl_spleen_path,chrom_locus,sumstats_locus)
-  sqtl_spleen_coloc <- run_coloc(sqtl_spleen,'spleen',sumstats_locus) %>% add_meta(type_name='sQTL',set_direction_to_0=TRUE)
+  sqtl_spleen_coloc <- run_coloc(sqtl_spleen,'spleen',sumstats_locus) %>% 
+    add_meta(type_name='sQTL',set_direction_to_0=TRUE)
   rm(sqtl_spleen)
-
+  gc()
+  
   #Dice
   dice_res <- lapply(1:nrow(dice_files), function(j){
     dice_eqtl_file <- prepare_eqtl_dice(dice_files$files[j],chrom_locus,sumstats_locus)
-    dice_coloc <- run_coloc(dice_eqtl_file,dice_files$name[j],sumstats_locus,dice=TRUE) %>% add_meta(type_name='eQTL')
+    dice_coloc <- run_coloc(dice_eqtl_file,dice_files$name[j],sumstats_locus,dice=TRUE) %>% 
+      add_meta(type_name='eQTL')
     rm(dice_eqtl_file)
+    gc()
     return(dice_coloc)
   }) %>% bind_rows()
   
@@ -398,7 +422,9 @@ From biomart
 mart <- useDataset("hsapiens_gene_ensembl", useMart("ensembl"))
 genes <- unique(coloc_results_all$gene_parsed)
 G_list <- getBM(filters= "ensembl_gene_id", 
-                attributes= c("ensembl_gene_id","hgnc_symbol"),values=genes,mart= mart) %>% 
+                attributes= c("ensembl_gene_id","hgnc_symbol"),
+                values=genes,
+                mart= mart) %>% 
   dplyr::rename(gene_parsed=ensembl_gene_id)
 ```
 
@@ -407,12 +433,13 @@ coloc_results_all <- coloc_results_all %>% left_join(.,G_list,by='gene_parsed')
 ```
 
 ```{r}
-coloc_results_all <- coloc_results_all %>% dplyr::select(locus:beta_top_GWAS,symbol=hgnc_symbol,ensembl=gene_parsed,nsnps:coloc_method)
+coloc_results_all <- coloc_results_all %>% 
+  dplyr::select(locus:beta_top_GWAS,symbol=hgnc_symbol,ensembl=gene_parsed,nsnps:coloc_method)
 ```
 
 ## Add LOEUF
 
-```{r}
+```{r,message=FALSE}
 loeuf <- read_tsv('data/gnomad_loeuf/supplementary_dataset_11_full_constraint_metrics.tsv') %>% 
   filter(canonical==TRUE) %>% 
   dplyr::select(gene,gene_id,transcript,oe_lof_upper,p) %>% 
@@ -428,6 +455,6 @@ coloc_results_all <- left_join(coloc_results_all,loeuf,by='ensembl')
 ## Write
 
 ```{r}
-dir.create('output/Coloc',showWarnings = FALSE)
-write_tsv(coloc_results_all,paste0('output/Coloc/coloc.',selected_trait,'.gtex_dice.txt'))
+dir.create('output/coloc',showWarnings = FALSE)
+write_tsv(coloc_results_all,paste0('output/coloc/coloc.',selected_trait,'.gtex_dice.txt'))
 ```
