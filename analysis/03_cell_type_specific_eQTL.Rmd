@@ -27,7 +27,7 @@ library(glmmTMB)
 
 ## Prepare data
 
-1. Load eQTL data
+Load eQTL data
 
 ```{r,message=FALSE,eval=TRUE}
 d <- read_tsv('output/eqtl/eqtl.PC70.txt')
@@ -37,7 +37,7 @@ d <- read_tsv('output/eqtl/eqtl.PC70.txt')
 d_sig <- filter(d,adj_p<0.05)
 ```
 
-2. Load gene expression
+Load gene expression
 
 ```{r,eval=TRUE}
 expression_ms <- readRDS('data_sensitive/expression/ms_sum_expression.individual_id.rds') %>% mutate(dataset='ms')
@@ -74,14 +74,14 @@ tmm_libsizes <- mclapply(cell_types,get_tmm_libsize,mc.cores=8) %>%
   mutate(individual_id=make.names(individual_id))
 ```
 
-3. Load genotypes
+Load genotypes
 
 ```{r,eval=TRUE}
 genotype_file <- 'data_sensitive/genotypes/processed/combined_final.vcf.gz'
 snp_positions_file <- 'data_sensitive/eqtl/PC70_caveman/sig_eQTL_snps_alleles.txt'
 ```
   
-```{r,eval=TRUE}
+```{r,eval=TRUE,message=FALSE}
 snp_coordinates <- read_tsv(snp_positions_file,col_names = FALSE) %>% setNames(c('chr','start','sid','A1','A2'))
 ```
 
@@ -99,7 +99,7 @@ genotypes <- tabix.read.table(genotype_file, paste0(snp_coordinates$chr,':',snp_
   dplyr::rename(sid=ID)
 ```
 
-4. Get covariates
+Get covariates
 
 ```{r,message=FALSE,eval=TRUE}
 cov_files <- list.files('data_sensitive/eqtl/PC70/',pattern = 'cov.txt.gz',full.names = TRUE)
@@ -121,7 +121,7 @@ cov <- tibble(files = cov_files) %>%
   mutate_at(vars(contains('PC')), as.numeric)
 ```
 
-5. Function to try different optimizers
+Function to try different optimizers if model did not converge
 
 ```{r,eval=TRUE}
 #Function to try other optimizers if model did not converge
@@ -149,7 +149,7 @@ try_other_optimizers <- function(model_fit){
 }
 ```
 
-6. Run interaction model
+Run interaction model
 
 Note: 
 
@@ -248,6 +248,8 @@ interaction_model <- function(i){
 }
 ```
 
+Get results
+
 ```{r,eval=TRUE}
 results <- mclapply(1:nrow(d_sig),interaction_model,mc.cores=36) %>% 
   setNames(1:nrow(d_sig)) %>% 
@@ -256,6 +258,8 @@ results <- mclapply(1:nrow(d_sig),interaction_model,mc.cores=36) %>%
   as_tibble() %>% 
   mutate_if(is.numeric,signif,3)
 ```
+
+Write
 
 ```{r,eval=TRUE}
 dir.create('output/eqtl_specific/',showWarnings = FALSE)
