@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+<meta name="author" content="Julien Bryois" />
+
+<meta name="date" content="2022-01-25" />
+
+<title>GWAS - epigenome enrichment</title>
+
+<script src="site_libs/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="site_libs/jqueryui-1.11.4/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<link rel="icon" href="https://github.com/workflowr/workflowr-assets/raw/master/img/reproducible.png">
+<!-- Add a small amount of space between sections. -->
+<style type="text/css">
+div.section {
+  padding-top: 12px;
+}
+</style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+</style>
+
+
+<style type="text/css">
+/* padding for bootstrap navbar */
+body {
+  padding-top: 51px;
+  padding-bottom: 40px;
+}
+/* offset scroll position for anchor links (for fixed navbar)  */
+.section h1 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h2 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h3 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h4 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h5 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.section h6 {
+  padding-top: 56px;
+  margin-top: -56px;
+}
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #ffffff;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script>
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark it active
+  menuAnchor.parent().addClass('active');
+
+  // if it's got a parent navbar menu mark it active as well
+  menuAnchor.closest('li.dropdown').addClass('active');
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "&#xe258;";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row-fluid">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">snRNA_eqtl</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">About</a>
+</li>
+<li>
+  <a href="license.html">License</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">GWAS - epigenome enrichment</h1>
+<h4 class="author">Julien Bryois</h4>
+<h4 class="date">January 25, 2022</h4>
+
+</div>
+
+
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-report" data-toggle="collapse" data-target="#workflowr-report">
+<span class="glyphicon glyphicon-list" aria-hidden="true"></span> workflowr <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span>
+</button>
+</p>
+<div id="workflowr-report" class="collapse">
+<ul class="nav nav-tabs">
+<li class="active">
+<a data-toggle="tab" href="#summary">Summary</a>
+</li>
+<li>
+<a data-toggle="tab" href="#checks"> Checks <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> </a>
+</li>
+<li>
+<a data-toggle="tab" href="#versions">Past versions</a>
+</li>
+</ul>
+<div class="tab-content">
+<div id="summary" class="tab-pane fade in active">
+<p>
+<strong>Last updated:</strong> 2022-01-25
+</p>
+<p>
+<strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
+</p>
+<p>
+<strong>Knit directory:</strong> <code>snRNA_eqtl/</code> <span class="glyphicon glyphicon-question-sign" aria-hidden="true" title="This is the local directory in which the code in this file was executed."> </span>
+</p>
+<p>
+This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis was created with <a
+  href="https://github.com/jdblischak/workflowr">workflowr</a> (version 1.6.2). The <em>Checks</em> tab describes the reproducibility checks that were applied when the results were created. The <em>Past versions</em> tab lists the development history.
+</p>
+<hr>
+</div>
+<div id="checks" class="tab-pane fade">
+<div id="workflowr-checks" class="panel-group">
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRMarkdownfilestronguptodate"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>R Markdown file:</strong> up-to-date </a>
+</p>
+</div>
+<div id="strongRMarkdownfilestronguptodate" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great! Since the R Markdown file has been committed to the Git repository, you know the exact version of the code that produced these results.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongEnvironmentstrongempty"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Environment:</strong> empty </a>
+</p>
+</div>
+<div id="strongEnvironmentstrongempty" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! The global environment was empty. Objects defined in the global environment can affect the analysis in your R Markdown file in unknown ways. For reproduciblity it’s best to always run the code in an empty environment.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSeedstrongcodesetseed20211124code"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Seed:</strong> <code>set.seed(20211124)</code> </a>
+</p>
+</div>
+<div id="strongSeedstrongcodesetseed20211124code" class="panel-collapse collapse">
+<div class="panel-body">
+<p>The command <code>set.seed(20211124)</code> was run prior to running the code in the R Markdown file. Setting a seed ensures that any results that rely on randomness, e.g. subsampling or permutations, are reproducible.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongSessioninformationstrongrecorded"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Session information:</strong> recorded </a>
+</p>
+</div>
+<div id="strongSessioninformationstrongrecorded" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Recording the operating system, R version, and package versions is critical for reproducibility.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongCachestrongnone"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Cache:</strong> none </a>
+</p>
+</div>
+<div id="strongCachestrongnone" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Nice! There were no cached chunks for this analysis, so you can be confident that you successfully produced the results during this run.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongFilepathsstrongrelative"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>File paths:</strong> relative </a>
+</p>
+</div>
+<div id="strongFilepathsstrongrelative" class="panel-collapse collapse">
+<div class="panel-body">
+<p>Great job! Using relative paths to the files within your workflowr project makes it easier to run your code on other machines.</p>
+</div>
+</div>
+</div>
+<div class="panel panel-default">
+<div class="panel-heading">
+<p class="panel-title">
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong615e226"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 615e226 </a>
+</p>
+</div>
+<div id="strongRepositoryversionstrong615e226" class="panel-collapse collapse">
+<div class="panel-body">
+<p>
+Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
+</p>
+<p>
+The results in this page were generated with repository version 615e226. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+</p>
+<p>
+Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
+</p>
+<pre><code>
+Ignored files:
+    Ignored:    .Rproj.user/
+    Ignored:    data/magma_interaction_eqtl/
+    Ignored:    data/magma_specific_genes/
+    Ignored:    data_sensitive/
+
+Untracked files:
+    Untracked:  analysis/._index.Rmd
+    Untracked:  analysis/06_eqtl_epigenome_enrichment.Rmd
+    Untracked:  analysis/08_prepare_Shiny.Rmd
+    Untracked:  analysis/additional/
+    Untracked:  analysis/alternatives/
+    Untracked:  analysis/clean_analysis.Rmd
+    Untracked:  analysis/get_tables.Rmd
+    Untracked:  analysis/log_run_slurm_out
+    Untracked:  analysis/log_run_slurm_stderr
+    Untracked:  analysis/portfolio/
+    Untracked:  analysis/run_slurm.Rscript
+    Untracked:  analysis/run_slurm.sbatch
+    Untracked:  data/dice/
+    Untracked:  data/epigenome_enrichment/
+    Untracked:  data/gencode/
+    Untracked:  data/gnomad_loeuf/
+    Untracked:  data/gtex/
+    Untracked:  data/gwas/
+    Untracked:  data/gwas_epigenome_overlap/
+    Untracked:  data/metabrain/
+    Untracked:  data/umap/
+    Untracked:  output/coloc/
+    Untracked:  output/eqtl/
+    Untracked:  output/gwas_epigenome_overlap/
+    Untracked:  output_tmp_QTLtools/
+    Untracked:  output_tmp_fastQTL_sample_ambient_removed/
+
+Unstaged changes:
+    Modified:   .gitignore
+    Modified:   analysis/02_run_eQTL.Rmd
+    Modified:   analysis/_site.yml
+    Modified:   analysis/index.Rmd
+    Modified:   analysis/plot_figures.Rmd
+    Deleted:    output/README.md
+
+</code></pre>
+<p>
+Note that any generated files, e.g. HTML, png, CSS, etc., are not included in this status report because it is ok for generated content to have uncommitted changes.
+</p>
+</div>
+</div>
+</div>
+</div>
+<hr>
+</div>
+<div id="versions" class="tab-pane fade">
+
+<p>
+These are the previous versions of the repository in which changes were made to the R Markdown (<code>analysis/07_GWAS_epigenome_overlap.Rmd</code>) and HTML (<code>docs/07_GWAS_epigenome_overlap.html</code>) files. If you’ve configured a remote Git repository (see <code>?wflow_git_remote</code>), click on the hyperlinks in the table below to view the files as they were in that past version.
+</p>
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+File
+</th>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+<th>
+Message
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+615e226
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-25
+</td>
+<td>
+GWAS epigenome overlap
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<hr>
+</div>
+</div>
+</div>
+<div id="libraries" class="section level2">
+<h2>Libraries</h2>
+<pre class="r"><code>library(tidyverse)
+library(liftOver)</code></pre>
+<pre class="r"><code>path &lt;-  system.file(package=&quot;liftOver&quot;, &quot;extdata&quot;, &quot;hg38ToHg19.over.chain&quot;)
+ch &lt;-  import.chain(path)</code></pre>
+<pre class="r"><code>r2_threshold &lt;- 0.8</code></pre>
+</div>
+<div id="get-gwas-linked-snps" class="section level2">
+<h2>Get GWAS linked SNPs</h2>
+<pre class="r"><code>get_gwas_linked_snps &lt;- function(x,threshold=r2_threshold){
+  if(nrow(x)&gt;1){
+    x &lt;- filter(x,R2&gt;=0.1) %&gt;% 
+      mutate(chr_snp=Coord %&gt;% gsub(&#39;:.+&#39;,&#39;&#39;,.) %&gt;% unique(),
+             chr_numeric=gsub(&#39;chr&#39;,&#39;&#39;,chr_snp),
+             start_snp=Coord %&gt;% gsub(&#39;chr[0-9]{1,2}:&#39;,&#39;&#39;,.) %&gt;% as.numeric(),
+             end_snp=start_snp) %&gt;% 
+      dplyr::select(chr_snp,start_snp,end_snp,everything()) %&gt;% 
+      dplyr::select(-Correlated_Alleles,-Dprime,-Alleles,-Coord) %&gt;% 
+      mutate(locus_name=paste0(chr_snp,&#39;:&#39;,min(start_snp),&#39;_&#39;,max(end_snp))) %&gt;% 
+      dplyr::rename(Distance_from_index_SNP=Distance)
+    
+    top_snp_df &lt;- filter(x,Distance_from_index_SNP==0) 
+    top_snp_pos &lt;- top_snp_df %&gt;% mutate(Coord=paste0(chr_snp,&#39;:&#39;,start_snp)) %&gt;%  pull(Coord)
+
+    x &lt;- filter(x,R2&gt;=threshold) %&gt;%  
+      mutate(GWAS_snp_pos=top_snp_pos) %&gt;% 
+      mutate(RS_Number=ifelse(RS_Number==&#39;.&#39;,paste0(chr_snp,&#39;:&#39;,start_snp,&#39;-&#39;,end_snp),RS_Number))
+    
+    return(x)
+  }
+  else{
+    return(NULL)
+  }
+}</code></pre>
+<div id="pd" class="section level3">
+<h3>PD</h3>
+<pre class="r"><code>proxy_snps_pd &lt;- readRDS(&#39;data/gwas/pd/loci_LDlinkR.allSNPs.EUR.rds&#39;)</code></pre>
+<pre class="r"><code>potential_causal_snps_pd &lt;- mclapply(proxy_snps_pd,get_gwas_linked_snps,mc.cores=20) %&gt;% 
+  bind_rows() %&gt;% 
+  arrange(chr_numeric,start_snp) %&gt;% 
+  dplyr::select(-chr_numeric)  %&gt;% 
+  mutate(trait=&#39;pd&#39;)</code></pre>
+</div>
+<div id="ad" class="section level3">
+<h3>AD</h3>
+<pre class="r"><code>proxy_snps_ad &lt;- readRDS(&#39;data/gwas/ad/loci_LDlinkR.allSNPs.EUR.rds&#39;)</code></pre>
+<pre class="r"><code>potential_causal_snps_ad &lt;- mclapply(proxy_snps_ad,get_gwas_linked_snps,mc.cores=20) %&gt;% 
+  bind_rows() %&gt;% 
+  arrange(chr_numeric,start_snp) %&gt;% 
+  dplyr::select(-chr_numeric)  %&gt;% 
+  mutate(trait=&#39;ad&#39;)</code></pre>
+</div>
+<div id="ms" class="section level3">
+<h3>MS</h3>
+<pre class="r"><code>proxy_snps_ms &lt;- readRDS(&#39;data/gwas/ms/loci_LDlinkR.allSNPs.EUR.rds&#39;)</code></pre>
+<pre class="r"><code>potential_causal_snps_ms &lt;- mclapply(proxy_snps_ms,get_gwas_linked_snps,mc.cores=20) %&gt;% 
+  bind_rows() %&gt;% 
+  arrange(chr_numeric,start_snp) %&gt;% 
+  dplyr::select(-chr_numeric)  %&gt;% 
+  mutate(trait=&#39;ms&#39;)</code></pre>
+</div>
+<div id="scz" class="section level3">
+<h3>SCZ</h3>
+<pre class="r"><code>proxy_snps_scz &lt;- readRDS(&#39;data/gwas/scz/loci_LDlinkR.allSNPs.EUR.rds&#39;)</code></pre>
+<pre class="r"><code>potential_causal_snps_scz &lt;- mclapply(proxy_snps_scz,get_gwas_linked_snps,mc.cores=20) %&gt;% 
+  bind_rows() %&gt;% 
+  arrange(chr_numeric,start_snp) %&gt;% 
+  dplyr::select(-chr_numeric)  %&gt;% 
+  mutate(trait=&#39;scz&#39;)</code></pre>
+</div>
+<div id="write" class="section level3">
+<h3>Write</h3>
+<pre class="r"><code>potential_causal_snps &lt;- rbind(potential_causal_snps_pd,potential_causal_snps_ad,potential_causal_snps_ms,potential_causal_snps_scz)
+write_tsv(potential_causal_snps,paste0(&#39;data/gwas_epigenome_overlap/GWAS_1kg_linked_SNPs_r&#39;,r2_threshold,&#39;.bed&#39;),col_names = FALSE)</code></pre>
+</div>
+</div>
+<div id="prepare-annotation" class="section level2">
+<h2>Prepare Annotation</h2>
+<div id="process-data-from-corces-et-al." class="section level3">
+<h3>Process data from Corces et al.</h3>
+<pre class="r"><code>corces_hg38 &lt;- readxl::read_xlsx(&#39;data/epigenome_enrichment/external_data/corces/Corces_etal_Nat_Neuro_2020_TableS4.xlsx&#39;,skip=16)</code></pre>
+<pre class="r"><code>corces_hg38 &lt;- corces_hg38 %&gt;% 
+  gather(cell_type,present,ExcitatoryNeurons:OPCs) %&gt;% 
+  group_by(Peak_ID) %&gt;% 
+  mutate(count_present=sum(present)) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(specific=ifelse(present==1 &amp; count_present==1,1,0)) %&gt;% 
+  filter(present==1) %&gt;% 
+  mutate(study=&#39;Corces&#39;) %&gt;% 
+  dplyr::select(hg38_Chromosome,hg38_Start,hg38_Stop,study,cell_type,specific,Annotation) %&gt;% 
+  makeGRangesFromDataFrame(., TRUE)</code></pre>
+<p>Lift to hg19</p>
+<pre class="r"><code>corces_hg19 &lt;- liftOver(corces_hg38,ch) %&gt;% 
+  unlist() %&gt;% 
+  as.data.frame() %&gt;% 
+  as_tibble() %&gt;% 
+  dplyr::select(seqnames:end,study,cell_type,specific,Annotation) %&gt;% 
+  write_tsv(.,&#39;data/gwas_epigenome_overlap/corces_hg19.bed&#39;,col_names=FALSE)</code></pre>
+</div>
+<div id="process-data-from-nott-et-al." class="section level3">
+<h3>Process data from Nott et al.</h3>
+<p>Hg19</p>
+<pre class="r"><code>process_nott &lt;- function(df,cell_type,Annotation){
+  df &lt;- setNames(df,c(&#39;chr&#39;,&#39;start&#39;,&#39;end&#39;)) %&gt;% filter(!is.na(chr))
+  df &lt;- df %&gt;% 
+    filter(chr%in%paste0(&#39;chr&#39;,1:22)) %&gt;%
+    arrange(chr,start) %&gt;% 
+    unique() %&gt;% 
+    mutate(study=&#39;Nott&#39;,cell_type=cell_type, Annotation=Annotation) %&gt;% 
+    write_tsv(.,paste0(&#39;data/epigenome_enrichment/external_data/nott/&#39;,cell_type,&#39;.&#39;,Annotation,&#39;.bed&#39;),col_names = FALSE)
+}</code></pre>
+<pre class="r"><code>astro_enh &lt;- readxl::read_xlsx(&#39;data/epigenome_enrichment/external_data/nott/Nott_etal_Science2019_Table_S5.xlsx&#39;,skip=0,sheet=5) %&gt;% 
+  process_nott(.,cell_type=&#39;Astrocytes&#39;,Annotation=&#39;Enhancer&#39;)</code></pre>
+<pre class="r"><code>astro_promoter &lt;- readxl::read_xlsx(&#39;data/epigenome_enrichment/external_data/nott/Nott_etal_Science2019_Table_S5.xlsx&#39;,skip=0,sheet=6) %&gt;% 
+  process_nott(.,cell_type=&#39;Astrocytes&#39;,Annotation=&#39;Promoter&#39;)</code></pre>
+<pre class="r"><code>neuronal_enh &lt;- readxl::read_xlsx(&#39;data/epigenome_enrichment/external_data/nott/Nott_etal_Science2019_Table_S5.xlsx&#39;,skip=0,sheet=7) %&gt;% 
+  process_nott(.,cell_type=&#39;Neurons&#39;,Annotation=&#39;Enhancer&#39;)</code></pre>
+<pre class="r"><code>neuronal_promoter &lt;- readxl::read_xlsx(&#39;data/epigenome_enrichment/external_data/nott/Nott_etal_Science2019_Table_S5.xlsx&#39;,skip=0,sheet=8) %&gt;% 
+  process_nott(.,cell_type=&#39;Neurons&#39;,Annotation=&#39;Promoter&#39;)</code></pre>
+<pre class="r"><code>oligo_enh &lt;- readxl::read_xlsx(&#39;data/epigenome_enrichment/external_data/nott/Nott_etal_Science2019_Table_S5.xlsx&#39;,skip=0,sheet=9) %&gt;% 
+  process_nott(.,cell_type=&#39;Oligodendrocytes&#39;,Annotation=&#39;Enhancer&#39;)</code></pre>
+<pre class="r"><code>oligo_promoter &lt;- readxl::read_xlsx(&#39;data/epigenome_enrichment/external_data/nott/Nott_etal_Science2019_Table_S5.xlsx&#39;,skip=0,sheet=10) %&gt;% 
+  process_nott(.,cell_type=&#39;Oligodendrocytes&#39;,Annotation=&#39;Promoter&#39;)</code></pre>
+<pre class="r"><code>micro_enhancer &lt;- readxl::read_xlsx(&#39;data/epigenome_enrichment/external_data/nott/Nott_etal_Science2019_Table_S5.xlsx&#39;,skip=0,sheet=11) %&gt;% 
+  process_nott(.,cell_type=&#39;Microglia&#39;,Annotation=&#39;Enhancer&#39;)</code></pre>
+<pre class="r"><code>micro_promoter &lt;- readxl::read_xlsx(&#39;data/epigenome_enrichment/external_data/nott/Nott_etal_Science2019_Table_S5.xlsx&#39;,skip=0,sheet=12) %&gt;% 
+  process_nott(.,cell_type=&#39;Microglia&#39;,Annotation=&#39;Promoter&#39;)</code></pre>
+<div id="promoter-and-enhancer-specific-peaks" class="section level4">
+<h4>Promoter and enhancer specific peaks</h4>
+<pre class="bash"><code>source ~/.bashrc
+cd data/epigenome_enrichment/external_data/nott
+
+ml bedtools/2.25.0-goolf-1.7.20
+bedtools intersect -v -a Astrocytes.Enhancer.bed -b Microglia.Enhancer.bed Neurons.Enhancer.bed Oligodendrocytes.Enhancer.bed &gt; Astrocytes.Enhancer_specific.bed
+bedtools intersect -v -a Microglia.Enhancer.bed -b Astrocytes.Enhancer.bed Neurons.Enhancer.bed Oligodendrocytes.Enhancer.bed &gt; Microglia.Enhancer_specific.bed
+bedtools intersect -v -a Neurons.Enhancer.bed -b Astrocytes.Enhancer.bed Microglia.Enhancer.bed Oligodendrocytes.Enhancer.bed &gt; Neurons.Enhancer_specific.bed
+bedtools intersect -v -a Oligodendrocytes.Enhancer.bed -b Astrocytes.Enhancer.bed Microglia.Enhancer.bed Neurons.Enhancer.bed &gt; Oligodendrocytes.Enhancer_specific.bed</code></pre>
+<pre class="bash"><code>source ~/.bashrc
+cd data/epigenome_enrichment/external_data/nott
+
+ml bedtools/2.25.0-goolf-1.7.20
+bedtools intersect -v -a Astrocytes.Promoter.bed -b Microglia.Promoter.bed Neurons.Promoter.bed Oligodendrocytes.Promoter.bed &gt; Astrocytes.Promoter_specific.bed
+bedtools intersect -v -a Microglia.Promoter.bed -b Astrocytes.Promoter.bed Neurons.Promoter.bed Oligodendrocytes.Promoter.bed &gt; Microglia.Promoter_specific.bed
+bedtools intersect -v -a Neurons.Promoter.bed -b Astrocytes.Promoter.bed Microglia.Promoter.bed Oligodendrocytes.Promoter.bed &gt; Neurons.Promoter_specific.bed
+bedtools intersect -v -a Oligodendrocytes.Promoter.bed -b Astrocytes.Promoter.bed Microglia.Promoter.bed Neurons.Promoter.bed &gt; Oligodendrocytes.Promoter_specific.bed</code></pre>
+<pre class="r"><code>specific_files &lt;- list.files(&#39;data/epigenome_enrichment/external_data/nott&#39;,pattern=&#39;specific.bed&#39;,full.names = TRUE)
+Nott_specific_hg19 &lt;- tibble(files=specific_files) %&gt;% 
+  mutate(file_content=map(files,read_tsv,col_names=FALSE)) %&gt;% 
+  unnest(file_content) %&gt;% 
+  dplyr::select(-files) %&gt;% 
+  mutate(id=paste0(X1,&#39;:&#39;,X2,&#39;-&#39;,X3,&#39;-&#39;,X5,&#39;-&#39;,X6))</code></pre>
+<pre class="r"><code>nott_files &lt;- list.files(&#39;data/epigenome_enrichment/external_data/nott&#39;,pattern=&#39;.bed&#39;,full.names = TRUE) %&gt;% grep(&#39;specific&#39;,.,value=TRUE,invert=TRUE)
+nott_hg19 &lt;- tibble(files=nott_files) %&gt;% 
+  mutate(file_content=map(files,read_tsv,col_names=FALSE)) %&gt;% 
+  unnest(file_content) %&gt;% 
+  dplyr::select(-files) %&gt;% 
+  mutate(id=paste0(X1,&#39;:&#39;,X2,&#39;-&#39;,X3,&#39;-&#39;,X5,&#39;-&#39;,X6)) %&gt;% 
+  mutate(specific=ifelse(id%in%Nott_specific_hg19$id,1,0)) %&gt;% 
+  setNames(c(&#39;seqnames&#39;,&#39;start&#39;,&#39;end&#39;,&#39;study&#39;,&#39;cell_type&#39;,&#39;Annotation&#39;,&#39;id&#39;,&#39;specific&#39;)) %&gt;% 
+  dplyr::select(seqnames,start,end,study,cell_type,specific,Annotation)</code></pre>
+</div>
+</div>
+</div>
+<div id="run-overlap" class="section level1">
+<h1>Run Overlap</h1>
+<p>Get all peaks discovered in corces et al. and nott et al.</p>
+<pre class="r"><code>bed &lt;- rbind(corces_hg19,nott_hg19) %&gt;% 
+  arrange(seqnames,start) %&gt;% 
+  write_tsv(.,&#39;data/gwas_epigenome_overlap/epigenomic_marks.bed&#39;,col_names=FALSE)</code></pre>
+<p>Add distance from enhancer to closest TSS</p>
+<pre class="r"><code>gtf &lt;- rtracklayer::import(&#39;data/gencode/gencode.v39lift37.annotation.gtf.gz&#39;) %&gt;% 
+  as.data.frame() %&gt;% 
+  dplyr::filter(type==&#39;gene&#39;,gene_type==&#39;protein_coding&#39;) %&gt;% 
+  dplyr::select(seqnames,start,end,strand,gene_id,gene_name) %&gt;% 
+  mutate(TSS_start=ifelse(strand==&#39;+&#39;,start,end),
+         TSS_end=ifelse(strand==&#39;+&#39;,start,end)) %&gt;% 
+  as_tibble() %&gt;% 
+  mutate(gene=paste0(gene_name,&#39;_&#39;,gsub(&#39;\\..+&#39;,&#39;&#39;,gene_id))) %&gt;% 
+  filter(seqnames %in% paste0(&#39;chr&#39;,1:22)) %&gt;% 
+  mutate(seqnames=as.character(seqnames)) %&gt;% 
+  arrange(seqnames,start) %&gt;% 
+  dplyr::select(seqnames,TSS_start,TSS_end,gene) %&gt;% 
+  write_tsv(.,&#39;data/gwas_epigenome_overlap/gencode.v39lift37.annotation.protein_coding.1_22.TSS.bed&#39;,col_names = FALSE)</code></pre>
+<pre class="bash"><code>source ~/.bashrc
+
+ml bedtools/2.25.0-goolf-1.7.20
+
+cd data/gwas_epigenome_overlap
+bedtools intersect -wa -wb -a epigenomic_marks.bed -b GWAS_1kg_linked_SNPs_r0.8.bed &gt; GWAS_epigenomic_marks.bed
+sort -k1,1V -k2,2n GWAS_epigenomic_marks.bed &gt; GWAS_epigenomic_marks.sorted.bed
+sort -k1,1V -k2,2n -k3,3n gencode.v39lift37.annotation.protein_coding.1_22.TSS.bed &gt; gencode.v39lift37.annotation.protein_coding.1_22.TSS.sorted.bed
+bedtools closest -d -t first -wa -a GWAS_epigenomic_marks.sorted.bed -b gencode.v39lift37.annotation.protein_coding.1_22.TSS.sorted.bed &gt; GWAS_epigenomic_marks.closest_gene.bed</code></pre>
+<p>Add distance to coloc genes</p>
+</div>
+<div id="coloc-load" class="section level1">
+<h1>Coloc load</h1>
+<pre class="r"><code>read_coloc &lt;- function(path){
+  coloc &lt;- read_tsv(path) %&gt;% 
+    dplyr::select(locus,ensembl,symbol,tissue,PP.H4.abf) %&gt;% 
+    dplyr::rename(phenotype=ensembl,hgnc_symbol=symbol,locus_name=locus) %&gt;% 
+    filter(PP.H4.abf&gt;0.7)
+  
+  #If coloc was performed for the same genes located in loci in close proximity, take the best
+  coloc &lt;- coloc %&gt;% group_by(phenotype,tissue) %&gt;% 
+  slice_max(n=1,order_by=PP.H4.abf,with_ties=FALSE) %&gt;% 
+  ungroup()
+  
+  return(coloc)
+}</code></pre>
+<pre class="r"><code>coloc_ms &lt;- read_coloc(&#39;output/coloc/coloc.ms.txt&#39;) %&gt;% mutate(trait=&#39;ms&#39;) 
+coloc_ad &lt;- read_coloc(&#39;output/coloc/coloc.ad.txt&#39;) %&gt;% mutate(trait=&#39;ad&#39;)
+coloc_scz &lt;- read_coloc(&#39;output/coloc/coloc.scz.txt&#39;) %&gt;% mutate(trait=&#39;scz&#39;)
+coloc_pd &lt;- read_coloc(&#39;output/coloc/coloc.pd.txt&#39;) %&gt;% mutate(trait=&#39;pd&#39;)</code></pre>
+<pre class="r"><code>coloc &lt;- rbind(coloc_ms,coloc_ad,coloc_scz,coloc_pd) %&gt;% 
+  arrange(-PP.H4.abf) %&gt;% 
+  mutate(gene=paste0(hgnc_symbol,&#39;_&#39;,phenotype)) %&gt;% 
+  dplyr::select(gene,tissue,PP.H4.abf,trait)</code></pre>
+<pre class="r"><code>gtf_coloc &lt;- inner_join(gtf,coloc,by=&#39;gene&#39;) %&gt;% 
+  mutate(chr_numeric = as.numeric(gsub(&#39;chr&#39;,&#39;&#39;,seqnames))) %&gt;% 
+  arrange(chr_numeric,TSS_start) %&gt;% 
+  dplyr::select(-chr_numeric) %&gt;% 
+  write_tsv(&#39;data/gwas_epigenome_overlap/coloc_genes.bed&#39;,col_names = FALSE)</code></pre>
+<pre class="bash"><code>source ~/.bashrc
+
+ml bedtools/2.25.0-goolf-1.7.20
+cd data/gwas_epigenome_overlap
+bedtools closest -d -t all -wa -a GWAS_epigenomic_marks.closest_gene.bed -b coloc_genes.bed &gt; GWAS_epigenomic_marks.closest_gene.closest_coloc.bed</code></pre>
+</div>
+<div id="results" class="section level1">
+<h1>Results</h1>
+<pre class="r"><code>dir.create(&#39;output/gwas_epigenome_overlap&#39;,showWarnings = FALSE)
+res &lt;- read_tsv(&#39;data/gwas_epigenome_overlap/GWAS_epigenomic_marks.closest_gene.closest_coloc.bed&#39;,col_names = FALSE) %&gt;% 
+  setNames(c(colnames(bed),colnames(potential_causal_snps),&#39;chr_gene&#39;,&#39;start_gene&#39;,&#39;end_gene&#39;,&#39;closest_TSS_from_regulatory_region&#39;,&#39;distance_to_closest_TSS&#39;,&#39;chr_coloc_gene&#39;,&#39;start_coloc_gene&#39;,&#39;end_coloc_gene&#39;,&#39;closest_coloc_TSS_from_regulatory_region&#39;,&#39;cell_type_coloc&#39;,&#39;PP.H4.abf&#39;,&#39;trait_coloc&#39;,&#39;distance_to_closest_coloc_TSS&#39;)) %&gt;% 
+  dplyr::select(-MAF,-chr_gene,-start_gene,-end_gene,-chr_coloc_gene,-start_coloc_gene,-end_coloc_gene) %&gt;% 
+  #add_count(RS_Number,name = &#39;n_SNP_overlap&#39;) %&gt;% 
+  dplyr::rename(chr_epigenome=seqnames,start_epigenome=start,end_epigenome=end,study_epigenome=study,Annotation_study=Annotation) %&gt;% 
+  arrange(chr_epigenome,start_epigenome) %&gt;% 
+  write_tsv(.,&#39;output/gwas_epigenome_overlap/GWAS_epigenomic_marks.closest_gene.closest_coloc.txt&#39;)</code></pre>
+<p>Get regions of interest</p>
+<pre class="r"><code>res &lt;- res %&gt;% mutate(cell_type_coloc_parsed = case_when(
+  cell_type_coloc %in% c(&#39;Excitatory neurons&#39;,&#39;Inhibitory neurons&#39;) ~&#39;Neurons&#39;,
+  cell_type_coloc %in% c(&#39;OPCs / COPs&#39;) ~&#39;OPCs&#39;,
+  TRUE ~ cell_type_coloc
+)) %&gt;% 
+  mutate(cell_type_parsed = case_when(
+    cell_type %in% c(&#39;ExcitatoryNeurons&#39;,&#39;InhibitoryNeurons&#39;) ~ &#39;Neurons&#39;,
+    TRUE ~cell_type
+  )) %&gt;% 
+  mutate(width=end_epigenome-start_epigenome+1)</code></pre>
+<p>Only keep SNPs overlaping epigenomic marks that are located less than 100kb from the TSS of a coloc gene, for which the epigenomic mark was detected in the coloc cell types.</p>
+<pre class="r"><code>potential_sequences_of_interest &lt;- filter(res,distance_to_closest_coloc_TSS&lt;100000,trait==trait_coloc,cell_type_coloc_parsed==cell_type_parsed)</code></pre>
+<pre class="r"><code>eqtl_files_to_read &lt;- potential_sequences_of_interest %&gt;% 
+  dplyr::select(chr_epigenome,cell_type_coloc) %&gt;% unique()</code></pre>
+<pre class="r"><code>get_eqtl_pvalue &lt;- function(i){
+  df &lt;- data.table::fread(paste0(&#39;data_sensitive/eqtl/PC70_nominal/&#39;,make.names(eqtl_files_to_read$cell_type_coloc[i]),&#39;.&#39;,gsub(&#39;chr&#39;,&#39;&#39;,eqtl_files_to_read$chr_epigenome[i]),&#39;.gz&#39;)) %&gt;% 
+    filter(V2%in%potential_sequences_of_interest$RS_Number,
+           V1%in%potential_sequences_of_interest$closest_coloc_TSS_from_regulatory_region) %&gt;% 
+    dplyr::select(closest_coloc_TSS_from_regulatory_region=V1,RS_Number=V2,p_eqtl=V4,beta_eqtl=V5) %&gt;% 
+    as_tibble() %&gt;% 
+    mutate(cell_type_coloc=eqtl_files_to_read$cell_type_coloc[i])
+}</code></pre>
+<pre class="r"><code>eqtl_pvalues &lt;- mclapply(1:nrow(eqtl_files_to_read),get_eqtl_pvalue,mc.cores=20) %&gt;% bind_rows()</code></pre>
+<pre class="r"><code>potential_sequences_of_interest &lt;- left_join(potential_sequences_of_interest,eqtl_pvalues,by=c(&#39;closest_coloc_TSS_from_regulatory_region&#39;,&#39;RS_Number&#39;,&#39;cell_type_coloc&#39;))</code></pre>
+<pre class="r"><code>potential_sequences_of_interest &lt;- potential_sequences_of_interest %&gt;% dplyr::select(chr_epigenome:study_epigenome,cell_type_epigenome=cell_type,specific,RS_Number,R2,RegulomeDB,Function,locus_name,trait_coloc,closest_coloc_TSS_from_regulatory_region,distance_to_closest_coloc_TSS,cell_type_coloc,PP.H4.abf,p_eqtl) %&gt;% 
+  write_csv(&#39;data/gwas_epigenome_overlap/GWAS_epigenomic_marks.closest_gene.closest_coloc.filtered.csv&#39;)</code></pre>
+<div id="add-snp2tfbs-information" class="section level3">
+<h3>Add SNP2TFBS information</h3>
+<pre class="bash"><code>cd data/gwas_epigenome_overlap
+cut -d &#39;,&#39; -f 7 GWAS_epigenomic_marks.closest_gene.closest_coloc.filtered.csv | sort -u |grep -v &#39;RS_Number&#39; &gt; snps_4_SNP2TFBS.txt</code></pre>
+<p>Use webtool at: <a href="https://ccg.epfl.ch/snp2tfbs/snpselect.php" class="uri">https://ccg.epfl.ch/snp2tfbs/snpselect.php</a></p>
+<pre class="r"><code>if(file.exists(&#39;data/gwas_epigenome_overlap/SNP2TFBS_out.txt&#39;)){
+  snp2tfbs &lt;- read_tsv(&#39;data/gwas_epigenome_overlap/SNP2TFBS_out.txt&#39;,col_names = FALSE) %&gt;% 
+    dplyr::select(RS_Number=X7,X6) %&gt;% mutate(SNP2TFBS_disrupted_TFmotif=gsub(&#39;.+TF=|;Score.+&#39;,&#39;&#39;,X6)) %&gt;% 
+    dplyr::select(-X6)
+  
+  potential_sequences_of_interest &lt;- left_join(potential_sequences_of_interest,snp2tfbs,by=&#39;RS_Number&#39;)
+  
+  write_csv(potential_sequences_of_interest,&#39;output/gwas_epigenome_overlap/GWAS_epigenomic_marks.closest_gene.closest_coloc.filtered.SNP2TFBS.txt&#39;)
+}</code></pre>
+<br>
+<p>
+<button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
+<span class="glyphicon glyphicon-wrench" aria-hidden="true"></span> Session information
+</button>
+</p>
+<div id="workflowr-sessioninfo" class="collapse">
+<pre class="r"><code>sessionInfo()</code></pre>
+<pre><code>R version 4.0.1 (2020-06-06)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: CentOS Linux 7 (Core)
+
+Matrix products: default
+BLAS/LAPACK: /pstore/apps/OpenBLAS/0.3.1-GCC-7.3.0-2.30/lib/libopenblasp-r0.3.1.so
+
+locale:
+ [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+ [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+ [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+ [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+ [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+[11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+
+attached base packages:
+[1] parallel  stats4    stats     graphics  grDevices utils     datasets 
+[8] methods   base     
+
+other attached packages:
+ [1] liftOver_1.12.0                        
+ [2] Homo.sapiens_1.3.1                     
+ [3] TxDb.Hsapiens.UCSC.hg19.knownGene_3.2.2
+ [4] org.Hs.eg.db_3.11.4                    
+ [5] GO.db_3.11.4                           
+ [6] OrganismDbi_1.30.0                     
+ [7] GenomicFeatures_1.40.0                 
+ [8] AnnotationDbi_1.50.0                   
+ [9] Biobase_2.48.0                         
+[10] rtracklayer_1.48.0                     
+[11] GenomicRanges_1.40.0                   
+[12] GenomeInfoDb_1.24.0                    
+[13] IRanges_2.22.2                         
+[14] S4Vectors_0.26.1                       
+[15] BiocGenerics_0.34.0                    
+[16] gwascat_2.20.1                         
+[17] forcats_0.5.0                          
+[18] stringr_1.4.0                          
+[19] dplyr_1.0.0                            
+[20] purrr_0.3.4                            
+[21] readr_1.3.1                            
+[22] tidyr_1.1.0                            
+[23] tibble_3.0.1                           
+[24] ggplot2_3.3.3                          
+[25] tidyverse_1.3.0                        
+[26] workflowr_1.6.2                        
+
+loaded via a namespace (and not attached):
+ [1] nlme_3.1-148                matrixStats_0.56.0         
+ [3] bitops_1.0-6                fs_1.4.1                   
+ [5] lubridate_1.7.9             bit64_0.9-7                
+ [7] progress_1.2.2              httr_1.4.1                 
+ [9] rprojroot_1.3-2             tools_4.0.1                
+[11] backports_1.1.7             R6_2.4.1                   
+[13] DBI_1.1.0                   colorspace_1.4-1           
+[15] withr_2.2.0                 prettyunits_1.1.1          
+[17] tidyselect_1.1.0            curl_4.3                   
+[19] bit_1.1-15.2                compiler_4.0.1             
+[21] git2r_0.27.1                graph_1.66.0               
+[23] cli_2.0.2                   rvest_0.3.5                
+[25] xml2_1.3.2                  DelayedArray_0.14.0        
+[27] scales_1.1.1                RBGL_1.64.0                
+[29] askpass_1.1                 rappdirs_0.3.1             
+[31] Rsamtools_2.4.0             digest_0.6.25              
+[33] rmarkdown_2.2               XVector_0.28.0             
+[35] pkgconfig_2.0.3             htmltools_0.5.1.1          
+[37] dbplyr_1.4.4                rlang_0.4.10               
+[39] readxl_1.3.1                rstudioapi_0.11            
+[41] RSQLite_2.2.0               generics_0.0.2             
+[43] jsonlite_1.6.1              BiocParallel_1.22.0        
+[45] RCurl_1.98-1.2              magrittr_1.5               
+[47] GenomeInfoDbData_1.2.3      Matrix_1.2-18              
+[49] Rcpp_1.0.6                  munsell_0.5.0              
+[51] fansi_0.4.1                 lifecycle_0.2.0            
+[53] stringi_1.4.6               whisker_0.4                
+[55] yaml_2.2.1                  SummarizedExperiment_1.18.1
+[57] zlibbioc_1.34.0             BiocFileCache_1.12.0       
+[59] grid_4.0.1                  blob_1.2.1                 
+[61] promises_1.1.1              crayon_1.3.4               
+[63] lattice_0.20-41             Biostrings_2.56.0          
+[65] haven_2.3.1                 hms_0.5.3                  
+[67] knitr_1.28                  pillar_1.4.4               
+[69] biomaRt_2.44.4              reprex_0.3.0               
+[71] XML_3.99-0.3                glue_1.4.1                 
+[73] evaluate_0.14               BiocManager_1.30.10        
+[75] modelr_0.1.8                vctrs_0.3.1                
+[77] httpuv_1.5.4                cellranger_1.1.0           
+[79] openssl_1.4.1               gtable_0.3.0               
+[81] assertthat_0.2.1            xfun_0.14                  
+[83] broom_0.5.6                 later_1.1.0.1              
+[85] GenomicAlignments_1.24.0    memoise_1.1.0              
+[87] ellipsis_0.3.1             </code></pre>
+</div>
+</div>
+</div>
+
+
+<!-- Adjust MathJax settings so that all math formulae are shown using
+TeX fonts only; see
+http://docs.mathjax.org/en/latest/configuration.html.  This will make
+the presentation more consistent at the cost of the webpage sometimes
+taking slightly longer to load. Note that this only works because the
+footer is added to webpages before the MathJax javascript. -->
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    "HTML-CSS": { availableFonts: ["TeX"] }
+  });
+</script>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
