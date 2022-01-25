@@ -1,0 +1,272 @@
+---
+title: "Epigenome enrichment"
+site: workflowr::wflow_site
+author: "Julien Bryois"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output:
+  workflowr::wflow_html:
+   toc: true
+   toc_float: true
+editor_options:
+  chunk_output_type: console
+---
+  
+```{r setup,include=FALSE}
+knitr::opts_chunk$set(engine.opts = list(bash="--login"))
+```
+
+## Libraries
+
+```{r,message=FALSE}
+library(tidyverse)
+library(parallel)
+library(liftOver)
+```
+
+## Prepare eQTL data
+
+```{r,message=FALSE}
+d_sig <- read_tsv('output/eqtl/eqtl.PC70.txt') %>% 
+  filter(adj_p<0.05) %>% 
+  dplyr::select(cell_type,pid,sid)
+```
+
+```{r,message=FALSE}
+geno <- read_tsv('data_sensitive/genotypes/processed/snp_pos_hg38.txt',col_names=FALSE) %>% 
+  setNames(c('chr','end','sid')) %>% 
+  mutate(start=end) %>% 
+  mutate(snp_pos_hg38=paste0(chr,':',start)) %>% 
+  dplyr::select(sid,chr,start,end,snp_pos_hg38)
+```
+
+```{r}
+d_sig <- inner_join(d_sig,geno,by='sid')
+```
+
+```{r}
+cell_types <- unique(d_sig$cell_type)
+```
+
+```{r}
+write_bed <- function(i){
+  
+  d_cell <- filter(d_sig,cell_type==cell_types[i]) %>% 
+    dplyr::select(chr,start,end,snp_pos_hg38,pid) %>% mutate(strand='+') %>% 
+    arrange(chr,start)
+  dir.create('data/epigenome_enrichment/fdensity',showWarnings = FALSE,recursive = TRUE)
+  write_tsv(d_cell,paste0('data/epigenome_enrichment/fdensity/',make.names(cell_types[i]),'.sig5FDR.bed'),col_names = FALSE)
+}
+```
+
+```{r,message=FALSE,results=FALSE}
+lapply(1:length(cell_types),write_bed)
+```
+
+## Prepare phenotype data
+
+1. Get gene coordinates
+
+```{r}
+gtf <- rtracklayer::import('data/gencode/Homo_sapiens.GRCh38.96.filtered.gtf') %>% 
+  as.data.frame() %>% 
+  dplyr::filter(type=='gene') %>% 
+  mutate(TSS_start=ifelse(strand=='+',start,end),
+         TSS_end=ifelse(strand=='+',start,end)) %>% 
+  mutate(gene=paste0(gene_name,'_',gene_id)) %>% 
+  dplyr::select(seqnames,TSS_start,TSS_end,gene,gene_name,strand) %>% 
+  filter(seqnames%in%c(1:22)) %>% 
+  dplyr::select(gene,strand) %>% 
+  as_tibble()
+```
+
+2. For each cell type get phenotypes mapped
+
+```{r}
+files <- list.files('data_sensitive/eqtl',pattern='.bed.gz$',full.names = TRUE)
+```
+
+```{r}
+get_phenotype_coord <- function(i){
+  pheno <- read_tsv(files[i]) %>% dplyr::select(1:4) %>% mutate(random='.') %>% dplyr::rename(gene=ID) %>% 
+    left_join(.,gtf,by='gene')
+  write_tsv(pheno,paste0('data/epigenome_enrichment/fdensity/',make.names(cell_types[i]),'.pheno.bed'),col_names = FALSE)
+}
+```
+
+```{r,message=FALSE,results=FALSE}
+mclapply(1:length(files),get_phenotype_coord)
+```
+
+## Prepare Annotation
+
+### Process data from Corces et al.
+
+```{r}
+corces <- readxl::read_xlsx('data/epigenome_enrichment/external_data/corces/Corces_etal_Nat_Neuro_2020_TableS4.xlsx',skip=16)
+```
+
+```{r}
+corces <- corces %>% 
+  gather(cell_type,present,ExcitatoryNeurons:OPCs) %>% 
+  group_by(Peak_ID) %>% 
+  mutate(count_present=sum(present)) %>% 
+  ungroup()
+```
+
+```{r}
+corces_specific <- corces %>% filter(present==1,count_present==1)
+```
+
+Write bed files
+
+```{r}
+write_bed_annot <- function(i,df,name){
+  dir.create('data/epigenome_enrichment/fdensity/corces',showWarnings = FALSE)
+  df %>% filter(cell_type==cell_types[i]) %>% 
+    dplyr::select(hg38_Chromosome,hg38_Start,hg38_Stop,Peak_ID) %>% 
+    mutate(hg38_Chromosome=gsub('chr','',hg38_Chromosome)) %>% 
+    write_tsv(.,paste0('data/epigenome_enrichment/fdensity/corces/',make.names(cell_types[i]),'.corces.',name,'.bed'),col_names = FALSE)
+}
+```
+
+```{r}
+cell_types <- unique(corces_specific$cell_type)
+```
+
+```{r,message=FALSE,results=FALSE}
+lapply(1:length(cell_types),write_bed_annot,df=corces_specific,name='specific')
+```
+
+### Process data from Fullard et al.
+
+Get DLPFC specific peaks using bedtools
+
+```{bash,eval=TRUE}
+mkdir -p data/epigenome_enrichment/fdensity/fullard
+cd data/epigenome_enrichment/fdensity/fullard
+source ~/.bashrc
+ml bedtools/2.25.0-goolf-1.7.20
+bedtools intersect -v -a DLPFC_neuron.bed -b DLPFC_glia.bed > DLPFC_neuron.specific.bed
+bedtools intersect -v -a DLPFC_glia.bed -b DLPFC_neuron.bed > DLPFC_glia.specific.bed
+```
+
+### Process data from Nott et al.
+
+```{r}
+path <-  system.file(package="liftOver", "extdata", "hg19ToHg38.over.chain")
+ch <-  import.chain(path)
+```
+
+```{r}
+lift_to_h38 <- function(df,out){
+  df <- setNames(df,c('chr','start','end')) %>% filter(!is.na(chr)) %>%  makeGRangesFromDataFrame(., TRUE)
+  seqlevelsStyle(df) <-  "UCSC" 
+  df_hg38 <- liftOver(df, ch) %>% 
+    unlist() %>% 
+    as.data.frame() %>% 
+    as_tibble() %>% 
+    mutate(seqnames=gsub('chr','',seqnames)) %>%
+    filter(seqnames%in%1:22) %>%
+    arrange(seqnames,start) %>% 
+    dplyr::select(seqnames,start,end) %>% 
+    sample_n(min(25000,nrow(.))) %>% #get at most 25000 peaks, more leads to failure of QTLtools for unknown reason
+    write_tsv(.,paste0('data/epigenome_enrichment/fdensity/nott/',out),col_names = FALSE)
+}
+```
+
+```{r,message=FALSE,results=FALSE}
+astro_enh <- readxl::read_xlsx('data/epigenome_enrichment/external_data/nott/Nott_etal_Science2019_Table_S5.xlsx',skip=0,sheet=5) %>% 
+  lift_to_h38(.,out='Astrocytes.enhancer.bed')
+```
+
+```{r,message=FALSE,results=FALSE}
+neuronal_enh <- readxl::read_xlsx('data/epigenome_enrichment/external_data/nott/Nott_etal_Science2019_Table_S5.xlsx',skip=0,sheet=7) %>% 
+  lift_to_h38(.,out='Neuronal.enhancer.bed')
+```
+
+```{r,message=FALSE,results=FALSE}
+oligo_enh <- readxl::read_xlsx('data/epigenome_enrichment/external_data/nott/Nott_etal_Science2019_Table_S5.xlsx',skip=0,sheet=9) %>% 
+  lift_to_h38(.,out='Oligodendrocytes.enhancer.bed')
+```
+
+```{r,message=FALSE,results=FALSE}
+micro_enh <- readxl::read_xlsx('data/epigenome_enrichment/external_data/nott/Nott_etal_Science2019_Table_S5.xlsx',skip=0,sheet=11) %>% 
+  lift_to_h38(.,out='Microglia.enhancer.bed')
+```
+
+#### Enhancer specific peaks
+
+```{bash,eval=TRUE,message=FALSE,results=FALSE}
+cd data/epigenome_enrichment/fdensity/nott
+source ~/.bashrc
+ml bedtools/2.25.0-goolf-1.7.20
+bedtools intersect -v -a Astrocytes.enhancer.bed -b Microglia.enhancer.bed Neuronal.enhancer.bed Oligodendrocytes.enhancer.bed > Astrocytes.enhancer_specific.bed
+bedtools intersect -v -a Microglia.enhancer.bed -b Astrocytes.enhancer.bed Neuronal.enhancer.bed Oligodendrocytes.enhancer.bed > Microglia.enhancer_specific.bed
+bedtools intersect -v -a Neuronal.enhancer.bed -b Astrocytes.enhancer.bed Microglia.enhancer.bed Oligodendrocytes.enhancer.bed > Neuronal.enhancer_specific.bed
+bedtools intersect -v -a Oligodendrocytes.enhancer.bed -b Astrocytes.enhancer.bed Microglia.enhancer.bed Neuronal.enhancer.bed > Oligodendrocytes.enhancer_specific.bed
+```
+
+# Epigenome Enrichment
+
+## Corces 
+
+```{bash,eval=TRUE,message=FALSE,results=FALSE}
+ml GSL/2.5-GCCcore-7.3.0
+ml Boost/1.67.0-foss-2018b
+
+source ~/.bashrc
+mkdir -p results/corces
+
+cd data/epigenome_enrichment/fdensity
+for f in *sig5FDR.bed
+do
+echo $f
+for f2 in corces/*.corces.*
+do
+f2_name=`basename $f2`
+QTLtools fdensity --qtl $f --bed $f2 --bin 10000 --out results/corces/density_${f}_${f2_name}
+done
+done
+```
+
+## Fullard 
+
+```{bash,eval=TRUE,message=FALSE,results=FALSE}
+ml GSL/2.5-GCCcore-7.3.0
+ml Boost/1.67.0-foss-2018b
+
+source ~/.bashrc
+mkdir -p results/fullard
+
+cd data/epigenome_enrichment/fdensity
+for f in *.sig5FDR.bed
+do
+echo $f
+for f2 in fullard/*specific.bed
+do
+f2_name=`basename $f2`
+QTLtools fdensity --qtl $f --bed $f2 --bin 10000 --out results/fullard/density_${f}_${f2_name}
+done
+done
+```
+
+## Nott 
+
+```{bash,eval=TRUE,message=FALSE,results=FALSE}
+ml GSL/2.5-GCCcore-7.3.0
+ml Boost/1.67.0-foss-2018b
+
+source ~/.bashrc
+mkdir -p results/nott
+
+cd data/epigenome_enrichment/fdensity
+for f in *.sig5FDR.bed
+do
+echo $f
+for f2 in nott/*.bed
+do
+f2_name=`basename $f2`
+QTLtools fdensity --qtl $f --bed $f2 --bin 10000 --out results/nott/density_${f}_${f2_name}
+done
+done
+```
