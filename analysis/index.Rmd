@@ -1,16 +1,24 @@
 ---
 title: "Home"
 site: workflowr::wflow_site
+author: "Julien Bryois"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output:
   workflowr::wflow_html:
-    toc: false
+   toc: true
+   toc_float: true
+   code_folding: hide
 editor_options:
   chunk_output_type: console
 ---
 
-# Figures code
+# Figures
 
 [Figures](plot_figures.html)
+
+# Supplementary tables
+
+[Supplementary tables](get_tables.html)
 
 # Processing code
 
@@ -19,3 +27,15 @@ editor_options:
 [Process expression](01_process_expression.html)
 
 [Run eQTL](02_run_eQTL.html)
+
+[Run cell-type specific eQTL](03_cell_type_specific_eQTL.html)
+
+[Run Coloc](04_coloc.html)
+
+[Run Coloc GTEx + Dice](05_coloc_GTEx_Dice.html)
+
+[eQTL epigenome enrichment](06_eqtl_epigenome_enrichment.html)
+
+[GWAS epigenome overlap](07_GWAS_epigenome_overlap.html)
+
+[Prepare ShinyApp](08_prepare_Shiny.html)
