@@ -42,7 +42,9 @@ sumstats <- vroom::vroom('data/gwas/ad/GCST90012877_buildGRCh37.tsv') %>%
   dplyr::select(variant_id,p_value,chr,bp_b37,effect_allele,other_allele,beta,se=standard_error) %>% 
   filter(!is.na(p_value))
 
-loci <- read_tsv('data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt')
+  if(file.exists('data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt')) {
+    loci <- read_tsv('data/gwas/ad/loci_LDlinkR.r2.0.1.EUR.txt')
+  }
 }
 ```
 
@@ -134,7 +136,7 @@ if(!file.exists('data/gwas/ad/closest.protein.coding.bed')){
 ```
 
 ```{r,eval=TRUE}
-if(!file.exists('data/gwas/ad/closest.protein.coding.bed')){
+if(!file.exists('data/gencode/gencode.v39lift37.annotation.protein_coding.1_22.bed')){
   protein_coding <- filter(gtf_b37,type=='gene',gene_type=='protein_coding') %>% 
     mutate(gene_label=paste0(gene_name,'_',gsub('\\..+','',gene_id))) %>% 
     dplyr::select(seqnames,start,end,gene_label) %>% 
@@ -164,7 +166,9 @@ sumstats <- vroom::vroom('data/gwas/pd/ParkinsonMeta_Nalls2014_2019.tbl') %>%
          other_allele=toupper(other_allele)) %>% 
   unique() #some lines are duplicated in the
 
-loci <- read_tsv('data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt')
+  if(file.exists('data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt')) {
+    loci <- read_tsv('data/gwas/pd/loci_LDlinkR.r2.0.1.EUR.txt')
+  }
 }
 ```
 
@@ -250,7 +254,9 @@ sumstats <- vroom::vroom('data/gwas/ms/discovery_metav3.0.meta') %>%
   filter(beta!=0) #Some SNPs have OR=1, so se estimate = 0, leading to issues in coloc, we exclude these here
 
 
-loci <- read_tsv('data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt')
+  if(file.exists('data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt')) {
+    loci <- read_tsv('data/gwas/ms/loci_LDlinkR.r2.0.1.EUR.txt')
+  }
 }
 ```
 
@@ -333,7 +339,9 @@ sumstats <- vroom::vroom('data/gwas/scz/PGC3_SCZ_wave3_public.v2.tsv.gz') %>%
   dplyr::select(variant_id=SNP,p_value=P,chr=CHR,bp_b37=BP,effect_allele=A1,other_allele=A2,beta,se)
 
 
-loci <- read_tsv('data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt')
+  if(file.exists('data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt')) {
+    loci <- read_tsv('data/gwas/scz/loci_LDlinkR.r2.0.1.EUR.txt')
+  }
 }
 ```
 
