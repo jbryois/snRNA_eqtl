@@ -1,0 +1,213 @@
+---
+title: "Prepare ShinyApp"
+site: workflowr::wflow_site
+author: "Julien Bryois"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output:
+  workflowr::wflow_html:
+   toc: true
+   toc_float: true
+editor_options:
+  chunk_output_type: console
+---
+  
+```{r setup,include=FALSE}
+knitr::opts_chunk$set(autodep=FALSE, cache=FALSE, cache.lazy=FALSE, dev='png' )
+```
+
+# Setup
+
+```{r}
+dir.create('output/shiny',showWarnings = FALSE)
+```
+
+```{r}
+hdF5_file_path <- "output/shiny/data.h5"
+```
+
+## Libraries
+
+```{r,message=FALSE}
+library(tidyverse)
+library(rhdf5)
+```
+
+
+# Gene expression Processing
+
+## Load datasets
+
+```{r,eval=TRUE}
+sum_expression_ms <- readRDS('data_sensitive/expression/ms_sum_expression.individual_id.rds') %>% 
+  mutate(dataset='ms')
+sum_expression_ad <- readRDS('data_sensitive/expression/ad_sum_expression.individual_id.rds') %>% 
+  mutate(dataset='ad')
+```
+
+## Aggregate datasets
+
+```{r,eval=TRUE}
+sum_expression <- rbind(sum_expression_ms,sum_expression_ad)
+```
+
+## Get CPM
+
+```{r,eval=TRUE}
+sum_expression <- sum_expression %>% 
+  group_by(individual_id,cell_type) %>% 
+  mutate(libsize=sum(counts)) %>% 
+  mutate(cpm=counts*10^6/libsize) %>% 
+  mutate(log2_cpm=log2(cpm+1)) %>% 
+  ungroup() %>% 
+  mutate(gene=paste0(symbol,'_',ensembl))
+```
+
+## Filter individuals
+
+Only keep individuals, cell type with at least 10 cells
+
+```{r}
+sum_expression <- filter(sum_expression,n_cells>10)
+```
+
+# Create hdF5
+
+```{r}
+if(!file.exists(hdF5_file_path)){
+  h5createFile(hdF5_file_path)
+  h5createGroup(hdF5_file_path,"expression")
+  h5createGroup(hdF5_file_path,"genotype")
+  h5createGroup(hdF5_file_path,"eqtl_results")
+  h5createGroup(hdF5_file_path,"annotations")
+  h5createGroup(hdF5_file_path,"coloc")
+}
+```
+
+## Write expression
+
+```{r}
+if(!file.exists(hdF5_file_path)){
+sum_expression %>% group_by(gene) %>% 
+  do(write=h5write(.[,c('cell_type','individual_id','log2_cpm')], 
+                   hdF5_file_path,paste0("expression/",unique(.$gene))))
+}
+```
+
+## Write eQTL
+
+```{r,message=FALSE}
+d <- read_tsv('output/eqtl/eqtl.PC70.txt') %>% 
+  dplyr::select(cell_type,gene=pid,SNP=sid,slope,adj_p) %>% 
+  mutate(slope=round(slope,digits=2),adj_p=signif(adj_p,digits=3))
+```
+
+```{r}
+if(!file.exists(hdF5_file_path)){
+  h5write(d, hdF5_file_path,"eqtl_results/eqtl_results_all")
+}
+```
+
+## Write genotype
+
+```{r}
+vcf <- data.table::fread("data_sensitive/genotypes/processed/combined_final.vcf.gz",
+                         data.table=FALSE) %>% 
+  as_tibble()
+```
+
+```{r}
+vcf_filt <- filter(vcf,ID%in%d$SNP) %>% 
+  gather(individual,genotype,10:201) %>% 
+  mutate(genotype_parsed=case_when(
+      genotype=='1/1' ~ 2,
+      genotype=='0/1' ~ 1,
+      genotype=='1/0' ~ 1,
+      genotype=='0/0' ~ 0,
+    )) %>% 
+  as_tibble() %>% 
+  dplyr::select(ID,individual,REF,ALT,genotype_parsed) %>% 
+  dplyr::rename(genotype=genotype_parsed)
+```
+
+```{r}
+if(!file.exists(hdF5_file_path)){
+  vcf_filt %>% group_by(ID) %>% 
+    do(write=h5write(.[,c('individual','REF','ALT','genotype')], 
+                   hdF5_file_path,paste0("genotype/",unique(.$ID))))
+}
+```
+
+## Write cell-type specific eQTL
+
+```{r,message=FALSE}
+d <- read_tsv('output/eqtl_specific/eqtl.PC70.specific.txt') %>% 
+  #Sets pvalue to NA if the model did not converge
+  mutate(nb_pvalue_aggregate=
+           ifelse(nb_pvalue_aggregate_model_converged==FALSE,NA,nb_pvalue_aggregate)) %>% 
+  mutate(nb_pvalue_at_least_one=
+           ifelse(nb_pvalue_at_least_one_model_converged==FALSE,NA,nb_pvalue_at_least_one)) %>%   
+  filter(!is.na(nb_pvalue_aggregate), #Remove genes for which the model did not converge (9 genes)
+         !is.na(nb_pvalue_at_least_one),
+         nb_pvalue_at_least_one!=Inf) %>% 
+  #Get adjusted pvalues
+  mutate(nb_pvalue_aggregate_adj=p.adjust(nb_pvalue_aggregate,method='fdr'),
+         nb_pvalue_at_least_one_adj=p.adjust(nb_pvalue_at_least_one,method = 'fdr')) %>% 
+  #For each row, get the maximum pvalue across all cell types, 
+  #this will be the gene-level pvalue testing whether the genetic effect 
+  #on gene expression is different than all other cell types
+  rowwise() %>% 
+  mutate(nb_pvalue_sig_all=max(Astrocytes_p,
+                               `Endothelial cells_p`,
+                               `Excitatory neurons_p`,
+                               `Inhibitory neurons_p`,
+                                Microglia_p,
+                                Oligodendrocytes_p,
+                                `OPCs / COPs_p`,
+                                Pericytes_p,
+                                na.rm=TRUE)) %>% 
+  ungroup() %>% 
+  mutate(nb_pvalue_all_adj = p.adjust(nb_pvalue_sig_all,method='fdr')) %>% 
+  dplyr::select(cell_type=cell_type_id,
+                gene=gene_id,
+                SNP=snp_id,
+                nb_pvalue_aggregate_adj,
+                nb_pvalue_at_least_one_adj,
+                nb_pvalue_all_adj) %>% 
+  mutate(nb_pvalue_aggregate_adj=signif(nb_pvalue_aggregate_adj,digits=3),
+         nb_pvalue_at_least_one_adj=signif(nb_pvalue_at_least_one_adj,digits=3),
+         nb_pvalue_all_adj=signif(nb_pvalue_all_adj,digits=3))
+```
+
+```{r}
+if(!file.exists(hdF5_file_path)){
+  h5write(d, hdF5_file_path,"eqtl_results/eqtl_results_specific")
+}
+```
+
+## Write Coloc 
+
+```{r}
+filter_coloc <- function(d,threshold=0.5){
+  genes2keep <- d %>% filter(PP.H4.abf>threshold) %>% pull(ensembl)
+  d <- filter(d,ensembl%in%genes2keep)
+  return(d)
+}
+```
+
+```{r,message=FALSE}
+ad <- read_tsv('output/coloc/coloc.ad.txt') %>% filter_coloc()
+pd <- read_tsv('output/coloc/coloc.pd.txt')%>% filter_coloc()
+scz <- read_tsv('output/coloc/coloc.scz.txt')%>% filter_coloc()
+ms <- read_tsv('output/coloc/coloc.ms.txt')%>% filter_coloc()
+ms_gtex_dice <- read_tsv('output/coloc/coloc.ms.gtex_dice.txt') %>% filter_coloc()
+```
+
+```{r}
+if(!file.exists(hdF5_file_path)){
+  h5write(ad, hdF5_file_path,"coloc/ad")
+  h5write(pd, hdF5_file_path,"coloc/pd")
+  h5write(scz, hdF5_file_path,"coloc/scz")
+  h5write(ms, hdF5_file_path,"coloc/ms")
+  h5write(ms_gtex_dice, hdF5_file_path,"coloc/ms_gtex_dice")
+}
+```
