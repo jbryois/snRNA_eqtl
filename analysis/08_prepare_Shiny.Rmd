@@ -72,24 +72,20 @@ sum_expression <- filter(sum_expression,n_cells>10)
 # Create hdF5
 
 ```{r}
-if(!file.exists(hdF5_file_path)){
-  h5createFile(hdF5_file_path)
-  h5createGroup(hdF5_file_path,"expression")
-  h5createGroup(hdF5_file_path,"genotype")
-  h5createGroup(hdF5_file_path,"eqtl_results")
-  h5createGroup(hdF5_file_path,"annotations")
-  h5createGroup(hdF5_file_path,"coloc")
-}
+h5createFile(hdF5_file_path)
+h5createGroup(hdF5_file_path,"expression")
+h5createGroup(hdF5_file_path,"genotype")
+h5createGroup(hdF5_file_path,"eqtl_results")
+h5createGroup(hdF5_file_path,"annotations")
+h5createGroup(hdF5_file_path,"coloc")
 ```
 
 ## Write expression
 
 ```{r}
-if(!file.exists(hdF5_file_path)){
 sum_expression %>% group_by(gene) %>% 
   do(write=h5write(.[,c('cell_type','individual_id','log2_cpm')], 
                    hdF5_file_path,paste0("expression/",unique(.$gene))))
-}
 ```
 
 ## Write eQTL
@@ -101,9 +97,7 @@ d <- read_tsv('output/eqtl/eqtl.PC70.txt') %>%
 ```
 
 ```{r}
-if(!file.exists(hdF5_file_path)){
-  h5write(d, hdF5_file_path,"eqtl_results/eqtl_results_all")
-}
+h5write(d, hdF5_file_path,"eqtl_results/eqtl_results_all")
 ```
 
 ## Write genotype
@@ -129,11 +123,9 @@ vcf_filt <- filter(vcf,ID%in%d$SNP) %>%
 ```
 
 ```{r}
-if(!file.exists(hdF5_file_path)){
   vcf_filt %>% group_by(ID) %>% 
     do(write=h5write(.[,c('individual','REF','ALT','genotype')], 
                    hdF5_file_path,paste0("genotype/",unique(.$ID))))
-}
 ```
 
 ## Write cell-type specific eQTL
@@ -178,9 +170,7 @@ d <- read_tsv('output/eqtl_specific/eqtl.PC70.specific.txt') %>%
 ```
 
 ```{r}
-if(!file.exists(hdF5_file_path)){
-  h5write(d, hdF5_file_path,"eqtl_results/eqtl_results_specific")
-}
+h5write(d, hdF5_file_path,"eqtl_results/eqtl_results_specific")
 ```
 
 ## Write Coloc 
@@ -202,11 +192,9 @@ ms_gtex_dice <- read_tsv('output/coloc/coloc.ms.gtex_dice.txt') %>% filter_coloc
 ```
 
 ```{r}
-if(!file.exists(hdF5_file_path)){
-  h5write(ad, hdF5_file_path,"coloc/ad")
-  h5write(pd, hdF5_file_path,"coloc/pd")
-  h5write(scz, hdF5_file_path,"coloc/scz")
-  h5write(ms, hdF5_file_path,"coloc/ms")
-  h5write(ms_gtex_dice, hdF5_file_path,"coloc/ms_gtex_dice")
-}
+h5write(ad, hdF5_file_path,"coloc/ad")
+h5write(pd, hdF5_file_path,"coloc/pd")
+h5write(scz, hdF5_file_path,"coloc/scz")
+h5write(ms, hdF5_file_path,"coloc/ms")
+h5write(ms_gtex_dice, hdF5_file_path,"coloc/ms_gtex_dice")
 ```
