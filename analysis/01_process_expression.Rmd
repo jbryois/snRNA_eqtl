@@ -279,6 +279,7 @@ cov <- rbind(cov_genotype_pcs,cov_all_t) %>% as_tibble()
 ```
 
 ```{r,eval=TRUE}
+dir.create('data_sensitive/eqtl',showWarnings = FALSE)
 write_tsv(cov,'data_sensitive/eqtl/covariate_pca_meta_fastqtl.txt')
 ```
 
@@ -707,7 +708,7 @@ pheno_files <- list.files('data_sensitive/eqtl/',pattern='*.bed.gz$',full.names 
 ```
 
 ```{r,eval=TRUE}
-get_covariates <- function(i){
+get_covariates <- function(i,folder_name){
   
   out_name <- basename(pheno_files[i]) %>% gsub('\\.bed\\.gz','',.) %>% paste0('.cov.txt')
   
@@ -729,18 +730,156 @@ get_covariates <- function(i){
       shared_samples <- intersect(colnames(geno_cov),colnames(top_pcs))
   
       cov <- rbind(geno_cov[,shared_samples],top_pcs[,shared_samples])
-      dir.create(paste0('data_sensitive/eqtl/PC',i),showWarnings = FALSE)
-      write_tsv(cov,paste0('data_sensitive/eqtl/PC',i,'/',out_name))
+      dir.create(paste0(folder_name,i),showWarnings = FALSE)
+      write_tsv(cov,paste0(folder_name,i,'/',out_name))
   })
 }
 ```
 
 ```{r,results=FALSE,eval=TRUE}
-mclapply(1:length(pheno_files),get_covariates,mc.cores=8)
+mclapply(1:length(pheno_files),get_covariates,folder_name='data_sensitive/eqtl/PC',mc.cores=8)
 ```
 
 ```{bash,eval=TRUE}
 cd data_sensitive/eqtl
+for f in PC*
+do
+cd $f
+gzip *
+ln -s ../*.bed.gz .
+ln -s ../*.bed.gz.tbi .
+ln -s ../../genotypes/processed/combined_final.vcf.gz .
+ln -s ../../genotypes/processed/combined_final.vcf.gz.tbi .
+cd ..
+done
+```
+
+## Pseudo-bulk eQTL
+
+Let's generate pseudo-bulk expression data across all cell types.
+
+First, we load the expression data at pseudo-bulk level for each cell type.
+
+```{r,eval=TRUE,message=FALSE}
+sum_expression_ms <- readRDS('data_sensitive/expression/ms_sum_expression.individual_id.rds') %>% mutate(dataset='ms')
+sum_expression_ad <- readRDS('data_sensitive/expression/ad_sum_expression.individual_id.rds') %>% mutate(dataset='ad')
+```
+
+```{r,eval=TRUE}
+sum_expression <- rbind(sum_expression_ms,sum_expression_ad)
+```
+
+Set all samples to the same set of symbol and gene ID (like MS dataset).
+
+```{r,eval=TRUE}
+gene_id_common <- sum_expression %>% 
+  filter(dataset=='ms') %>% 
+  dplyr::select(symbol,ensembl) %>% 
+  unique() %>% 
+  mutate(gene=paste0(symbol,'_',ensembl)) %>% dplyr::select(-symbol)
+```
+
+```{r,eval=TRUE}
+sum_expression <- sum_expression %>% 
+  inner_join(.,gene_id_common,by='ensembl') %>% 
+  dplyr::select(cell_type,individual_id,gene,counts)
+```
+
+Get pseudo-bulk expression for each individual accross all cell types
+
+```{r,eval=TRUE}
+pb <- sum_expression %>% 
+  group_by(individual_id,gene) %>% 
+  summarise(counts=sum(counts)) %>% 
+  ungroup()
+```
+
+Only keep genes with a mean CPM > 1
+
+```{r}
+pb <- pb %>% group_by(individual_id) %>% 
+  mutate(cpm=counts*10^6/sum(counts)) %>% 
+  group_by(gene) %>% 
+  mutate(mean_cpm=mean(cpm)) %>% 
+  ungroup() %>% 
+  filter(mean_cpm>1)
+```
+
+Perform TMM normalization and get fastQTL format
+
+```{r,eval=TRUE}
+dir.create('data_sensitive/eqtl_pb/',showWarnings = FALSE)
+
+bed <- pb %>%
+    dplyr::select(individual_id,gene,counts) %>% 
+    spread(individual_id,counts) %>% 
+    column_to_rownames('gene') %>% 
+    edgeR::DGEList(counts = .) %>% #TMM normalize the data using edgeR
+    edgeR::calcNormFactors(.) %>% 
+    edgeR::cpm(.) %>%
+    as.data.frame() %>% 
+    rownames_to_column('gene')
+
+bed <- bed %>% inner_join(.,gtf,by='gene') %>% 
+      dplyr::select(seqnames,TSS_start,TSS_end,gene,everything()) %>% 
+      arrange(seqnames,TSS_start)
+    
+colnames(bed)[c(1,2,3,4)] <- c('#Chr','start','end','ID')
+    
+write_tsv(bed,path = 'data_sensitive/eqtl_pb/pb.bed')
+```
+
+```{bash,eval=TRUE}
+cd data_sensitive/eqtl_pb
+ml tabix/0.2.6-goolf-1.7.20
+
+for f in *.bed
+do
+bgzip $f && tabix -p bed $f.gz
+done
+```
+
+## Generate expression pca
+
+```{r,eval=TRUE}
+pheno_files <- list.files('data_sensitive/eqtl_pb/',pattern='*.bed.gz$',full.names = T)
+```
+
+```{r,eval=TRUE}
+get_covariates <- function(i,folder_name){
+  
+  out_name <- basename(pheno_files[i]) %>% gsub('\\.bed\\.gz','',.) %>% paste0('.cov.txt')
+  
+  #load expression data
+  d <- data.table::fread(pheno_files[i],data.table=FALSE)
+  #perform pca
+  pca <- d[-c(1,2,3,4)] %>% t() %>% prcomp(.,scale.=T)
+  
+  #Create directories with different number of expression pcs
+  #Add the n first pcs to the covariate file and write the covariate file in fastqtl format
+  number_of_pcs <- c(10,20,30,40,50,60,70,80,90,100,110,120)
+  
+  lapply(number_of_pcs,function(i){
+    
+      top_pcs <- pca$x[,1:i] %>% t()
+      rownames(top_pcs) <- paste0(rownames(top_pcs),'_exp')
+      top_pcs <- top_pcs %>% as.data.frame() %>% rownames_to_column('id')
+  
+      shared_samples <- intersect(colnames(geno_cov),colnames(top_pcs))
+  
+      cov <- rbind(geno_cov[,shared_samples],top_pcs[,shared_samples])
+      dir.create(paste0(folder_name,i),showWarnings = FALSE)
+      write_tsv(cov,paste0(folder_name,i,'/',out_name))
+  })
+}
+```
+
+```{r,results=FALSE,eval=TRUE}
+lapply(1:length(pheno_files),get_covariates,folder_name='data_sensitive/eqtl_pb/PC')
+```
+
+```{bash,eval=TRUE}
+cd data_sensitive/eqtl_pb
 for f in PC*
 do
 cd $f
