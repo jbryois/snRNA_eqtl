@@ -215,9 +215,9 @@ ml GSL/2.5-GCCcore-7.3.0
 ml Boost/1.67.0-foss-2018b
 
 source ~/.bashrc
+cd data/epigenome_enrichment/fdensity
 mkdir -p results/corces
 
-cd data/epigenome_enrichment/fdensity
 for f in *sig5FDR.bed
 do
 echo $f
@@ -236,9 +236,10 @@ ml GSL/2.5-GCCcore-7.3.0
 ml Boost/1.67.0-foss-2018b
 
 source ~/.bashrc
-mkdir -p results/fullard
 
 cd data/epigenome_enrichment/fdensity
+mkdir -p results/fullard
+
 for f in *.sig5FDR.bed
 do
 echo $f
@@ -257,9 +258,10 @@ ml GSL/2.5-GCCcore-7.3.0
 ml Boost/1.67.0-foss-2018b
 
 source ~/.bashrc
-mkdir -p results/nott
 
 cd data/epigenome_enrichment/fdensity
+mkdir -p results/nott
+
 for f in *.sig5FDR.bed
 do
 echo $f
