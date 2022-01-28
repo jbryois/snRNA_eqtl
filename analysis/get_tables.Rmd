@@ -1,0 +1,97 @@
+---
+title: "Get tables"
+site: workflowr::wflow_site
+author: "Julien Bryois"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output:
+  workflowr::wflow_html:
+   toc: true
+   toc_float: true
+editor_options:
+  chunk_output_type: console
+---
+
+```{r,message=FALSE}
+library(tidyverse)
+```
+
+```{r}
+dir.create('output/tables',showWarnings = FALSE)
+```
+
+# Suplementary tables
+
+## Table S1
+
+Manually created
+
+## Table S2
+
+```{r,message=FALSE}
+tableS2 <- read_tsv('output/eqtl/eqtl.PC70.txt') %>% 
+  separate(pid,into=c('symbol','ensembl'),sep='_') %>% 
+  dplyr::select(cell_type,symbol,ensembl,SNP=sid,dist_TSS=dist,slope,bpval,adj_p) %>% 
+  write_csv(.,'output/tables/tableS2.csv')
+```
+
+## Table S3
+
+```{r,message=FALSE}
+snp_pos <- read_tsv('data_sensitive/genotypes/processed/snp_pos_hg38.txt',col_names=FALSE) %>% dplyr::rename(CHROM=X1,POS=X2,SNP=X3)
+```
+
+```{r,message=FALSE}
+tableS3 <- read_tsv('output/eqtl/eqtl.70PCs.caveman.txt') %>% 
+  separate(GENE,into=c('symbol','ensembl','chr','pos_top_cis_eQTL','A1_eqtl','A2_eqtl'),sep='_') %>% 
+  dplyr::select(cell_type,symbol,ensembl,CHROM,POS,CaVEMaN,Probability) %>% arrange(-Probability) %>% 
+  unique() %>% 
+  left_join(.,snp_pos,by=c('CHROM','POS')) %>% 
+  dplyr::select(cell_type,symbol,ensembl,SNP,chr_hg38=CHROM,pos_hg38=POS,CaVEMaN,Probability) %>% 
+  write_csv(.,'output/tables/tableS3.csv')
+```
+
+## Table S4
+
+```{r,message=FALSE,warning=FALSE}
+tableS4 <- read_tsv('output/eqtl_specific/eqtl.PC70.specific.txt') %>% 
+  #Sets pvalue to NA if the model did not converge or if the model output is Inf
+  mutate(nb_pvalue_aggregate=ifelse(nb_pvalue_aggregate_model_converged==FALSE | nb_pvalue_aggregate_model_converged==Inf,NA,nb_pvalue_aggregate)) %>% 
+  mutate(nb_pvalue_at_least_one=ifelse(nb_pvalue_at_least_one_model_converged==FALSE | nb_pvalue_at_least_one==Inf,NA,nb_pvalue_at_least_one)) %>%   #Remove genes for which the model did not converge (9 genes
+  #Get adjusted pvalues
+  mutate(nb_pvalue_aggregate_adj=p.adjust(nb_pvalue_aggregate,method='fdr'),
+         nb_pvalue_at_least_one_adj=p.adjust(nb_pvalue_at_least_one,method = 'fdr')) %>% 
+  #For each row, get the maximum pvalue across all cell types, this will be the gene-level pvalue testing whether the genetic effect on gene expression is different than all other cell types
+  rowwise() %>% 
+  mutate(nb_pvalue_sig_all=max(Astrocytes_p,`Endothelial cells_p`,`Excitatory neurons_p`,`Inhibitory neurons_p`,Microglia_p,Oligodendrocytes_p,`OPCs / COPs_p`,Pericytes_p,na.rm=TRUE)) %>% 
+  ungroup() %>% 
+  #Sets pvalue to NA if the model did not converge
+  mutate(nb_pvalue_sig_all=ifelse(nb_pvalue_at_least_one_model_converged==FALSE | nb_pvalue_sig_all==Inf | nb_pvalue_sig_all==-Inf,NA,nb_pvalue_sig_all)) %>% 
+  mutate(nb_pvalue_all_adj = p.adjust(nb_pvalue_sig_all,method='fdr')) %>% 
+  separate(gene_id,into=c('symbol','ensembl'),sep='_') %>%
+  dplyr::select(cell_type_id,symbol,ensembl,
+                snp_id,nb_pvalue_aggregate,nb_pvalue_aggregate_adj,nb_pvalue_at_least_one,                                                                      nb_pvalue_at_least_one_adj,nb_pvalue_all=nb_pvalue_sig_all,                                                                                     nb_pvalue_all_adj,nb_pvalue_aggregate_model_converged,
+                nb_pvalue_at_least_one_model_converged,Astrocytes_p:Pericytes_p) %>% 
+  arrange(nb_pvalue_aggregate) %>% 
+  write_csv('output/tables/tableS4.csv')
+```
+
+## Table S5
+
+```{r,message=FALSE}
+read_tsv('output/coloc/coloc.ms.txt') %>% write_csv('output/tables/tableS5.ms.csv')
+read_tsv('output/coloc/coloc.ad.txt') %>% write_csv('output/tables/tableS5.ad.csv')
+read_tsv('output/coloc/coloc.scz.txt') %>% write_csv('output/tables/tableS5.scz.csv')
+read_tsv('output/coloc/coloc.pd.txt') %>% write_csv('output/tables/tableS5.pd.csv')
+```
+
+## Table S6
+
+```{r,message=FALSE}
+read_tsv('output/coloc/coloc.ms.gtex_dice.txt') %>% write_csv('output/tables/tableS6.csv')
+```
+
+## Table S7
+
+```{r,message=FALSE}
+read_csv('output/gwas_epigenome_overlap/GWAS_epigenomic_marks.closest_gene.closest_coloc.filtered.SNP2TFBS.txt') %>% write_csv('output/tables/tableS7.csv')
+```
