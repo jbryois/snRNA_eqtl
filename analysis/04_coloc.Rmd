@@ -27,7 +27,7 @@ library(rtracklayer)
 ```
 
 ```{r}
-selected_trait <- 'pd'
+selected_trait <- 'ad'
 ```
 
 # Process GWAS
