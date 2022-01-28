@@ -30,7 +30,7 @@ Set path for eqtl data
 Sys.setenv(eqtl_path='data_sensitive/eqtl')
 ```
 
-# Generate commands for fastQTL
+# Permutation pass
 
 ```{bash,eval=FALSE}
 cd $eqtl_path
@@ -56,8 +56,6 @@ done
 cd ..
 done
 ```
-
-# Permutation pass
 
 ```{bash,eval=FALSE}
 cd $eqtl_path
@@ -251,6 +249,7 @@ mclapply(1:length(bed_files_fastqtl),read_fastQTL_write_QTLtools,mc.cores = 8)
 ```
 
 ```{bash,eval=FALSE}
+mkdir -p $eqtl_path'/PC70_indep'
 cd $eqtl_path'/PC70_indep'
 ml tabix/0.2.6-goolf-1.7.20
 
@@ -627,4 +626,196 @@ d <- tibble(files) %>% mutate(file_content=map(files,read_tsv)) %>%
 
 ```{r,eval=FALSE}
 write_tsv(d,'output/eqtl/eqtl.70PCs.caveman.txt')
+```
+
+# Permutation pass - Pseudo-bulk All
+
+```{r,eval=TRUE}
+Sys.setenv(eqtl_path='data_sensitive/eqtl_pb')
+```
+
+```{bash,eval=FALSE}
+cd $eqtl_path
+source ~/.bashrc
+
+ml foss/2018b
+ml Rmath/3.6.1-GCCcore-7.3.0
+ml GSL/2.5-GCCcore-7.3.0
+ml Eigen/3.3.7
+ml Boost/1.67.0-foss-2018b
+
+for f in PC*
+do
+cd $f
+for bed in *.bed.gz
+do
+cell=`echo $bed | sed 's/.bed.gz//'`
+echo $cell
+fastQTL --vcf combined_final.vcf.gz --bed $bed --permute 1000 --out $cell.quantile.txt.gz --normal --cov $cell.cov.txt.gz --commands 22 $cell.commands.22.tmp
+sed 's/^ /sbatch --wrap="/; s/$/"/' $cell.commands.22.tmp > $cell.commands.22.txt
+rm $cell.commands.22.tmp
+done
+cd ..
+done
+```
+
+```{bash,eval=FALSE}
+cd $eqtl_path
+source ~/.bashrc
+
+ml foss/2018b
+ml Rmath/3.6.1-GCCcore-7.3.0
+ml GSL/2.5-GCCcore-7.3.0
+ml Eigen/3.3.7
+ml Boost/1.67.0-foss-2018b
+
+for d in PC*
+do
+cd $d
+rm *quantile.txt.gz
+for f in *.commands.22.txt
+do
+sh $f
+done
+cd ..
+done
+```
+
+Check that all eQTL jobs ran successfully
+
+```{bash,eval=TRUE}
+cd $eqtl_path
+
+for d in PC{10,20,30,40,50,60,70,80,90,100,110,120}
+do
+cd $d
+echo $d
+grep 'Running time' slurm-* | wc -l
+cd ..
+done
+```
+
+All done (22)
+
+```{r,eval=FALSE}
+fastqtl_out_files <- list.files('data_sensitive/eqtl_pb/',pattern='.gz.[0-9]',full.names = T,recursive = TRUEfastqtl_out_files)
+```
+
+```{r,eval=FALSE}
+d <- tibble(files=fastqtl_out_files,
+            cell_type=basename(files) %>% 
+              gsub('.quantile.txt.gz..+','',.)) %>% 
+  mutate(PCs=dirname(files) %>% basename(.)) %>% 
+  mutate(file_content=map(files,read.table,header=F)) %>% 
+  unnest(file_content) %>% 
+  filter(!is.na(V11)) %>% 
+  select(-files) %>% 
+  setNames(c("cell_type","PCs","pid", "nvar", "shape1", "shape2", "dummy", "sid", "dist", "npval", "slope","ppval", "bpval")) %>% 
+  group_by(cell_type,PCs) %>% 
+  mutate(adj_p=qvalue(bpval)$qvalues) %>% 
+  ungroup() %>% 
+  arrange(cell_type,bpval)
+```
+
+## Write
+
+Write eQTL results with different number of expression principal components
+
+```{r,eval=FALSE}
+dir.create('output/eqtl/',showWarnings = FALSE)
+write_tsv(d,'output/eqtl/eqtl.pb.allPCs.txt')
+```
+
+Get number of PCs maximising the number of eQTL discoveries
+
+```{r,eval=FALSE}
+selected_pcs <- d %>% 
+  filter(adj_p<0.05) %>% 
+  dplyr::count(PCs) %>% filter(n==max(n))
+```
+
+Write eQTL results with selected number of PCs
+
+```{r,eval=FALSE}
+d %>% 
+  filter(PCs==selected_pcs$PCs) %>% 
+  dplyr::select(-PCs) %>% 
+  write_tsv(.,paste0('output/eqtl/eqtl.pb.',selected_pcs$PCs,'.txt'))
+```
+
+## Clean
+
+Removing tmp files
+
+```{bash,eval=FALSE}
+cd $eqtl_path
+
+for d in PC*
+do
+cd $d
+rm *quantile*
+cd ..
+done
+```
+
+# Nominal pass - Pseudo-bulk All
+
+We now run a nominal pass to get pvalues for all SNPs.
+
+We will use 70 PCs as this maximised the number of eQTL discoveries using permutations.
+
+```{bash,eval=FALSE,message=FALSE}
+source ~/.bashrc
+cd $eqtl_path
+
+ml foss/2018b
+ml Rmath/3.6.1-GCCcore-7.3.0
+ml GSL/2.5-GCCcore-7.3.0
+ml Eigen/3.3.7
+ml Boost/1.67.0-foss-2018b
+
+
+mkdir -p 'PC70_nominal'
+cd PC70_nominal
+ln -s ../PC70/*.bed.gz .
+ln -s ../PC70/*.bed.gz.tbi .
+ln -s ../PC70/*.cov.txt.gz .
+ln -s ../PC70/combined_final.vcf.gz .
+ln -s ../PC70/combined_final.vcf.gz.tbi .
+
+for bed in *.bed.gz
+do
+cell=`echo $bed | sed 's/.bed.gz//'`
+fastQTL --vcf combined_final.vcf.gz --bed $bed --out $cell.quantile.txt.gz --normal --cov $cell.cov.txt.gz --commands 22 $cell.commands.22.tmp
+sed 's/^ /sbatch --wrap="/; s/$/"/' $cell.commands.22.tmp > $cell.commands.22.txt
+sh $cell.commands.22.txt
+rm $cell.commands.22.tmp
+done
+```
+
+```{bash,eval=TRUE}
+cd $eqtl_path'/PC70_nominal'
+grep 'Running time' slurm-* | wc -l
+```
+
+22 files successfully completed. All good!
+
+Now let's gzip the association files and give them a nice name.
+
+```{bash,eval=FALSE}
+cd $eqtl_path'/PC70_nominal'
+rm *quantile.txt.gz
+rm *.bed.gz
+rm *.bed.gz.tbi  
+rm *cov.txt.gz
+rm *.commands.22.txt
+rm *.vcf.gz
+rm *.vcf.gz.tbi
+
+for f in *.quantile.txt.gz.*
+do
+gzip $f
+x=`echo $f | sed 's/:.\+$/.gz/' | sed 's/.quantile.txt.gz//'`
+mv $f.gz $x
+done
 ```
