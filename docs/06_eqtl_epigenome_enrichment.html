@@ -11,7 +11,7 @@
 
 <meta name="author" content="Julien Bryois" />
 
-<meta name="date" content="2022-01-25" />
+<meta name="date" content="2022-01-28" />
 
 <title>Epigenome enrichment</title>
 
@@ -380,7 +380,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Epigenome enrichment</h1>
 <h4 class="author">Julien Bryois</h4>
-<h4 class="date">January 25, 2022</h4>
+<h4 class="date">January 28, 2022</h4>
 
 </div>
 
@@ -405,7 +405,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2022-01-25
+<strong>Last updated:</strong> 2022-01-28
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong837ddf9"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 837ddf9 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongd1c1d2d"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> d1c1d2d </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong837ddf9" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongd1c1d2d" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 837ddf9. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version d1c1d2d. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -516,11 +516,9 @@ Ignored files:
     Ignored:    data/magma_interaction_eqtl/
     Ignored:    data/magma_specific_genes/
     Ignored:    data_sensitive/
-    Ignored:    results/
 
 Untracked files:
     Untracked:  analysis/._index.Rmd
-    Untracked:  analysis/08_prepare_Shiny.Rmd
     Untracked:  analysis/additional/
     Untracked:  analysis/alternatives/
     Untracked:  analysis/clean_analysis.Rmd
@@ -528,6 +526,7 @@ Untracked files:
     Untracked:  analysis/log_run_slurm_out
     Untracked:  analysis/log_run_slurm_stderr
     Untracked:  analysis/portfolio/
+    Untracked:  analysis/revision.Rmd
     Untracked:  analysis/run_slurm.Rscript
     Untracked:  analysis/run_slurm.sbatch
     Untracked:  data/dice/
@@ -541,15 +540,18 @@ Untracked files:
     Untracked:  data/umap/
     Untracked:  output/coloc/
     Untracked:  output/eqtl/
+    Untracked:  output/eqtl_specific/
+    Untracked:  output/figures/
+    Untracked:  output/figures_rev/
     Untracked:  output/gwas_epigenome_overlap/
+    Untracked:  output/shiny/
     Untracked:  output_tmp_QTLtools/
     Untracked:  output_tmp_fastQTL_sample_ambient_removed/
 
 Unstaged changes:
     Modified:   .gitignore
-    Modified:   analysis/02_run_eQTL.Rmd
+    Modified:   analysis/04_coloc.Rmd
     Modified:   analysis/_site.yml
-    Modified:   analysis/index.Rmd
     Modified:   analysis/plot_figures.Rmd
     Deleted:    output/README.md
 
@@ -590,6 +592,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+d1c1d2d
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+<td>
+epigenome_enrichment
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+311cd5c
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-25
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -746,9 +782,9 @@ bedtools intersect -v -a Oligodendrocytes.enhancer.bed -b Astrocytes.enhancer.be
 ml Boost/1.67.0-foss-2018b
 
 source ~/.bashrc
+cd data/epigenome_enrichment/fdensity
 mkdir -p results/corces
 
-cd data/epigenome_enrichment/fdensity
 for f in *sig5FDR.bed
 do
 echo $f
@@ -765,9 +801,10 @@ done</code></pre>
 ml Boost/1.67.0-foss-2018b
 
 source ~/.bashrc
-mkdir -p results/fullard
 
 cd data/epigenome_enrichment/fdensity
+mkdir -p results/fullard
+
 for f in *.sig5FDR.bed
 do
 echo $f
@@ -784,9 +821,10 @@ done</code></pre>
 ml Boost/1.67.0-foss-2018b
 
 source ~/.bashrc
-mkdir -p results/nott
 
 cd data/epigenome_enrichment/fdensity
+mkdir -p results/nott
+
 for f in *.sig5FDR.bed
 do
 echo $f
