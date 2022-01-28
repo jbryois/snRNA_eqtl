@@ -11,7 +11,7 @@
 
 <meta name="author" content="Julien Bryois" />
 
-<meta name="date" content="2022-01-25" />
+<meta name="date" content="2022-01-28" />
 
 <title>Run eQTL analysis</title>
 
@@ -380,7 +380,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Run eQTL analysis</h1>
 <h4 class="author">Julien Bryois</h4>
-<h4 class="date">January 25, 2022</h4>
+<h4 class="date">January 28, 2022</h4>
 
 </div>
 
@@ -405,7 +405,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2022-01-25
+<strong>Last updated:</strong> 2022-01-28
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong2f8e71b"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 2f8e71b </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongfe925c3"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> fe925c3 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong2f8e71b" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongfe925c3" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 2f8e71b. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version fe925c3. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -516,11 +516,9 @@ Ignored files:
     Ignored:    data/magma_interaction_eqtl/
     Ignored:    data/magma_specific_genes/
     Ignored:    data_sensitive/
-    Ignored:    results/
 
 Untracked files:
     Untracked:  analysis/._index.Rmd
-    Untracked:  analysis/08_prepare_Shiny.Rmd
     Untracked:  analysis/additional/
     Untracked:  analysis/alternatives/
     Untracked:  analysis/clean_analysis.Rmd
@@ -528,6 +526,7 @@ Untracked files:
     Untracked:  analysis/log_run_slurm_out
     Untracked:  analysis/log_run_slurm_stderr
     Untracked:  analysis/portfolio/
+    Untracked:  analysis/revision.Rmd
     Untracked:  analysis/run_slurm.Rscript
     Untracked:  analysis/run_slurm.sbatch
     Untracked:  data/dice/
@@ -541,12 +540,17 @@ Untracked files:
     Untracked:  data/umap/
     Untracked:  output/coloc/
     Untracked:  output/eqtl/
+    Untracked:  output/eqtl_specific/
+    Untracked:  output/figures/
+    Untracked:  output/figures_rev/
     Untracked:  output/gwas_epigenome_overlap/
+    Untracked:  output/shiny/
     Untracked:  output_tmp_QTLtools/
     Untracked:  output_tmp_fastQTL_sample_ambient_removed/
 
 Unstaged changes:
     Modified:   .gitignore
+    Modified:   analysis/06_eqtl_epigenome_enrichment.Rmd
     Modified:   analysis/_site.yml
     Modified:   analysis/plot_figures.Rmd
     Deleted:    output/README.md
@@ -588,6 +592,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+fe925c3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+<td>
+run eQTL with pseudo-bulk
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+c0af206
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-25
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -652,8 +690,8 @@ library(qvalue)
 library(parallel)</code></pre>
 <p>Set path for eqtl data</p>
 <pre class="r"><code>Sys.setenv(eqtl_path=&#39;data_sensitive/eqtl&#39;)</code></pre>
-<div id="generate-commands-for-fastqtl" class="section level1">
-<h1>Generate commands for fastQTL</h1>
+<div id="permutation-pass" class="section level1">
+<h1>Permutation pass</h1>
 <pre class="bash"><code>cd $eqtl_path
 source ~/.bashrc
 
@@ -676,9 +714,6 @@ rm $cell.commands.22.tmp
 done
 cd ..
 done</code></pre>
-</div>
-<div id="permutation-pass" class="section level1">
-<h1>Permutation pass</h1>
 <pre class="bash"><code>cd $eqtl_path
 source ~/.bashrc
 
@@ -847,7 +882,8 @@ done</code></pre>
   write_tsv(fasqtl,output_file_name) 
 }</code></pre>
 <pre class="r"><code>mclapply(1:length(bed_files_fastqtl),read_fastQTL_write_QTLtools,mc.cores = 8)</code></pre>
-<pre class="bash"><code>cd $eqtl_path&#39;/PC70_indep&#39;
+<pre class="bash"><code>mkdir -p $eqtl_path&#39;/PC70_indep&#39;
+cd $eqtl_path&#39;/PC70_indep&#39;
 ml tabix/0.2.6-goolf-1.7.20
 
 for f in *.qtltools.bed
@@ -1119,6 +1155,178 @@ rm *_*</code></pre>
   mutate(cell_type=gsub(&#39;OPCs   COPs&#39;,&#39;OPCs / COPs&#39;,cell_type)) %&gt;% 
   arrange(-Probability)</code></pre>
 <pre class="r"><code>write_tsv(d,&#39;output/eqtl/eqtl.70PCs.caveman.txt&#39;)</code></pre>
+</div>
+<div id="permutation-pass---pseudo-bulk-all" class="section level1">
+<h1>Permutation pass - Pseudo-bulk All</h1>
+<pre class="r"><code>Sys.setenv(eqtl_path=&#39;data_sensitive/eqtl_pb&#39;)</code></pre>
+<pre class="bash"><code>cd $eqtl_path
+source ~/.bashrc
+
+ml foss/2018b
+ml Rmath/3.6.1-GCCcore-7.3.0
+ml GSL/2.5-GCCcore-7.3.0
+ml Eigen/3.3.7
+ml Boost/1.67.0-foss-2018b
+
+for f in PC*
+do
+cd $f
+for bed in *.bed.gz
+do
+cell=`echo $bed | sed &#39;s/.bed.gz//&#39;`
+echo $cell
+fastQTL --vcf combined_final.vcf.gz --bed $bed --permute 1000 --out $cell.quantile.txt.gz --normal --cov $cell.cov.txt.gz --commands 22 $cell.commands.22.tmp
+sed &#39;s/^ /sbatch --wrap=&quot;/; s/$/&quot;/&#39; $cell.commands.22.tmp &gt; $cell.commands.22.txt
+rm $cell.commands.22.tmp
+done
+cd ..
+done</code></pre>
+<pre class="bash"><code>cd $eqtl_path
+source ~/.bashrc
+
+ml foss/2018b
+ml Rmath/3.6.1-GCCcore-7.3.0
+ml GSL/2.5-GCCcore-7.3.0
+ml Eigen/3.3.7
+ml Boost/1.67.0-foss-2018b
+
+for d in PC*
+do
+cd $d
+rm *quantile.txt.gz
+for f in *.commands.22.txt
+do
+sh $f
+done
+cd ..
+done</code></pre>
+<p>Check that all eQTL jobs ran successfully</p>
+<pre class="bash"><code>cd $eqtl_path
+
+for d in PC{10,20,30,40,50,60,70,80,90,100,110,120}
+do
+cd $d
+echo $d
+grep &#39;Running time&#39; slurm-* | wc -l
+cd ..
+done</code></pre>
+<pre><code>PC10
+22
+PC20
+22
+PC30
+22
+PC40
+22
+PC50
+22
+PC60
+22
+PC70
+22
+PC80
+22
+PC90
+22
+PC100
+22
+PC110
+22
+PC120
+22</code></pre>
+<p>All done (22)</p>
+<pre class="r"><code>fastqtl_out_files &lt;- list.files(&#39;data_sensitive/eqtl_pb/&#39;,pattern=&#39;.gz.[0-9]&#39;,full.names = T,recursive = TRUEfastqtl_out_files)</code></pre>
+<pre class="r"><code>d &lt;- tibble(files=fastqtl_out_files,
+            cell_type=basename(files) %&gt;% 
+              gsub(&#39;.quantile.txt.gz..+&#39;,&#39;&#39;,.)) %&gt;% 
+  mutate(PCs=dirname(files) %&gt;% basename(.)) %&gt;% 
+  mutate(file_content=map(files,read.table,header=F)) %&gt;% 
+  unnest(file_content) %&gt;% 
+  filter(!is.na(V11)) %&gt;% 
+  select(-files) %&gt;% 
+  setNames(c(&quot;cell_type&quot;,&quot;PCs&quot;,&quot;pid&quot;, &quot;nvar&quot;, &quot;shape1&quot;, &quot;shape2&quot;, &quot;dummy&quot;, &quot;sid&quot;, &quot;dist&quot;, &quot;npval&quot;, &quot;slope&quot;,&quot;ppval&quot;, &quot;bpval&quot;)) %&gt;% 
+  group_by(cell_type,PCs) %&gt;% 
+  mutate(adj_p=qvalue(bpval)$qvalues) %&gt;% 
+  ungroup() %&gt;% 
+  arrange(cell_type,bpval)</code></pre>
+<div id="write-2" class="section level2">
+<h2>Write</h2>
+<p>Write eQTL results with different number of expression principal components</p>
+<pre class="r"><code>dir.create(&#39;output/eqtl/&#39;,showWarnings = FALSE)
+write_tsv(d,&#39;output/eqtl/eqtl.pb.allPCs.txt&#39;)</code></pre>
+<p>Get number of PCs maximising the number of eQTL discoveries</p>
+<pre class="r"><code>selected_pcs &lt;- d %&gt;% 
+  filter(adj_p&lt;0.05) %&gt;% 
+  dplyr::count(PCs) %&gt;% filter(n==max(n))</code></pre>
+<p>Write eQTL results with selected number of PCs</p>
+<pre class="r"><code>d %&gt;% 
+  filter(PCs==selected_pcs$PCs) %&gt;% 
+  dplyr::select(-PCs) %&gt;% 
+  write_tsv(.,paste0(&#39;output/eqtl/eqtl.pb.&#39;,selected_pcs$PCs,&#39;.txt&#39;))</code></pre>
+</div>
+<div id="clean-1" class="section level2">
+<h2>Clean</h2>
+<p>Removing tmp files</p>
+<pre class="bash"><code>cd $eqtl_path
+
+for d in PC*
+do
+cd $d
+rm *quantile*
+cd ..
+done</code></pre>
+</div>
+</div>
+<div id="nominal-pass---pseudo-bulk-all" class="section level1">
+<h1>Nominal pass - Pseudo-bulk All</h1>
+<p>We now run a nominal pass to get pvalues for all SNPs.</p>
+<p>We will use 70 PCs as this maximised the number of eQTL discoveries using permutations.</p>
+<pre class="bash"><code>source ~/.bashrc
+cd $eqtl_path
+
+ml foss/2018b
+ml Rmath/3.6.1-GCCcore-7.3.0
+ml GSL/2.5-GCCcore-7.3.0
+ml Eigen/3.3.7
+ml Boost/1.67.0-foss-2018b
+
+
+mkdir -p &#39;PC70_nominal&#39;
+cd PC70_nominal
+ln -s ../PC70/*.bed.gz .
+ln -s ../PC70/*.bed.gz.tbi .
+ln -s ../PC70/*.cov.txt.gz .
+ln -s ../PC70/combined_final.vcf.gz .
+ln -s ../PC70/combined_final.vcf.gz.tbi .
+
+for bed in *.bed.gz
+do
+cell=`echo $bed | sed &#39;s/.bed.gz//&#39;`
+fastQTL --vcf combined_final.vcf.gz --bed $bed --out $cell.quantile.txt.gz --normal --cov $cell.cov.txt.gz --commands 22 $cell.commands.22.tmp
+sed &#39;s/^ /sbatch --wrap=&quot;/; s/$/&quot;/&#39; $cell.commands.22.tmp &gt; $cell.commands.22.txt
+sh $cell.commands.22.txt
+rm $cell.commands.22.tmp
+done</code></pre>
+<pre class="bash"><code>cd $eqtl_path&#39;/PC70_nominal&#39;
+grep &#39;Running time&#39; slurm-* | wc -l</code></pre>
+<pre><code>22</code></pre>
+<p>22 files successfully completed. All good!</p>
+<p>Now let’s gzip the association files and give them a nice name.</p>
+<pre class="bash"><code>cd $eqtl_path&#39;/PC70_nominal&#39;
+rm *quantile.txt.gz
+rm *.bed.gz
+rm *.bed.gz.tbi  
+rm *cov.txt.gz
+rm *.commands.22.txt
+rm *.vcf.gz
+rm *.vcf.gz.tbi
+
+for f in *.quantile.txt.gz.*
+do
+gzip $f
+x=`echo $f | sed &#39;s/:.\+$/.gz/&#39; | sed &#39;s/.quantile.txt.gz//&#39;`
+mv $f.gz $x
+done</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
