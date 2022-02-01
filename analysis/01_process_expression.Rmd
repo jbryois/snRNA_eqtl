@@ -52,7 +52,6 @@ sce_ms <- sce_ms[,colnames(sce_ms)%in%annot$cell_id]
 ```{r,eval=TRUE}
 m <- match(colnames(sce_ms),annot$cell_id)
 sce_ms$broad_annot <- annot$type_broad[m]
-sce_ms$sample_id <- sce_ms$library_id
 ```
 
 Some scRNA-seq were swapped and not corrected in the loaded sce object.
@@ -123,8 +122,7 @@ Finally, let's save info about which sample corresponds to which individual in t
 ```{r,eval=TRUE}
 ms_sample_individual <- colData(sce_ms) %>% 
   as_tibble() %>% 
-  dplyr::select(sample_id=library_id,
-                individual_id) %>% 
+  dplyr::select(sample_id=library_id,individual_id,age,post_mortem_m,sex,tissue=matter) %>% 
   unique() %>% 
   write_tsv(.,'data_sensitive/expression/sample_individual_ms.txt',col_names = TRUE)
 ```
@@ -199,8 +197,8 @@ Finally, let's save info about which sample corresponds to which individual in t
 ```{r,eval=TRUE}
 ad_sample_individual <- colData(sce_ad) %>% 
   as_tibble() %>% 
-  dplyr::select(sample_id,
-                individual_id) %>% 
+  mutate(post_mortem_m=pmi*60) %>% 
+  dplyr::select(sample_id,individual_id,age,post_mortem_m,sex,tissue) %>% 
   unique() %>% 
   write_tsv(.,'data_sensitive/expression/sample_individual_ad.txt',col_names = TRUE)
 ```
@@ -331,7 +329,8 @@ if(!file.exists('data_sensitive/expression/ms_sum_expression.individual_id.rds')
 
 ```{r,eval=TRUE}
 if(!file.exists('data_sensitive/expression/ms_sum_expression.sample_id.rds')){
-  
+
+  sce_ms$sample_id <- sce_ms$library_id
   cell_type_id <- cbind(as.character(sce_ms$broad_annot),sce_ms$sample_id) %>% unique() %>% as.data.frame()
   
   sum_expression_ms <- mclapply(1:nrow(cell_type_id),
