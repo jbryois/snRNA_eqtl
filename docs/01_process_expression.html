@@ -11,7 +11,7 @@
 
 <meta name="author" content="Julien Bryois" />
 
-<meta name="date" content="2022-01-27" />
+<meta name="date" content="2022-02-01" />
 
 <title>Process expression</title>
 
@@ -380,7 +380,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Process expression</h1>
 <h4 class="author">Julien Bryois</h4>
-<h4 class="date">January 27, 2022</h4>
+<h4 class="date">February 01, 2022</h4>
 
 </div>
 
@@ -405,7 +405,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2022-01-27
+<strong>Last updated:</strong> 2022-02-01
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong3a086fb"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 3a086fb </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong07b8f71"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 07b8f71 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong3a086fb" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong07b8f71" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 3a086fb. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 07b8f71. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -513,7 +513,8 @@ Note that you need to be careful to ensure that all relevant files for the analy
 <pre><code>
 Ignored files:
     Ignored:    .Rproj.user/
-    Ignored:    analysis/figure/
+    Ignored:    data/magma_interaction_eqtl/
+    Ignored:    data/magma_specific_genes/
     Ignored:    data_sensitive/
 
 Untracked files:
@@ -521,7 +522,6 @@ Untracked files:
     Untracked:  analysis/additional/
     Untracked:  analysis/alternatives/
     Untracked:  analysis/clean_analysis.Rmd
-    Untracked:  analysis/get_tables.Rmd
     Untracked:  analysis/log_run_slurm_out
     Untracked:  analysis/log_run_slurm_stderr
     Untracked:  analysis/portfolio/
@@ -535,24 +535,15 @@ Untracked files:
     Untracked:  data/gtex/
     Untracked:  data/gwas/
     Untracked:  data/gwas_epigenome_overlap/
-    Untracked:  data/magma_interaction_eqtl/
-    Untracked:  data/magma_specific_genes/
     Untracked:  data/metabrain/
     Untracked:  data/umap/
-    Untracked:  output/coloc/
-    Untracked:  output/eqtl/
-    Untracked:  output/eqtl_specific/
-    Untracked:  output/figures/
-    Untracked:  output/figures_rev/
-    Untracked:  output/gwas_epigenome_overlap/
-    Untracked:  output/shiny/
+    Untracked:  output_almost_final/
     Untracked:  output_tmp_QTLtools/
     Untracked:  output_tmp_fastQTL_sample_ambient_removed/
 
 Unstaged changes:
     Modified:   .gitignore
-    Modified:   analysis/02_run_eQTL.Rmd
-    Modified:   analysis/06_eqtl_epigenome_enrichment.Rmd
+    Modified:   analysis/04_coloc.Rmd
     Modified:   analysis/_site.yml
     Modified:   analysis/plot_figures.Rmd
     Deleted:    output/README.md
@@ -594,6 +585,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+07b8f71
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-02-01
+</td>
+<td>
+process
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+7f06226
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-27
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1026,8 +1051,7 @@ library(parallel)</code></pre>
 <p>Only keep cells that were annotated</p>
 <pre class="r"><code>sce_ms &lt;- sce_ms[,colnames(sce_ms)%in%annot$cell_id]</code></pre>
 <pre class="r"><code>m &lt;- match(colnames(sce_ms),annot$cell_id)
-sce_ms$broad_annot &lt;- annot$type_broad[m]
-sce_ms$sample_id &lt;- sce_ms$library_id</code></pre>
+sce_ms$broad_annot &lt;- annot$type_broad[m]</code></pre>
 <p>Some scRNA-seq were swapped and not corrected in the loaded sce object.</p>
 <p>EU017 and EU018 –&gt; swap WM189 and WM190 –&gt; swap</p>
 <p>Swap them here</p>
@@ -1060,8 +1084,7 @@ colnames(sce_ms) &lt;- gsub(&#39;tmp&#39;,&#39;WM190&#39;,colnames(sce_ms))</cod
 <p>Finally, let’s save info about which sample corresponds to which individual in the filtered data</p>
 <pre class="r"><code>ms_sample_individual &lt;- colData(sce_ms) %&gt;% 
   as_tibble() %&gt;% 
-  dplyr::select(sample_id=library_id,
-                individual_id) %&gt;% 
+  dplyr::select(sample_id=library_id,individual_id,age,post_mortem_m,sex,tissue=matter) %&gt;% 
   unique() %&gt;% 
   write_tsv(.,&#39;data_sensitive/expression/sample_individual_ms.txt&#39;,col_names = TRUE)</code></pre>
 </div>
@@ -1115,8 +1138,8 @@ colnames(sce_ms) &lt;- gsub(&#39;tmp&#39;,&#39;WM190&#39;,colnames(sce_ms))</cod
 <p>Finally, let’s save info about which sample corresponds to which individual in the filtered data</p>
 <pre class="r"><code>ad_sample_individual &lt;- colData(sce_ad) %&gt;% 
   as_tibble() %&gt;% 
-  dplyr::select(sample_id,
-                individual_id) %&gt;% 
+  mutate(post_mortem_m=pmi*60) %&gt;% 
+  dplyr::select(sample_id,individual_id,age,post_mortem_m,sex,tissue) %&gt;% 
   unique() %&gt;% 
   write_tsv(.,&#39;data_sensitive/expression/sample_individual_ad.txt&#39;,col_names = TRUE)</code></pre>
 </div>
@@ -1203,7 +1226,8 @@ write_tsv(cov,&#39;data_sensitive/eqtl/covariate_pca_meta_fastqtl.txt&#39;)</cod
   gc()
 }</code></pre>
 <pre class="r"><code>if(!file.exists(&#39;data_sensitive/expression/ms_sum_expression.sample_id.rds&#39;)){
-  
+
+  sce_ms$sample_id &lt;- sce_ms$library_id
   cell_type_id &lt;- cbind(as.character(sce_ms$broad_annot),sce_ms$sample_id) %&gt;% unique() %&gt;% as.data.frame()
   
   sum_expression_ms &lt;- mclapply(1:nrow(cell_type_id),
@@ -1221,8 +1245,8 @@ write_tsv(cov,&#39;data_sensitive/eqtl/covariate_pca_meta_fastqtl.txt&#39;)</cod
 <pre class="r"><code>rm(sce_ms)
 gc()</code></pre>
 <pre><code>            used   (Mb) gc trigger    (Mb)    max used    (Mb)
-Ncells   9370414  500.5   19682095  1051.2    19682095  1051.2
-Vcells 163242933 1245.5 8907262413 67957.1 12461469471 95073.5</code></pre>
+Ncells   9370433  500.5   17863195   954.0    17863195   954.0
+Vcells 163244243 1245.5 8907262380 67957.1 12459921062 95061.7</code></pre>
 </div>
 <div id="ad" class="section level2">
 <h2>AD</h2>
@@ -1261,8 +1285,8 @@ Vcells 163242933 1245.5 8907262413 67957.1 12461469471 95073.5</code></pre>
 <pre class="r"><code>rm(sce_ad)
 gc()</code></pre>
 <pre><code>           used  (Mb) gc trigger    (Mb)    max used    (Mb)
-Ncells  7516220 401.5   19682095  1051.2    19682095  1051.2
-Vcells 21595458 164.8 7125809931 54365.7 12461469471 95073.5</code></pre>
+Ncells  7516239 401.5   17863195   954.0    17863195   954.0
+Vcells 21596773 164.8 7125809904 54365.7 12459921062 95061.7</code></pre>
 </div>
 </div>
 <div id="load-pseudo-bulk" class="section level1">
@@ -1427,14 +1451,14 @@ saveRDS(markers,&#39;data_sensitive/expression/cell_marker_expression.rds&#39;)<
 <pre><code># A tibble: 8 x 2
   cell_type              n
   &lt;chr&gt;              &lt;int&gt;
-1 Excitatory neurons 14596
-2 Inhibitory neurons 12946
-3 Astrocytes         11434
-4 Oligodendrocytes   10824
-5 OPCs / COPs        10803
-6 Endothelial cells  10788
-7 Microglia           8900
-8 Pericytes           6941</code></pre>
+1 Excitatory neurons 14595
+2 Inhibitory neurons 12943
+3 Astrocytes         11436
+4 Oligodendrocytes   10816
+5 OPCs / COPs        10801
+6 Endothelial cells  10778
+7 Microglia           8887
+8 Pericytes           6940</code></pre>
 </div>
 </div>
 <div id="filter-individuals" class="section level2">
@@ -1571,6 +1595,11 @@ ln -s ../../genotypes/processed/combined_final.vcf.gz .
 ln -s ../../genotypes/processed/combined_final.vcf.gz.tbi .
 cd ..
 done</code></pre>
+<pre><code>gzip: location is a directory -- ignored
+gzip: epigenome_overlap is a directory -- ignored
+gzip: results is a directory -- ignored
+gzip: *: No such file or directory
+gzip: *: No such file or directory</code></pre>
 </div>
 <div id="pseudo-bulk-eqtl" class="section level2">
 <h2>Pseudo-bulk eQTL</h2>
@@ -1670,6 +1699,7 @@ ln -s ../../genotypes/processed/combined_final.vcf.gz .
 ln -s ../../genotypes/processed/combined_final.vcf.gz.tbi .
 cd ..
 done</code></pre>
+<pre><code>gzip: *: No such file or directory</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
