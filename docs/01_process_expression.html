@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong07b8f71"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 07b8f71 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong7cdba32"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 7cdba32 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong07b8f71" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong7cdba32" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 07b8f71. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 7cdba32. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -537,12 +537,14 @@ Untracked files:
     Untracked:  data/gwas_epigenome_overlap/
     Untracked:  data/metabrain/
     Untracked:  data/umap/
+    Untracked:  output/eqtl/
     Untracked:  output_almost_final/
     Untracked:  output_tmp_QTLtools/
     Untracked:  output_tmp_fastQTL_sample_ambient_removed/
 
 Unstaged changes:
     Modified:   .gitignore
+    Modified:   analysis/02_run_eQTL.Rmd
     Modified:   analysis/04_coloc.Rmd
     Modified:   analysis/_site.yml
     Modified:   analysis/plot_figures.Rmd
@@ -585,6 +587,23 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+html
+</td>
+<td>
+7cdba32
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-02-01
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1245,8 +1264,8 @@ write_tsv(cov,&#39;data_sensitive/eqtl/covariate_pca_meta_fastqtl.txt&#39;)</cod
 <pre class="r"><code>rm(sce_ms)
 gc()</code></pre>
 <pre><code>            used   (Mb) gc trigger    (Mb)    max used    (Mb)
-Ncells   9370433  500.5   17863195   954.0    17863195   954.0
-Vcells 163244243 1245.5 8907262380 67957.1 12459921062 95061.7</code></pre>
+Ncells   9370436  500.5   17791542   950.2    17791542   950.2
+Vcells 163244320 1245.5 8907262452 67957.1 12459900815 95061.5</code></pre>
 </div>
 <div id="ad" class="section level2">
 <h2>AD</h2>
@@ -1285,8 +1304,8 @@ Vcells 163244243 1245.5 8907262380 67957.1 12459921062 95061.7</code></pre>
 <pre class="r"><code>rm(sce_ad)
 gc()</code></pre>
 <pre><code>           used  (Mb) gc trigger    (Mb)    max used    (Mb)
-Ncells  7516239 401.5   17863195   954.0    17863195   954.0
-Vcells 21596773 164.8 7125809904 54365.7 12459921062 95061.7</code></pre>
+Ncells  7516242 401.5   17791542   950.2    17791542   950.2
+Vcells 21596850 164.8 7125809962 54365.7 12459900815 95061.5</code></pre>
 </div>
 </div>
 <div id="load-pseudo-bulk" class="section level1">
@@ -1595,11 +1614,6 @@ ln -s ../../genotypes/processed/combined_final.vcf.gz .
 ln -s ../../genotypes/processed/combined_final.vcf.gz.tbi .
 cd ..
 done</code></pre>
-<pre><code>gzip: location is a directory -- ignored
-gzip: epigenome_overlap is a directory -- ignored
-gzip: results is a directory -- ignored
-gzip: *: No such file or directory
-gzip: *: No such file or directory</code></pre>
 </div>
 <div id="pseudo-bulk-eqtl" class="section level2">
 <h2>Pseudo-bulk eQTL</h2>
@@ -1699,7 +1713,6 @@ ln -s ../../genotypes/processed/combined_final.vcf.gz .
 ln -s ../../genotypes/processed/combined_final.vcf.gz.tbi .
 cd ..
 done</code></pre>
-<pre><code>gzip: *: No such file or directory</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
