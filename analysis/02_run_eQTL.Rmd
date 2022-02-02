@@ -122,7 +122,7 @@ d <- tibble(files=fastqtl_out_files,
 Write eQTL results with different number of expression principal components
 
 ```{r,eval=FALSE}
-dir.create('output/eqtl/',showWarnings = FALSE)
+dir.create('output/eqtl/',showWarnings = FALSE,recursive = TRUE)
 write_tsv(d,'output/eqtl/eqtl.allPCs.txt')
 ```
 
@@ -618,7 +618,8 @@ files <- list.files('data_sensitive/eqtl/PC70_caveman/results',pattern='.best',f
 d <- tibble(files) %>% mutate(file_content=map(files,read_tsv)) %>% 
   unnest(file_content) %>% 
   mutate(cell_type=basename(files) %>% gsub('\\.all.best','',.)) %>% 
-  select(cell_type,everything()) %>% select(-files) %>% 
+  dplyr::select(cell_type,everything()) %>% 
+  dplyr::select(-files) %>% 
   mutate(cell_type=gsub('\\.',' ',cell_type)) %>% 
   mutate(cell_type=gsub('OPCs   COPs','OPCs / COPs',cell_type)) %>% 
   arrange(-Probability)
@@ -698,7 +699,7 @@ done
 All done (22)
 
 ```{r,eval=FALSE}
-fastqtl_out_files <- list.files('data_sensitive/eqtl_pb/',pattern='.gz.[0-9]',full.names = T,recursive = TRUEfastqtl_out_files)
+fastqtl_out_files <- list.files('data_sensitive/eqtl_pb/',pattern='.gz.[0-9]',full.names = T,recursive = TRUE)
 ```
 
 ```{r,eval=FALSE}
@@ -709,7 +710,7 @@ d <- tibble(files=fastqtl_out_files,
   mutate(file_content=map(files,read.table,header=F)) %>% 
   unnest(file_content) %>% 
   filter(!is.na(V11)) %>% 
-  select(-files) %>% 
+  dplyr::select(-files) %>% 
   setNames(c("cell_type","PCs","pid", "nvar", "shape1", "shape2", "dummy", "sid", "dist", "npval", "slope","ppval", "bpval")) %>% 
   group_by(cell_type,PCs) %>% 
   mutate(adj_p=qvalue(bpval)$qvalues) %>% 
