@@ -11,7 +11,7 @@
 
 <meta name="author" content="Julien Bryois" />
 
-<meta name="date" content="2022-01-28" />
+<meta name="date" content="2022-02-02" />
 
 <title>Run eQTL analysis</title>
 
@@ -380,7 +380,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Run eQTL analysis</h1>
 <h4 class="author">Julien Bryois</h4>
-<h4 class="date">January 28, 2022</h4>
+<h4 class="date">February 02, 2022</h4>
 
 </div>
 
@@ -405,7 +405,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2022-01-28
+<strong>Last updated:</strong> 2022-02-02
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongfe925c3"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> fe925c3 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongd7f2b88"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> d7f2b88 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongfe925c3" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongd7f2b88" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version fe925c3. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version d7f2b88. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -516,13 +516,13 @@ Ignored files:
     Ignored:    data/magma_interaction_eqtl/
     Ignored:    data/magma_specific_genes/
     Ignored:    data_sensitive/
+    Ignored:    output/figures/
 
 Untracked files:
     Untracked:  analysis/._index.Rmd
     Untracked:  analysis/additional/
     Untracked:  analysis/alternatives/
     Untracked:  analysis/clean_analysis.Rmd
-    Untracked:  analysis/get_tables.Rmd
     Untracked:  analysis/log_run_slurm_out
     Untracked:  analysis/log_run_slurm_stderr
     Untracked:  analysis/portfolio/
@@ -538,19 +538,14 @@ Untracked files:
     Untracked:  data/gwas_epigenome_overlap/
     Untracked:  data/metabrain/
     Untracked:  data/umap/
-    Untracked:  output/coloc/
     Untracked:  output/eqtl/
-    Untracked:  output/eqtl_specific/
-    Untracked:  output/figures/
-    Untracked:  output/figures_rev/
-    Untracked:  output/gwas_epigenome_overlap/
-    Untracked:  output/shiny/
+    Untracked:  output_almost_final/
     Untracked:  output_tmp_QTLtools/
     Untracked:  output_tmp_fastQTL_sample_ambient_removed/
 
 Unstaged changes:
     Modified:   .gitignore
-    Modified:   analysis/06_eqtl_epigenome_enrichment.Rmd
+    Modified:   analysis/04_coloc.Rmd
     Modified:   analysis/_site.yml
     Modified:   analysis/plot_figures.Rmd
     Deleted:    output/README.md
@@ -592,6 +587,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+d7f2b88
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-02-02
+</td>
+<td>
+eQTL pipeline
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+fa2d582
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -787,7 +816,7 @@ PC120
 <div id="write" class="section level2">
 <h2>Write</h2>
 <p>Write eQTL results with different number of expression principal components</p>
-<pre class="r"><code>dir.create(&#39;output/eqtl/&#39;,showWarnings = FALSE)
+<pre class="r"><code>dir.create(&#39;output/eqtl/&#39;,showWarnings = FALSE,recursive = TRUE)
 write_tsv(d,&#39;output/eqtl/eqtl.allPCs.txt&#39;)</code></pre>
 <p>Get number of PCs maximising the number of eQTL discoveries</p>
 <pre class="r"><code>selected_pcs &lt;- d %&gt;% 
@@ -1150,7 +1179,8 @@ rm *_*</code></pre>
 <pre class="r"><code>d &lt;- tibble(files) %&gt;% mutate(file_content=map(files,read_tsv)) %&gt;% 
   unnest(file_content) %&gt;% 
   mutate(cell_type=basename(files) %&gt;% gsub(&#39;\\.all.best&#39;,&#39;&#39;,.)) %&gt;% 
-  select(cell_type,everything()) %&gt;% select(-files) %&gt;% 
+  dplyr::select(cell_type,everything()) %&gt;% 
+  dplyr::select(-files) %&gt;% 
   mutate(cell_type=gsub(&#39;\\.&#39;,&#39; &#39;,cell_type)) %&gt;% 
   mutate(cell_type=gsub(&#39;OPCs   COPs&#39;,&#39;OPCs / COPs&#39;,cell_type)) %&gt;% 
   arrange(-Probability)</code></pre>
@@ -1235,7 +1265,7 @@ PC110
 PC120
 22</code></pre>
 <p>All done (22)</p>
-<pre class="r"><code>fastqtl_out_files &lt;- list.files(&#39;data_sensitive/eqtl_pb/&#39;,pattern=&#39;.gz.[0-9]&#39;,full.names = T,recursive = TRUEfastqtl_out_files)</code></pre>
+<pre class="r"><code>fastqtl_out_files &lt;- list.files(&#39;data_sensitive/eqtl_pb/&#39;,pattern=&#39;.gz.[0-9]&#39;,full.names = T,recursive = TRUE)</code></pre>
 <pre class="r"><code>d &lt;- tibble(files=fastqtl_out_files,
             cell_type=basename(files) %&gt;% 
               gsub(&#39;.quantile.txt.gz..+&#39;,&#39;&#39;,.)) %&gt;% 
@@ -1243,7 +1273,7 @@ PC120
   mutate(file_content=map(files,read.table,header=F)) %&gt;% 
   unnest(file_content) %&gt;% 
   filter(!is.na(V11)) %&gt;% 
-  select(-files) %&gt;% 
+  dplyr::select(-files) %&gt;% 
   setNames(c(&quot;cell_type&quot;,&quot;PCs&quot;,&quot;pid&quot;, &quot;nvar&quot;, &quot;shape1&quot;, &quot;shape2&quot;, &quot;dummy&quot;, &quot;sid&quot;, &quot;dist&quot;, &quot;npval&quot;, &quot;slope&quot;,&quot;ppval&quot;, &quot;bpval&quot;)) %&gt;% 
   group_by(cell_type,PCs) %&gt;% 
   mutate(adj_p=qvalue(bpval)$qvalues) %&gt;% 
