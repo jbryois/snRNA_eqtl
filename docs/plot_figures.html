@@ -11,7 +11,7 @@
 
 <meta name="author" content="Julien Bryois" />
 
-<meta name="date" content="2022-01-28" />
+<meta name="date" content="2022-02-02" />
 
 <title>Plot figures</title>
 
@@ -392,7 +392,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Plot figures</h1>
 <h4 class="author">Julien Bryois</h4>
-<h4 class="date">January 28, 2022</h4>
+<h4 class="date">February 02, 2022</h4>
 
 </div>
 
@@ -417,7 +417,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2022-01-28
+<strong>Last updated:</strong> 2022-02-02
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -508,16 +508,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongf63c42b"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> f63c42b </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongbe75661"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> be75661 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongf63c42b" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongbe75661" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version f63c42b. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version be75661. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -525,6 +525,7 @@ Note that you need to be careful to ensure that all relevant files for the analy
 <pre><code>
 Ignored files:
     Ignored:    .Rproj.user/
+    Ignored:    analysis/figure/
     Ignored:    data/magma_interaction_eqtl/
     Ignored:    data/magma_specific_genes/
     Ignored:    data_sensitive/
@@ -553,10 +554,9 @@ Untracked files:
     Untracked:  output/eqtl/
     Untracked:  output/eqtl_specific/
     Untracked:  output/figures/
-    Untracked:  output/figures_rev/
     Untracked:  output/gwas_epigenome_overlap/
     Untracked:  output/shiny/
-    Untracked:  output/tables/
+    Untracked:  output_almost_final/
     Untracked:  output_tmp_QTLtools/
     Untracked:  output_tmp_fastQTL_sample_ambient_removed/
 
@@ -602,6 +602,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+be75661
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-02-02
+</td>
+<td>
+plot fig
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -894,6 +928,43 @@ library(rhdf5)</code></pre>
         axis.line = element_blank()) 
 p + geom_text(data=pos,aes(label=broad),col=&#39;black&#39;,size=5)</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-6-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-6-1">
+Past versions of unnamed-chunk-6-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-6-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>p &lt;- p + geom_text(data=pos,aes(label=broad),col=&#39;black&#39;,size=9)
 ggsave(p,filename = &#39;output/figures/Figure1_umap.png&#39;,width=12,height=8,dpi = 300)</code></pre>
 </div>
@@ -939,6 +1010,43 @@ cells_to_display &lt;- c(&#39;Oligodendrocytes&#39;,&#39;Excitatory neurons&#39;
 chrm5 &lt;- plot_eqtl_specific(cell_type_name,gene_name,snp_name,cells_to_display) + theme(text=element_text(size=20),plot.title = element_text(size=12))
 chrm5</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-10-1.png" width="768" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-10-1">
+Past versions of unnamed-chunk-10-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-10-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggsave(chrm5,filename = &#39;output/figures/Figure1_int.png&#39;,width=7,height=3)</code></pre>
 </div>
 </div>
@@ -958,6 +1066,43 @@ p &lt;- d %&gt;%
 ggsave(p,filename=&#39;output/figures/Figure2A.png&#39;,height=5,width=7,dpi = 300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-11-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-11-1">
+Past versions of unnamed-chunk-11-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-11-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="figure-2b" class="section level2">
 <h2>Figure 2B</h2>
@@ -982,6 +1127,43 @@ p</code></pre>
 ggsave(p,filename=&#39;output/figures/Figure2B.png&#39;,height=5,width=7,dpi = 300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-16-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-16-1">
+Past versions of unnamed-chunk-16-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-16-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="figure-2c" class="section level2">
 <h2>Figure 2C</h2>
@@ -991,7 +1173,7 @@ p</code></pre>
   dplyr::rename(SNP=sid) %&gt;% 
   separate(pid,into=c(&#39;symbol&#39;,&#39;ensembl&#39;),sep=&#39;_&#39;)</code></pre>
 <pre class="bash"><code>cd data_sensitive/genotypes/processed
-zcat combined_final.vcf.gz | cut -f 1,2,3 | grep -v &quot;^##&quot; &gt; snp_pos_hg38.txt</code></pre>
+zcat combined_final.vcf.gz | cut -f 1,2,3 | grep -v &quot;^#&quot; &gt; snp_pos_hg38.txt</code></pre>
 <pre class="r"><code>snp_pos &lt;- data.table::fread(&#39;data_sensitive/genotypes/processed/snp_pos_hg38.txt&#39;,data.table = FALSE) %&gt;% 
   dplyr::select(chr_hg38=V1,pos_hg38=V2,SNP=V3) %&gt;% 
   as_tibble()</code></pre>
@@ -1056,6 +1238,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
 <tr>
 <td>
 056f5c7
@@ -1124,6 +1317,17 @@ Date
 <tbody>
 <tr>
 <td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+<tr>
+<td>
 056f5c7
 </td>
 <td>
@@ -1159,6 +1363,43 @@ fraction (LOEUF)&quot;) + ggpubr::stat_compare_means(comparisons = my_comparison
 ggsave(p,filename=&#39;output/figures/Figure2E.png&#39;,width = 9,height=6,dpi = 300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-31-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-31-1">
+Past versions of unnamed-chunk-31-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-31-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="figure-2f" class="section level2">
 <h2>Figure 2F</h2>
@@ -1208,6 +1449,43 @@ cell_type_name &lt;- &#39;Astrocytes&#39;</code></pre>
 <pre class="r"><code>p &lt;- nsun2 + hla &amp; theme(text=element_text(size=24),plot.title = element_text(size=20))
 p &amp; theme(text=element_text(size=12),plot.title = element_text(size=12))</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-39-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-39-1">
+Past versions of unnamed-chunk-39-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-39-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggsave(p,filename = &#39;output/figures/Figure2F.png&#39;,width=12,height=5)</code></pre>
 </div>
 <div id="figure-2g" class="section level2">
@@ -1223,7 +1501,44 @@ cell_type_name &lt;- &#39;Excitatory neurons&#39;</code></pre>
 <pre class="r"><code>p &lt;- met + glud1 &amp; theme(text=element_text(size=24),plot.title = element_text(size=20))
 p &amp; theme(text=element_text(size=12),plot.title = element_text(size=12))</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-44-1.png" width="672" style="display: block; margin: auto;" /></p>
-<pre class="r"><code>ggsave(p,filename = &#39;output/figures/Figure2E.png&#39;,width=12,height=5)</code></pre>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-44-1">
+Past versions of unnamed-chunk-44-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-44-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<pre class="r"><code>ggsave(p,filename = &#39;output/figures/Figure2G.png&#39;,width=12,height=5)</code></pre>
 </div>
 <div id="figure-3a" class="section level2">
 <h2>Figure 3A</h2>
@@ -1269,6 +1584,43 @@ p &lt;- fdensity_res  %&gt;% filter(!sig%in%c(&#39;Pericytes eQTL&#39;,&#39;Endo
 ggsave(p,filename = &#39;output/figures/Figure3A.png&#39;,width=11,height=8.5,dpi = 300)
 p + theme(text=element_text(size=10),axis.title = element_text(size=14))</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-47-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-47-1">
+Past versions of unnamed-chunk-47-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-47-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="figure-3b" class="section level2">
 <h2>Figure 3B</h2>
@@ -1312,6 +1664,43 @@ p + theme(text=element_text(size=10),axis.title = element_text(size=14))</code><
 ggsave(p,filename=&#39;output/figures/Figure3B.png&#39;,height=6,width=10,dpi = 300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-50-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-50-1">
+Past versions of unnamed-chunk-50-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-50-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="figure-3c" class="section level2">
 <h2>Figure 3C</h2>
@@ -1335,6 +1724,43 @@ p</code></pre>
   summarise(pi1=1-qvalue::qvalue(p)$pi0)</code></pre>
 <pre class="r"><code>pi1 %&gt;% spread(cell_type_test,pi1) %&gt;% column_to_rownames(&#39;cell_type_id&#39;) %&gt;% pheatmap::pheatmap(.,display_numbers = TRUE,number_color = &#39;black&#39;,angle_col = 45) %&gt;% print()</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-54-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-54-1">
+Past versions of unnamed-chunk-54-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-54-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>pi1 %&gt;% spread(cell_type_test,pi1) %&gt;% column_to_rownames(&#39;cell_type_id&#39;) %&gt;% pheatmap::pheatmap(.,display_numbers = TRUE,number_color = &#39;black&#39;,angle_col = 45,filename = &#39;output/figures/Figure3C.png&#39;,height = 4)</code></pre>
 </div>
 <div id="figure-3d" class="section level2">
@@ -1374,6 +1800,43 @@ cell_type_name &lt;- &#39;Oligodendrocytes&#39;
 chrm5 &lt;- plot_eqtl_specific(cell_type_name,gene_name,snp_name) + theme(text=element_text(size=20),plot.title = element_text(size=12))
 chrm5 + theme(text=element_text(size=14))</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-59-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-59-1">
+Past versions of unnamed-chunk-59-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-59-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggsave(chrm5,filename = &#39;output/figures/Figure3D.png&#39;,width=9,height=5)</code></pre>
 </div>
 <div id="figure-3e" class="section level2">
@@ -1384,6 +1847,43 @@ cell_type_name &lt;- &#39;Microglia&#39;
 p &lt;- plot_eqtl_specific(cell_type_name,gene_name,snp_name) + theme(text=element_text(size=20),plot.title = element_text(size=12))
 p + theme(text=element_text(size=14))</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-60-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-60-1">
+Past versions of unnamed-chunk-60-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-60-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggsave(p,filename = &#39;output/figures/Figure3E.png&#39;,width=9,height=5)</code></pre>
 </div>
 <div id="figure-3f" class="section level2">
@@ -1394,6 +1894,43 @@ cell_type_name &lt;- &#39;Astrocytes&#39;
 p &lt;- plot_eqtl_specific(cell_type_name,gene_name,snp_name) + theme(text=element_text(size=20),plot.title = element_text(size=12))
 p + theme(text=element_text(size=14))</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-61-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-61-1">
+Past versions of unnamed-chunk-61-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-61-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggsave(p,filename = &#39;output/figures/Figure3F.png&#39;,width=9,height=5)</code></pre>
 </div>
 <div id="figure-4a" class="section level2">
@@ -1452,6 +1989,43 @@ my_limits &lt;- function(x) {
 <pre class="r"><code>p &lt;-  ggplot(x,aes(n_genes_per_loci,n,fill=cell_type2)) + geom_col() + facet_wrap(~trait,scales = &#39;free&#39;) + xlab(&#39;Number of coloc genes&#39;) + ylab(&#39;Number of loci&#39;) + theme_classic() + scale_x_continuous(breaks=my_breaks,limits=my_limits) + guides(fill=guide_legend(title=&#39;&#39;))
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-67-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-67-1">
+Past versions of unnamed-chunk-67-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-67-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>p &lt;- p + theme(text=element_text(size=50),axis.ticks.length=unit(.25, &quot;cm&quot;),legend.position=&#39;top&#39;,legend.text = element_text(size=22)) 
 ggsave(p,filename=&#39;output/figures/Figure4A.png&#39;,width=16,height=12,dpi = 300)</code></pre>
 </div>
@@ -1524,6 +2098,43 @@ p + theme(legend.position=&#39;top&#39;,text=element_text(size=14),legend.title 
   guides(colour = guide_legend(override.aes = list(size=5))) +
   ggpubr::stat_compare_means(comparisons = my_comparisons,size=4,vjust = -0.3,bracket.size = 1)</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-73-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-73-1">
+Past versions of unnamed-chunk-73-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-73-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="figure-4c" class="section level2">
 <h2>Figure 4C</h2>
@@ -1643,6 +2254,43 @@ p + theme(legend.position=&#39;top&#39;,text=element_text(size=14),legend.title 
 <pre class="r"><code>pheatmap::pheatmap(t(m),scale=&#39;row&#39;,cluster_cols = FALSE,cluster_rows = FALSE,angle_col = 0,filename = &#39;output/figures/FigureS1.png&#39;,height = 2,width=7)</code></pre>
 <pre class="r"><code>pheatmap::pheatmap(t(m),scale=&#39;row&#39;,cluster_cols = FALSE,cluster_rows = FALSE,angle_col = 0)</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-83-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-83-1">
+Past versions of unnamed-chunk-83-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-83-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="figure-s2---pi1-plots-all" class="section level2">
 <h2>Figure S2 - Pi1 plots all</h2>
@@ -1655,6 +2303,43 @@ p &lt;- d %&gt;% ggplot(.,aes(bpval,fill=cell_type)) + geom_histogram(bins=30, b
 ggsave(p,filename=&#39;output/figures/FigureS2.png&#39;,width=8,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-84-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-84-1">
+Past versions of unnamed-chunk-84-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-84-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="figure-s3---metabrain" class="section level2">
 <h2>Figure S3 - Metabrain</h2>
@@ -1680,6 +2365,43 @@ p</code></pre>
 ggsave(p,filename=&#39;output/figures/FigureS3A.png&#39;,width=12,height=3,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-87-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-87-1">
+Past versions of unnamed-chunk-87-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-87-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="non-replicating-eqtl" class="section level3">
 <h3>non-replicating eQTL</h3>
@@ -1706,6 +2428,43 @@ p</code></pre>
 ggsave(p,filename=&#39;output/figures/FigureS3C.png&#39;,width=12,height=3,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-91-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-91-1">
+Past versions of unnamed-chunk-91-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-91-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="loeuf" class="section level3">
 <h3>Loeuf</h3>
@@ -1730,6 +2489,43 @@ p</code></pre>
 ggsave(p,filename=&#39;output/figures/FigureS3B.png&#39;,width=12,height=3,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-94-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-94-1">
+Past versions of unnamed-chunk-94-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-94-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="figure-s4s5-eqtl-location" class="section level2">
@@ -1791,6 +2587,43 @@ bedtools closest -D b -k 500 -a eqtl_5FDR.bed -b Homo_sapiens.GRCh38.96.filtered
 ggsave(p,filename=&#39;output/figures/FigureS4.png&#39;,width=5,height=3,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-100-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-100-1">
+Past versions of unnamed-chunk-100-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-100-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="rank-of-affected-gene" class="section level3">
 <h3>Rank of affected gene</h3>
@@ -1811,6 +2644,43 @@ p</code></pre>
 ggsave(p,filename=&#39;output/figures/FigureS5.png&#39;,width=6,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-102-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-102-1">
+Past versions of unnamed-chunk-102-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-102-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="figure-s6---eqtl-expression-level" class="section level2">
@@ -1874,6 +2744,43 @@ p</code></pre>
 ggsave(p,filename=&#39;output/figures/FigureS6.png&#39;,width=14,height=5,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-111-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-111-1">
+Past versions of unnamed-chunk-111-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-111-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="figure-s7---independent-eqtls" class="section level2">
 <h2>Figure S7 - Independent eQTLs</h2>
@@ -1887,6 +2794,43 @@ p</code></pre>
 ggsave(p,filename=&#39;output/figures/FigureS7B.png&#39;,width=6,height=2.5,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-113-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-113-1">
+Past versions of unnamed-chunk-113-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-113-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <div id="distance-to-tss" class="section level3">
 <h3>Distance to TSS</h3>
 <pre class="r"><code>p &lt;- filter(d,rank==1) %&gt;% 
@@ -1899,6 +2843,43 @@ p</code></pre>
 ggsave(p,filename=&#39;output/figures/FigureS7C.png&#39;,width=7,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-114-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-114-1">
+Past versions of unnamed-chunk-114-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-114-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>p &lt;- d %&gt;% 
   mutate(`n indep eQTL`=as.factor(rank+1)) %&gt;% 
   ggplot(.,aes(`n indep eQTL`,abs(dist_phe_var+1),group=`n indep eQTL`,col=`n indep eQTL`)) +
@@ -1914,6 +2895,43 @@ p</code></pre>
 ggsave(p,filename=&#39;output/figures/FigureS7D.png&#39;,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-115-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-115-1">
+Past versions of unnamed-chunk-115-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-115-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="figure-s8---caveman" class="section level2">
@@ -1965,6 +2983,43 @@ bedtools intersect -loj -wa -wb -a finemapped_SNPs.bed -b corces_hg19.bed &gt; f
 ggsave(p,filename=paste0(&#39;output/figures/FigureS8A.png&#39;),width=7,height=4,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-121-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-121-1">
+Past versions of unnamed-chunk-121-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-121-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="histogram" class="section level3">
 <h3>Histogram</h3>
@@ -1978,6 +3033,43 @@ p</code></pre>
 ggsave(p,filename=&#39;output/figures/FigureS8B.png&#39;,width=5,height=3,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-123-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-123-1">
+Past versions of unnamed-chunk-123-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-123-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="figure-s9---epigenome-enrichment" class="section level2">
@@ -2014,6 +3106,43 @@ p</code></pre>
 ggsave(p,filename = &#39;output/figures/FigureS9.png&#39;,width=12,height=8,limitsize = FALSE,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-126-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-126-1">
+Past versions of unnamed-chunk-126-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-126-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="figure-s10---epigenome-enrichment" class="section level2">
@@ -2048,6 +3177,43 @@ p</code></pre>
 ggsave(p,filename = &#39;output/figures/FigureS10.png&#39;,width=8,height=6,limitsize = FALSE,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-129-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-129-1">
+Past versions of unnamed-chunk-129-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-129-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="figure-s11---cell-type-specific-eqtl" class="section level2">
@@ -2086,6 +3252,43 @@ p</code></pre>
 ggsave(p,filename=&#39;output/figures/FigureS11.png&#39;,width=12,height=5,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-134-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-134-1">
+Past versions of unnamed-chunk-134-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-134-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="figure-s12---cell-type-specific-eqtl" class="section level2">
@@ -2159,14 +3362,125 @@ p</code></pre>
 ggsave(p,filename=&#39;output/figures/FigureS12A.png&#39;,width=17,height=3,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-140-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-140-1">
+Past versions of unnamed-chunk-140-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-140-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>p &lt;- plot_loeuf_int(&#39;At least one&#39;)
 ggsave(p,filename=&#39;output/figures/FigureS12B.png&#39;,width=17,height=3,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-141-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-141-1">
+Past versions of unnamed-chunk-141-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-141-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>p &lt;- plot_loeuf_int(&#39;All&#39;)
 ggsave(p,filename=&#39;output/figures/FigureS12C.png&#39;,width=17,height=3,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-142-1.png" width="1152" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-142-1">
+Past versions of unnamed-chunk-142-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-142-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="figure-s13---cell-type-specific-eqtl" class="section level2">
@@ -2239,6 +3553,43 @@ p &lt;- ggplot(d,aes(VARIABLE,-log10(P),fill=Significance)) + geom_col() + facet
 ggsave(p,filename=&#39;output/figures/FigureS13.png&#39;,width=8,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-148-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-148-1">
+Past versions of unnamed-chunk-148-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-148-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="figure-s14---cell-type-specific-eqtl" class="section level2">
@@ -2280,6 +3631,43 @@ cell_type_name &lt;- &#39;Oligodendrocytes&#39;
 p &lt;- plot_eqtl_specific(cell_type_name,gene_name,snp_name) + theme(text=element_text(size=20),plot.title = element_text(size=12))
 p + theme(text=element_text(size=14))</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-152-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-152-1">
+Past versions of unnamed-chunk-152-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-152-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggsave(p,filename = &#39;output/figures/FigureS14A.png&#39;,width=9,height=5)</code></pre>
 <pre class="r"><code>gene_name &lt;- &#39;ACAP2_ENSG00000114331&#39;
 snp_name &lt;- &#39;rs6437374&#39;
@@ -2287,6 +3675,43 @@ cell_type_name &lt;- &#39;Astrocytes&#39;
 p &lt;- plot_eqtl_specific(cell_type_name,gene_name,snp_name) + theme(text=element_text(size=20),plot.title = element_text(size=12))
 p + theme(text=element_text(size=14))</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-153-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-153-1">
+Past versions of unnamed-chunk-153-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-153-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggsave(p,filename = &#39;output/figures/FigureS14B.png&#39;,width=9,height=5)</code></pre>
 </div>
 </div>
@@ -2316,6 +3741,43 @@ p + theme(text=element_text(size=14))</code></pre>
 ggsave(p,filename=&#39;output/figures/FigureS15.png&#39;,width=14,height=10,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-157-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-157-1">
+Past versions of unnamed-chunk-157-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-157-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 </div>
 <div id="figure-s16---number-of-coloc-loci" class="section level2">
@@ -2343,6 +3805,43 @@ n_loci &lt;- lapply(thresholds,get_loci_explained) %&gt;% bind_rows() %&gt;%
 ggsave(p,filename = &#39;output/figures/FigureS16.png&#39;,width = 8,height = 6,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-162-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-162-1">
+Past versions of unnamed-chunk-162-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-162-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="figure-s17---exp-of-ad-coloc-genes" class="section level2">
 <h2>Figure S17 - Exp of AD coloc genes</h2>
@@ -2373,6 +3872,43 @@ sum_expression &lt;- sum_expression %&gt;% filter(ensembl%in%coloc_ad$ensembl)</
 <pre class="r"><code>pheatmap::pheatmap(log2(m+1),display_numbers = TRUE,number_color = &#39;black&#39;,angle_col = 45,cellwidth = 30,filename = &#39;output/figures/FigureS17.png&#39;,height = 5,width=7)</code></pre>
 <pre class="r"><code>pheatmap::pheatmap(log2(m+1),display_numbers = TRUE,number_color = &#39;black&#39;,angle_col = 45,cellwidth = 30)</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-170-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-170-1">
+Past versions of unnamed-chunk-170-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-170-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="figure-s18---gwas-enrichment" class="section level2">
 <h2>Figure S18 - GWAS enrichment</h2>
@@ -2468,6 +4004,43 @@ scale_y_reordered &lt;- function(..., sep = &quot;___&quot;) {
   ggtitle(&#39;GWAS enrichment of top 1000 most specific genes&#39;)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-181-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-181-1">
+Past versions of unnamed-chunk-181-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-181-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <pre class="r"><code>ggsave(p,filename=&#39;output/figures/FigureS18.png&#39;,width=8,height=5,dpi=300)</code></pre>
 </div>
 <div id="figure-s19---coloc-ms-gtex-and-dice" class="section level2">
@@ -2575,6 +4148,43 @@ p &lt;- ggplot(d) +geom_point(aes(C1,C2,col= super_pop),size=0.5) + theme_bw() +
 ggsave(p,filename=&#39;output/figures/FigureS20.png&#39;,width=7,height=5,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-185-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-185-1">
+Past versions of unnamed-chunk-185-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-185-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 </div>
 <div id="figures21---eqtls-number-vs-pcs" class="section level2">
 <h2>FigureS21 - eQTLs number vs PCs</h2>
@@ -2586,6 +4196,43 @@ p</code></pre>
 ggsave(p,filename=&#39;output/figures/FigureS21.png&#39;,width=8,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-187-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p>
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-187-1">
+Past versions of unnamed-chunk-187-1.png
+</button>
+</p>
+<div id="fig-unnamed-chunk-187-1" class="collapse">
+<div class="table-responsive">
+<table class="table table-condensed table-hover">
+<thead>
+<tr>
+<th>
+Version
+</th>
+<th>
+Author
+</th>
+<th>
+Date
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+bb7b4d3
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
