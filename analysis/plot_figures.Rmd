@@ -184,7 +184,7 @@ d <- read_tsv('output/eqtl/eqtl.PC70.txt') %>%
 
 ```{bash,eval=FALSE}
 cd data_sensitive/genotypes/processed
-zcat combined_final.vcf.gz | cut -f 1,2,3 | grep -v "^##" > snp_pos_hg38.txt
+zcat combined_final.vcf.gz | cut -f 1,2,3 | grep -v "^#" > snp_pos_hg38.txt
 ```
 
 ```{r,eval=FALSE}
@@ -401,7 +401,7 @@ glud1 <- plot_eqtl(cell_type_name,gene_name,snp_name,'#87ab34') + theme(axis.tit
 ```{r}
 p <- met + glud1 & theme(text=element_text(size=24),plot.title = element_text(size=20))
 p & theme(text=element_text(size=12),plot.title = element_text(size=12))
-ggsave(p,filename = 'output/figures/Figure2E.png',width=12,height=5)
+ggsave(p,filename = 'output/figures/Figure2G.png',width=12,height=5)
 ```
 
 ## Figure 3A
