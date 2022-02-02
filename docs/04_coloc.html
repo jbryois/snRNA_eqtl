@@ -11,7 +11,7 @@
 
 <meta name="author" content="Julien Bryois" />
 
-<meta name="date" content="2022-01-28" />
+<meta name="date" content="2022-02-02" />
 
 <title>Colocalization analysis</title>
 
@@ -380,7 +380,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Colocalization analysis</h1>
 <h4 class="author">Julien Bryois</h4>
-<h4 class="date">January 28, 2022</h4>
+<h4 class="date">February 02, 2022</h4>
 
 </div>
 
@@ -405,7 +405,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2022-01-28
+<strong>Last updated:</strong> 2022-02-02
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongcaf8cdd"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> caf8cdd </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong1be9439"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 1be9439 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongcaf8cdd" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong1be9439" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version caf8cdd. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 1be9439. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -516,13 +516,13 @@ Ignored files:
     Ignored:    data/magma_interaction_eqtl/
     Ignored:    data/magma_specific_genes/
     Ignored:    data_sensitive/
+    Ignored:    output/figures/
 
 Untracked files:
     Untracked:  analysis/._index.Rmd
     Untracked:  analysis/additional/
     Untracked:  analysis/alternatives/
     Untracked:  analysis/clean_analysis.Rmd
-    Untracked:  analysis/get_tables.Rmd
     Untracked:  analysis/log_run_slurm_out
     Untracked:  analysis/log_run_slurm_stderr
     Untracked:  analysis/portfolio/
@@ -538,13 +538,8 @@ Untracked files:
     Untracked:  data/gwas_epigenome_overlap/
     Untracked:  data/metabrain/
     Untracked:  data/umap/
-    Untracked:  output/coloc/
     Untracked:  output/eqtl/
-    Untracked:  output/eqtl_specific/
-    Untracked:  output/figures/
-    Untracked:  output/figures_rev/
-    Untracked:  output/gwas_epigenome_overlap/
-    Untracked:  output/shiny/
+    Untracked:  output_almost_final/
     Untracked:  output_tmp_QTLtools/
     Untracked:  output_tmp_fastQTL_sample_ambient_removed/
 
@@ -591,6 +586,57 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+1be9439
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-02-02
+</td>
+<td>
+coloc
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+d7d8d07
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-02-02
+</td>
+<td>
+coloc
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+3bdf530
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1320,7 +1366,7 @@ library(coloc)
 library(parallel)
 library(GenomicRanges)
 library(rtracklayer)</code></pre>
-<pre class="r"><code>selected_trait &lt;- &#39;pd&#39;</code></pre>
+<pre class="r"><code>selected_trait &lt;- &#39;ms&#39;</code></pre>
 </div>
 <div id="process-gwas" class="section level1">
 <h1>Process GWAS</h1>
@@ -1688,15 +1734,15 @@ genome(cur19) = &quot;hg19&quot;</code></pre>
 <div id="run-coloc-for-each-locus" class="section level2">
 <h2>Run Coloc for each locus</h2>
 <p>Set location of nominal fastQTL result files:</p>
-<pre class="r"><code>ms_eqtl_path &lt;- &#39;data_sensitive/eqtl/PC70_nominal/&#39;</code></pre>
-<pre class="r"><code>ex &lt;- paste0(ms_eqtl_path,&#39;Excitatory.neurons.&#39;)
-inh &lt;- paste0(ms_eqtl_path,&#39;Inhibitory.neurons.&#39;)
-oli &lt;- paste0(ms_eqtl_path,&#39;Oligodendrocytes.&#39;)
-opc &lt;- paste0(ms_eqtl_path,&#39;OPCs...COPs.&#39;)
-micro &lt;- paste0(ms_eqtl_path,&#39;Microglia.&#39;)
-astro &lt;- paste0(ms_eqtl_path,&#39;Astrocytes.&#39;)
-endo &lt;- paste0(ms_eqtl_path,&#39;Endothelial.cells.&#39;)
-peri &lt;- paste0(ms_eqtl_path,&#39;Pericytes.&#39;)</code></pre>
+<pre class="r"><code>eqtl_path &lt;- &#39;data_sensitive/eqtl/PC70_nominal/&#39;</code></pre>
+<pre class="r"><code>ex &lt;- paste0(eqtl_path,&#39;Excitatory.neurons.&#39;)
+inh &lt;- paste0(eqtl_path,&#39;Inhibitory.neurons.&#39;)
+oli &lt;- paste0(eqtl_path,&#39;Oligodendrocytes.&#39;)
+opc &lt;- paste0(eqtl_path,&#39;OPCs...COPs.&#39;)
+micro &lt;- paste0(eqtl_path,&#39;Microglia.&#39;)
+astro &lt;- paste0(eqtl_path,&#39;Astrocytes.&#39;)
+endo &lt;- paste0(eqtl_path,&#39;Endothelial.cells.&#39;)
+peri &lt;- paste0(eqtl_path,&#39;Pericytes.&#39;)</code></pre>
 <div id="functions" class="section level3">
 <h3>Functions</h3>
 <pre class="r"><code># eqtl_ex &lt;- prepare_eqtl(micro,chrom_locus,sumstats_locus)
