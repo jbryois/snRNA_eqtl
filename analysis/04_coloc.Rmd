@@ -27,7 +27,7 @@ library(rtracklayer)
 ```
 
 ```{r}
-selected_trait <- 'pd'
+selected_trait <- 'scz'
 ```
 
 # Process GWAS
@@ -515,18 +515,18 @@ write_tsv(snp_pos,'data_sensitive/genotypes/processed/snp_pos_hg38_hg19.mappings
 Set location of nominal fastQTL result files:
 
 ```{r}
-ms_eqtl_path <- 'data_sensitive/eqtl/PC70_nominal/'
+eqtl_path <- 'data_sensitive/eqtl/PC70_nominal/'
 ```
 
 ```{r}
-ex <- paste0(ms_eqtl_path,'Excitatory.neurons.')
-inh <- paste0(ms_eqtl_path,'Inhibitory.neurons.')
-oli <- paste0(ms_eqtl_path,'Oligodendrocytes.')
-opc <- paste0(ms_eqtl_path,'OPCs...COPs.')
-micro <- paste0(ms_eqtl_path,'Microglia.')
-astro <- paste0(ms_eqtl_path,'Astrocytes.')
-endo <- paste0(ms_eqtl_path,'Endothelial.cells.')
-peri <- paste0(ms_eqtl_path,'Pericytes.')
+ex <- paste0(eqtl_path,'Excitatory.neurons.')
+inh <- paste0(eqtl_path,'Inhibitory.neurons.')
+oli <- paste0(eqtl_path,'Oligodendrocytes.')
+opc <- paste0(eqtl_path,'OPCs...COPs.')
+micro <- paste0(eqtl_path,'Microglia.')
+astro <- paste0(eqtl_path,'Astrocytes.')
+endo <- paste0(eqtl_path,'Endothelial.cells.')
+peri <- paste0(eqtl_path,'Pericytes.')
 ```
 
 ### Functions
