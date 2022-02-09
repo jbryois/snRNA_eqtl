@@ -27,18 +27,17 @@ library(glmmTMB)
 
 ## Prepare data
 
-1. Load eQTL data
+Load eQTL data
 
 ```{r,message=FALSE,eval=TRUE}
-d <- read_tsv('output/eqtl/eqtl.PC70.txt') %>% 
-  mutate(cell_type=ifelse(cell_type=='OPCs   COPs','OPCs / COPs',cell_type))
+d <- read_tsv('output/eqtl/eqtl.PC70.txt')
 ```
 
 ```{r,eval=TRUE}
 d_sig <- filter(d,adj_p<0.05)
 ```
 
-2. Load gene expression
+Load gene expression
 
 ```{r,eval=TRUE}
 expression_ms <- readRDS('data_sensitive/expression/ms_sum_expression.individual_id.rds') %>% mutate(dataset='ms')
@@ -47,16 +46,6 @@ expression_ad <- readRDS('data_sensitive/expression/ad_sum_expression.individual
 
 ```{r,eval=TRUE}
 expression <- rbind(expression_ms,expression_ad)
-```
-
-Get counts per million (CPM)
-
-```{r,eval=TRUE}
-expression <- expression %>% 
-  group_by(cell_type,individual_id) %>% 
-  mutate(counts_scaled_1M=counts*10^6/sum(counts)) %>% 
-  ungroup() %>% 
-  as_tibble()
 ```
 
 Compute TMM libsize
@@ -85,14 +74,14 @@ tmm_libsizes <- mclapply(cell_types,get_tmm_libsize,mc.cores=8) %>%
   mutate(individual_id=make.names(individual_id))
 ```
 
-3. Load genotypes
+Load genotypes
 
 ```{r,eval=TRUE}
 genotype_file <- 'data_sensitive/genotypes/processed/combined_final.vcf.gz'
 snp_positions_file <- 'data_sensitive/eqtl/PC70_caveman/sig_eQTL_snps_alleles.txt'
 ```
   
-```{r,eval=TRUE}
+```{r,eval=TRUE,message=FALSE}
 snp_coordinates <- read_tsv(snp_positions_file,col_names = FALSE) %>% setNames(c('chr','start','sid','A1','A2'))
 ```
 
@@ -110,7 +99,7 @@ genotypes <- tabix.read.table(genotype_file, paste0(snp_coordinates$chr,':',snp_
   dplyr::rename(sid=ID)
 ```
 
-4. Get covariates
+Get covariates
 
 ```{r,message=FALSE,eval=TRUE}
 cov_files <- list.files('data_sensitive/eqtl/PC70/',pattern = 'cov.txt.gz',full.names = TRUE)
@@ -132,7 +121,7 @@ cov <- tibble(files = cov_files) %>%
   mutate_at(vars(contains('PC')), as.numeric)
 ```
 
-5. Run interaction model
+Function to try different optimizers if model did not converge
 
 ```{r,eval=TRUE}
 #Function to try other optimizers if model did not converge
@@ -160,17 +149,11 @@ try_other_optimizers <- function(model_fit){
 }
 ```
 
-Ambient RNA estimation.
-
-Genes with at least 1CPM (on average) and for which the ambient RNA explain at most 10% of the reads will be considered expressed.
-
-```{r,eval=TRUE}
-ambient_prop_per_cell_type <- readRDS('data_sensitive/ambient/ambient.prop.estimate.droplet_utils.rds')
-```
+Run interaction model
 
 Note: 
 
-If a gene is not expressed in a cell type, we can't estimate the genetic effect on gene expression in that cell type. We set the interaction pvalue to NA for such cases.
+If a gene is not expressed in a cell type, we can't estimate the genetic effect on gene expression in that cell type. Hence, an eQTL for a gene that is expressed in a single cell type would not be called cell-type specific.
 
 ```{r,warning=FALSE,eval=TRUE}
 interaction_model <- function(i){
@@ -180,7 +163,9 @@ interaction_model <- function(i){
   snp_id <- d_sig$sid[i]
   cell_type_id <- d_sig$cell_type[i]
   
-  expression_gene <- filter(expression,ensembl==ensenmbl_id) %>% mutate(individual_id=make.names(individual_id))
+  expression_gene <- filter(expression,ensembl==ensenmbl_id) %>%
+    mutate(individual_id=make.names(individual_id))
+  
   genotype_snp <- filter(genotypes,sid==snp_id)
   
   df <- inner_join(expression_gene,genotype_snp,by='individual_id')
@@ -191,102 +176,68 @@ interaction_model <- function(i){
   #Add TMM libsize
   df <- inner_join(df,tmm_libsizes,by=c('cell_type','individual_id'))
   
-  #Get summary stats for expression level
-  gene_sumstats <- df %>% group_by(cell_type) %>% 
-  summarise(mean_cpm=mean(counts_scaled_1M),
-         n_samples_expressed=sum(counts>0)) %>% 
-  ungroup()
-  
-  #Get ambient expression in the 8 cell types, only keep the ones with less than 10% of the reads that could be explained by the ambient profile.
-  ambient_prop <- ambient_prop_per_cell_type %>% 
-    filter(ensembl==ensenmbl_id) %>% 
-    filter(mean_soup<0.1)
-  
-  #Get cell types expressing the gene, Same threshold as used for the eQTL analysis
-  cell_type_expressed <- gene_sumstats %>% 
-    filter(mean_cpm>1,n_samples_expressed>10) %>% 
-    filter(cell_type%in%ambient_prop$cell_type) %>% 
-    pull(cell_type)
-
   #Aggregate - Set all cell types that are not the cell type in which the eQTL was discovered as 'Others'
   df <- df %>% 
     mutate(cell_type_model=
              factor(ifelse(cell_type==cell_type_id,cell_type,'Others'),levels=c('Others',cell_type_id)))
   
-  if(length(cell_type_expressed)>1){
-    #Aggregate - Model formula
-    full_model <- 
+  #Aggregate - Model formula
+  full_model <- 
       as.formula(paste0('counts ~ genotype_parsed+cell_type+genotype_parsed:cell_type_model+diagnosis+study+',
                                   paste0('PC',1:3,collapse='+'),'+',
                                   paste0('PC',1:5,'_exp',collapse='+'),
                                   '+(1|individual_id)'))
   
-    #Aggregate - Run model 
-    full_model_nb_aggregate <- glmmTMB(full_model,offset=log(libsize_TMM),
-                                     data=df,
-                                     family=nbinom2,
-                                     control = glmmTMBControl(parallel = 1))
+  #Aggregate - Run model 
+  full_model_nb_aggregate <- glmmTMB(full_model,offset=log(libsize_TMM),
+                                   data=df,
+                                   family=nbinom2,
+                                   control = glmmTMBControl(parallel = 1))
   
-    #if not converged, try different optimizers
-    full_model_nb_aggregate <- try_other_optimizers(full_model_nb_aggregate)
+  #if not converged, try different optimizers
+  full_model_nb_aggregate <- try_other_optimizers(full_model_nb_aggregate)
   
-    full_model_nb_aggregate_convergence <- ifelse(full_model_nb_aggregate$fit$convergence,FALSE,TRUE)
+  #Check if model converged or not
+  full_model_nb_aggregate_convergence <- ifelse(full_model_nb_aggregate$fit$convergence,FALSE,TRUE)
 
-    nb_pvalues_aggregate <- summary(full_model_nb_aggregate)$coefficients$cond %>% 
+  nb_pvalues_aggregate <- summary(full_model_nb_aggregate)$coefficients$cond %>% 
     as.data.frame() %>% 
     rownames_to_column('variable') %>% 
     filter(grepl('genotype_parsed:',variable)) %>% 
     dplyr::select(-variable)
-  } else{
-    #If there is only one cell type, the pvalue is set to NA
-    nb_pvalues_aggregate <- tibble(Estimate=NA,`Std. Error`=NA,`z value`=NA,`Pr(>|z|)`=NA)
-    full_model_nb_aggregate_convergence <- TRUE
-  }
   
-  if(length(cell_type_expressed)>1){
-    #If there is more than one cell type expressing the gene, we estimate if the genetic effect is 
-    #different between the cell type in which the eQTL was discovered and all other cell types
-    
-    # At least one
-    df <- df %>% mutate(cell_type_model=fct_relevel(cell_type,cell_type_id))
+ 
+  # At least one
+  # Change levels for the cell_type_model variables
+  df <- df %>% mutate(cell_type_model=fct_relevel(cell_type,cell_type_id))
   
-    ## At least one - Run
-    full_model_nb <- glmmTMB(full_model,
+  full_model_nb <- glmmTMB(full_model,
                            offset=log(libsize_TMM),
                            data=df,
                            family=nbinom2,
                            control = glmmTMBControl(parallel = 1))
 
-    # if not converged, try different optimizers
-    full_model_nb <- try_other_optimizers(full_model_nb)
+  # if not converged, try different optimizers
+  full_model_nb <- try_other_optimizers(full_model_nb)
 
-    full_model_nb_convergence <- ifelse(full_model_nb$fit$convergence,FALSE,TRUE)
+  #Check if model converged or not
+  full_model_nb_convergence <- ifelse(full_model_nb$fit$convergence,FALSE,TRUE)
   
-    nb_pvalues <- summary(full_model_nb)$coefficients$cond %>% 
+  nb_pvalues <- summary(full_model_nb)$coefficients$cond %>% 
       as.data.frame() %>% 
       rownames_to_column('variable') %>% 
       filter(grepl('genotype_parsed:',variable)) %>% 
       dplyr::select(variable,`Pr(>|z|)`) %>% 
       mutate(variable=gsub('genotype_parsed:cell_type_model','',variable)) %>% 
-      mutate(`Pr(>|z|)`=ifelse(!variable%in%cell_type_expressed,NA,`Pr(>|z|)`)) %>% 
       mutate(p_bonf=p.adjust(`Pr(>|z|)`,method='bonferroni'))
   
-    nb_pvalues_all <- nb_pvalues %>% dplyr::select(-p_bonf) %>% spread(variable,`Pr(>|z|)`)
-    nb_pvalues_all[,cell_type_id] <- NA
-    colnames(nb_pvalues_all) <- paste0(colnames(nb_pvalues_all),'_p')
+  nb_pvalues_all <- nb_pvalues %>% dplyr::select(-p_bonf) %>% spread(variable,`Pr(>|z|)`)
+  nb_pvalues_all[,cell_type_id] <- NA
+  colnames(nb_pvalues_all) <- paste0(colnames(nb_pvalues_all),'_p')
   
-    nb_pvalues_all <- nb_pvalues_all[,order(names(nb_pvalues_all))]
-  } else {
-    nb_pvalues_all <- tibble(Astrocytes=NA,`Endothelial cells`=NA,`Excitatory neurons`=NA,
-                             `Inhibitory neurons`=NA,Microglia=NA,Oligodendrocytes=NA,
-                             `OPCs / COPs`=NA,Pericytes=NA)
-    nb_pvalues_all[,cell_type_id] <- NA
-    colnames(nb_pvalues_all) <- paste0(colnames(nb_pvalues_all),'_p')
-    nb_pvalues <- tibble(p_bonf=NA)
-    full_model_nb_convergence <- TRUE
-  }
+  nb_pvalues_all <- nb_pvalues_all[,order(names(nb_pvalues_all))]
   
-    out <- tibble(cell_type_id=cell_type_id,gene_id=gene_id,snp_id=snp_id,
+  out <- tibble(cell_type_id=cell_type_id,gene_id=gene_id,snp_id=snp_id,
                 nb_pvalue_aggregate=nb_pvalues_aggregate$`Pr(>|z|)`,
                 nb_pvalue_at_least_one=min(nb_pvalues$p_bonf,na.rm=TRUE)) %>% 
     cbind(nb_pvalues_all,
@@ -297,6 +248,8 @@ interaction_model <- function(i){
 }
 ```
 
+Get results
+
 ```{r,eval=TRUE}
 results <- mclapply(1:nrow(d_sig),interaction_model,mc.cores=36) %>% 
   setNames(1:nrow(d_sig)) %>% 
@@ -306,6 +259,9 @@ results <- mclapply(1:nrow(d_sig),interaction_model,mc.cores=36) %>%
   mutate_if(is.numeric,signif,3)
 ```
 
+Write
+
 ```{r,eval=TRUE}
+dir.create('output/eqtl_specific/',showWarnings = FALSE)
 write_tsv(results,'output/eqtl_specific/eqtl.PC70.specific.txt')
 ```
