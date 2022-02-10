@@ -11,7 +11,7 @@
 
 <meta name="author" content="Julien Bryois" />
 
-<meta name="date" content="2022-01-28" />
+<meta name="date" content="2022-02-10" />
 
 <title>Get tables</title>
 
@@ -380,7 +380,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Get tables</h1>
 <h4 class="author">Julien Bryois</h4>
-<h4 class="date">January 28, 2022</h4>
+<h4 class="date">February 10, 2022</h4>
 
 </div>
 
@@ -405,7 +405,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2022-01-28
+<strong>Last updated:</strong> 2022-02-10
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -496,16 +496,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongdd69b4d"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> dd69b4d </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongc125e72"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> c125e72 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongdd69b4d" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrongc125e72" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version dd69b4d. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version c125e72. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -513,9 +513,8 @@ Note that you need to be careful to ensure that all relevant files for the analy
 <pre><code>
 Ignored files:
     Ignored:    .Rproj.user/
-    Ignored:    data/magma_interaction_eqtl/
-    Ignored:    data/magma_specific_genes/
     Ignored:    data_sensitive/
+    Ignored:    output/.DS_Store
 
 Untracked files:
     Untracked:  analysis/._index.Rmd
@@ -535,20 +534,23 @@ Untracked files:
     Untracked:  data/gtex/
     Untracked:  data/gwas/
     Untracked:  data/gwas_epigenome_overlap/
+    Untracked:  data/locuszoom/
+    Untracked:  data/magma_interaction_eqtl/
+    Untracked:  data/magma_specific_genes/
     Untracked:  data/metabrain/
     Untracked:  data/umap/
+    Untracked:  output/._.DS_Store
     Untracked:  output/coloc/
     Untracked:  output/eqtl/
     Untracked:  output/eqtl_specific/
     Untracked:  output/figures/
-    Untracked:  output/figures_rev/
     Untracked:  output/gwas_epigenome_overlap/
     Untracked:  output/shiny/
-    Untracked:  output_tmp_QTLtools/
-    Untracked:  output_tmp_fastQTL_sample_ambient_removed/
+    Untracked:  output/tables/
 
 Unstaged changes:
     Modified:   .gitignore
+    Modified:   analysis/04_coloc.Rmd
     Modified:   analysis/_site.yml
     Modified:   analysis/plot_figures.Rmd
     Deleted:    output/README.md
@@ -595,6 +597,40 @@ Message
 Rmd
 </td>
 <td>
+c125e72
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-02-10
+</td>
+<td>
+get tables
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+194bc0a
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-01-28
+</td>
+<td>
+Build site.
+</td>
+</tr>
+<tr>
+<td>
+Rmd
+</td>
+<td>
 dd69b4d
 </td>
 <td>
@@ -624,9 +660,34 @@ get tables
 </div>
 <div id="table-s2" class="section level2">
 <h2>Table S2</h2>
+<pre class="r"><code>matched_snps &lt;- read_tsv(&#39;output/eqtl/eqtl.PC70.metabrain.matched.txt&#39;) %&gt;% dplyr::select(cell_type,sid=SNP,ensembl,beta_metabrain,p_metabrain,Replication)</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  SNP_id_hg38 = col_character(),
+  ensembl = col_character(),
+  AlleleAssessed = col_character(),
+  beta_metabrain = col_double(),
+  se_metabrain = col_double(),
+  p_metabrain = col_double(),
+  cell_type = col_character(),
+  symbol = col_character(),
+  SNP = col_character(),
+  chr_hg38 = col_double(),
+  effect_allele = col_character(),
+  other_allele = col_character(),
+  slope = col_double(),
+  se = col_double(),
+  bpval = col_double(),
+  adj_p = col_double(),
+  p_rep_adj = col_double(),
+  Replication = col_character()
+)</code></pre>
+<pre class="r"><code>snp_alleles &lt;- data.table::fread(&#39;data_sensitive/genotypes/processed/plink.frq&#39;,data.table=FALSE) %&gt;% dplyr::select(sid=SNP,effect_allele=A1,other_allele=A2) %&gt;% as_tibble()</code></pre>
 <pre class="r"><code>tableS2 &lt;- read_tsv(&#39;output/eqtl/eqtl.PC70.txt&#39;) %&gt;% 
   separate(pid,into=c(&#39;symbol&#39;,&#39;ensembl&#39;),sep=&#39;_&#39;) %&gt;% 
-  dplyr::select(cell_type,symbol,ensembl,SNP=sid,dist_TSS=dist,slope,bpval,adj_p) %&gt;% 
+  inner_join(.,snp_alleles,by=&#39;sid&#39;) %&gt;% 
+  left_join(.,matched_snps,by=c(&#39;cell_type&#39;,&#39;sid&#39;,&#39;ensembl&#39;)) %&gt;% 
+  dplyr::select(cell_type,symbol,ensembl,SNP=sid,effect_allele,other_allele,dist_TSS=dist,beta=slope,bpval,adj_p,beta_metabrain,p_metabrain,Replication) %&gt;% 
   write_csv(.,&#39;output/tables/tableS2.csv&#39;)</code></pre>
 </div>
 <div id="table-s3" class="section level2">
@@ -644,8 +705,8 @@ get tables
 <h2>Table S4</h2>
 <pre class="r"><code>tableS4 &lt;- read_tsv(&#39;output/eqtl_specific/eqtl.PC70.specific.txt&#39;) %&gt;% 
   #Sets pvalue to NA if the model did not converge or if the model output is Inf
-  mutate(nb_pvalue_aggregate=ifelse(nb_pvalue_aggregate_model_converged==FALSE | nb_pvalue_aggregate_model_converged==Inf,NA,nb_pvalue_aggregate)) %&gt;% 
-  mutate(nb_pvalue_at_least_one=ifelse(nb_pvalue_at_least_one_model_converged==FALSE | nb_pvalue_at_least_one==Inf,NA,nb_pvalue_at_least_one)) %&gt;%   #Remove genes for which the model did not converge (9 genes
+  mutate(nb_pvalue_aggregate=ifelse(nb_pvalue_aggregate_model_converged==FALSE,NA,nb_pvalue_aggregate)) %&gt;% 
+  mutate(nb_pvalue_at_least_one=ifelse(nb_pvalue_at_least_one_model_converged==FALSE,NA,nb_pvalue_at_least_one)) %&gt;%
   #Get adjusted pvalues
   mutate(nb_pvalue_aggregate_adj=p.adjust(nb_pvalue_aggregate,method=&#39;fdr&#39;),
          nb_pvalue_at_least_one_adj=p.adjust(nb_pvalue_at_least_one,method = &#39;fdr&#39;)) %&gt;% 
@@ -720,10 +781,10 @@ loaded via a namespace (and not attached):
 [33] scales_1.1.1      jsonlite_1.6.1    fs_1.4.1          hms_0.5.3        
 [37] digest_0.6.25     stringi_1.4.6     grid_4.0.1        rprojroot_1.3-2  
 [41] cli_2.0.2         tools_4.0.1       magrittr_1.5      crayon_1.3.4     
-[45] whisker_0.4       pkgconfig_2.0.3   ellipsis_0.3.1    xml2_1.3.2       
-[49] reprex_0.3.0      lubridate_1.7.9   rstudioapi_0.11   assertthat_0.2.1 
-[53] rmarkdown_2.2     httr_1.4.1        R6_2.4.1          nlme_3.1-148     
-[57] git2r_0.27.1      compiler_4.0.1   </code></pre>
+[45] whisker_0.4       pkgconfig_2.0.3   ellipsis_0.3.1    data.table_1.12.8
+[49] xml2_1.3.2        reprex_0.3.0      lubridate_1.7.9   rstudioapi_0.11  
+[53] assertthat_0.2.1  rmarkdown_2.2     httr_1.4.1        R6_2.4.1         
+[57] nlme_3.1-148      git2r_0.27.1      compiler_4.0.1   </code></pre>
 </div>
 </div>
 </div>
