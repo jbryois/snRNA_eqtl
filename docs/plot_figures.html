@@ -11,7 +11,7 @@
 
 <meta name="author" content="Julien Bryois" />
 
-<meta name="date" content="2022-02-02" />
+<meta name="date" content="2022-02-10" />
 
 <title>Plot figures</title>
 
@@ -392,7 +392,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Plot figures</h1>
 <h4 class="author">Julien Bryois</h4>
-<h4 class="date">February 02, 2022</h4>
+<h4 class="date">February 10, 2022</h4>
 
 </div>
 
@@ -417,7 +417,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2022-02-02
+<strong>Last updated:</strong> 2022-02-10
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -508,16 +508,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrongbe75661"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> be75661 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong10ef245"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 10ef245 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrongbe75661" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong10ef245" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version be75661. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 10ef245. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -525,10 +525,8 @@ Note that you need to be careful to ensure that all relevant files for the analy
 <pre><code>
 Ignored files:
     Ignored:    .Rproj.user/
-    Ignored:    analysis/figure/
-    Ignored:    data/magma_interaction_eqtl/
-    Ignored:    data/magma_specific_genes/
     Ignored:    data_sensitive/
+    Ignored:    output/.DS_Store
 
 Untracked files:
     Untracked:  analysis/._index.Rmd
@@ -548,21 +546,25 @@ Untracked files:
     Untracked:  data/gtex/
     Untracked:  data/gwas/
     Untracked:  data/gwas_epigenome_overlap/
+    Untracked:  data/locuszoom/
+    Untracked:  data/magma_interaction_eqtl/
+    Untracked:  data/magma_specific_genes/
     Untracked:  data/metabrain/
     Untracked:  data/umap/
+    Untracked:  output/._.DS_Store
     Untracked:  output/coloc/
     Untracked:  output/eqtl/
     Untracked:  output/eqtl_specific/
     Untracked:  output/figures/
     Untracked:  output/gwas_epigenome_overlap/
     Untracked:  output/shiny/
-    Untracked:  output_almost_final/
-    Untracked:  output_tmp_QTLtools/
-    Untracked:  output_tmp_fastQTL_sample_ambient_removed/
+    Untracked:  output/tables/
 
 Unstaged changes:
     Modified:   .gitignore
+    Modified:   analysis/04_coloc.Rmd
     Modified:   analysis/_site.yml
+    Modified:   analysis/get_tables.Rmd
     Deleted:    output/README.md
 
 </code></pre>
@@ -602,6 +604,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+10ef245
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-02-10
+</td>
+<td>
+plot_figures
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+f999a54
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-02-02
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -1090,6 +1126,17 @@ Date
 <tbody>
 <tr>
 <td>
+f999a54
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-02-02
+</td>
+</tr>
+<tr>
+<td>
 bb7b4d3
 </td>
 <td>
@@ -1151,6 +1198,17 @@ Date
 <tbody>
 <tr>
 <td>
+f999a54
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-02-02
+</td>
+</tr>
+<tr>
+<td>
 bb7b4d3
 </td>
 <td>
@@ -1167,61 +1225,154 @@ Julien Bryois
 </div>
 <div id="figure-2c" class="section level2">
 <h2>Figure 2C</h2>
-<pre class="r"><code>d &lt;- read_tsv(&#39;output/eqtl/eqtl.PC70.txt&#39;) %&gt;% 
-  filter(adj_p&lt;0.05) %&gt;% 
-  dplyr::select(cell_type,pid,sid) %&gt;% 
-  dplyr::rename(SNP=sid) %&gt;% 
-  separate(pid,into=c(&#39;symbol&#39;,&#39;ensembl&#39;),sep=&#39;_&#39;)</code></pre>
-<pre class="bash"><code>cd data_sensitive/genotypes/processed
-zcat combined_final.vcf.gz | cut -f 1,2,3 | grep -v &quot;^#&quot; &gt; snp_pos_hg38.txt</code></pre>
-<pre class="r"><code>snp_pos &lt;- data.table::fread(&#39;data_sensitive/genotypes/processed/snp_pos_hg38.txt&#39;,data.table = FALSE) %&gt;% 
-  dplyr::select(chr_hg38=V1,pos_hg38=V2,SNP=V3) %&gt;% 
-  as_tibble()</code></pre>
-<pre class="r"><code>d &lt;- left_join(d,snp_pos,by=&#39;SNP&#39;) %&gt;% 
-  mutate(SNP_id_hg38=paste0(&#39;chr&#39;,chr_hg38,&#39;:&#39;,pos_hg38))</code></pre>
-<pre class="r"><code>get_snp_pvalues_metabrain &lt;- function(chr,tissue=&#39;Cortex&#39;) {
+<pre class="r"><code>get_snp_pvalues_metabrain &lt;- function(df,chr,tissue=&#39;Cortex&#39;) {
 
-  d_sig_chr &lt;- filter(d,chr_hg38==chr)
+  write(chr,&#39;metabrain_chr.txt&#39;,append=TRUE)
+  message(chr)
+  d_sig_chr &lt;- filter(df,chr_hg38==chr)
   
-  matched_pvalues &lt;- 
+  matched &lt;- 
     data.table::fread(paste0(&#39;data/metabrain/2020-05-26-&#39;,tissue,&#39;-EUR-&#39;,chr,&#39;-biogenformat.txt.gz&#39;),data.table = FALSE) %&gt;% 
-    dplyr::select(PValue,SNPChr,SNPChrPos,ProbeName,SNPName) %&gt;% 
+    dplyr::select(p_metabrain=PValue,SNPChr,SNPChrPos,ProbeName,AlleleAssessed,beta_metabrain=`Meta-Beta`,se_metabrain=`Meta-SE`) %&gt;% 
     mutate(ensembl=gsub(&#39;\\..+&#39;,&#39;&#39;,ProbeName)) %&gt;% 
     mutate(SNP_id_hg38=paste0(&#39;chr&#39;,SNPChr,&#39;:&#39;,SNPChrPos)) %&gt;% 
     as_tibble() %&gt;% 
     mutate(tissue=tissue) %&gt;% 
-    dplyr::select(SNP_id_hg38,ensembl,PValue) %&gt;% 
-    inner_join(.,d_sig_chr,by=c(&#39;SNP_id_hg38&#39;,&#39;ensembl&#39;))
-  return(matched_pvalues)
+    dplyr::select(SNP_id_hg38,ensembl,AlleleAssessed,beta_metabrain,se_metabrain,p_metabrain) %&gt;% 
+    inner_join(.,d_sig_chr,by=c(&#39;SNP_id_hg38&#39;,&#39;ensembl&#39;)) %&gt;% 
+    filter(AlleleAssessed==effect_allele | AlleleAssessed==other_allele) %&gt;% 
+    mutate(beta_metabrain=ifelse(AlleleAssessed==effect_allele,beta_metabrain,-beta_metabrain))
+  
+  return(matched)
 }</code></pre>
-<pre class="r"><code>matched_snps &lt;- mclapply(1:22,get_snp_pvalues_metabrain,mc.cores=11,mc.preschedule = FALSE) %&gt;% bind_rows()</code></pre>
-<pre class="r"><code>write_tsv(matched_snps,&#39;output/eqtl/eqtl.PC70.metabrain.matched.txt&#39;)</code></pre>
+<pre class="r"><code>d &lt;- read_tsv(&#39;output/eqtl/eqtl.PC70.txt&#39;) %&gt;% 
+  mutate(se=abs(slope/qnorm(bpval/2))) %&gt;% #compute standard error from pvalue and beta
+  dplyr::select(cell_type,pid,sid,slope,se,bpval,adj_p) %&gt;% 
+  dplyr::rename(SNP=sid) %&gt;%
+  separate(pid,into=c(&#39;symbol&#39;,&#39;ensembl&#39;),sep=&#39;_&#39;)</code></pre>
+<pre class="bash"><code>cd data_sensitive/genotypes/processed
+zcat combined_final.vcf.gz | cut -f 1,2,3 | grep -v &quot;^#&quot; &gt; snp_pos_hg38.txt</code></pre>
+<pre class="r"><code>snp_alleles &lt;- data.table::fread(&#39;data_sensitive/genotypes/processed/plink.frq&#39;,data.table=FALSE) %&gt;% dplyr::select(SNP,effect_allele=A1,other_allele=A2) %&gt;% as_tibble()</code></pre>
+<pre class="r"><code>snp_pos &lt;- data.table::fread(&#39;data_sensitive/genotypes/processed/snp_pos_hg38.txt&#39;,data.table=FALSE) %&gt;% dplyr::select(SNP=V3,pos_hg38=V2,chr_hg38=V1) %&gt;% as_tibble()</code></pre>
+<pre class="r"><code>d &lt;- left_join(d,snp_alleles,by=&#39;SNP&#39;) %&gt;% 
+  left_join(.,snp_pos,by=&#39;SNP&#39;) %&gt;% 
+  mutate(SNP_id_hg38=paste0(&#39;chr&#39;,chr_hg38,&#39;:&#39;,pos_hg38)) %&gt;% 
+  dplyr::select(cell_type,symbol,ensembl,SNP,chr_hg38,SNP_id_hg38,effect_allele,other_allele,slope,se,bpval,adj_p)</code></pre>
+<pre class="r"><code>sig &lt;- d %&gt;% filter(adj_p&lt;0.05)
+null &lt;- d %&gt;% filter(bpval&gt;0.5)</code></pre>
+<pre class="r"><code>if(!file.exists(&#39;output/eqtl/eqtl.PC70.metabrain.matched.txt&#39;)){
+matched_snps &lt;- lapply(1:22,get_snp_pvalues_metabrain,df=sig) %&gt;% 
+  bind_rows() %&gt;% 
+  group_by(cell_type) %&gt;% 
+  mutate(p_rep_adj=p.adjust(p_metabrain,method=&#39;fdr&#39;)) %&gt;% 
+  mutate(Replication=ifelse(p_rep_adj&lt;0.05,&#39;5% FDR&#39;,&#39;Not significant&#39;))
+  write_tsv(matched_snps,&#39;output/eqtl/eqtl.PC70.metabrain.matched.txt&#39;)
+} else{
+  matched_snps &lt;- read_tsv(&#39;output/eqtl/eqtl.PC70.metabrain.matched.txt&#39;)
+}</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  SNP_id_hg38 = col_character(),
+  ensembl = col_character(),
+  AlleleAssessed = col_character(),
+  beta_metabrain = col_double(),
+  se_metabrain = col_double(),
+  p_metabrain = col_double(),
+  cell_type = col_character(),
+  symbol = col_character(),
+  SNP = col_character(),
+  chr_hg38 = col_double(),
+  effect_allele = col_character(),
+  other_allele = col_character(),
+  slope = col_double(),
+  se = col_double(),
+  bpval = col_double(),
+  adj_p = col_double(),
+  p_rep_adj = col_double(),
+  Replication = col_character()
+)</code></pre>
+<pre class="r"><code>if(!file.exists(&#39;output/eqtl/eqtl.PC70.metabrain.matched.null.txt&#39;)){
+  null_snps &lt;- lapply(1:22,get_snp_pvalues_metabrain,df=null) %&gt;% 
+    bind_rows()
+  write_tsv(null_snps,&#39;output/eqtl/eqtl.PC70.metabrain.matched.null.txt&#39;)
+} else{
+  null_snps &lt;- read_tsv(&#39;output/eqtl/eqtl.PC70.metabrain.matched.null.txt&#39;)
+}</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  SNP_id_hg38 = col_character(),
+  ensembl = col_character(),
+  AlleleAssessed = col_character(),
+  beta_metabrain = col_double(),
+  se_metabrain = col_double(),
+  p_metabrain = col_double(),
+  cell_type = col_character(),
+  symbol = col_character(),
+  SNP = col_character(),
+  chr_hg38 = col_double(),
+  effect_allele = col_character(),
+  other_allele = col_character(),
+  slope = col_double(),
+  se = col_double(),
+  bpval = col_double(),
+  adj_p = col_double()
+)</code></pre>
 <pre class="r"><code>matched_snps &lt;- matched_snps %&gt;% mutate(glia_neurons=case_when(
   cell_type %in% c(&#39;Excitatory neurons&#39;,&#39;Inhibitory neurons&#39;) ~ &#39;Neurons&#39;,
   TRUE ~ &#39;Glia&#39;
 )) </code></pre>
-<pre class="r"><code>matched_snps_text_prop &lt;- matched_snps %&gt;% 
+<pre class="r"><code>matched_snps_text &lt;- matched_snps %&gt;% 
   group_by(glia_neurons) %&gt;% 
-  summarise(prop=paste0(&#39;prop = &#39;,round(sum(PValue&lt;0.05)*100/sum(PValue&lt;10),digits=1),&#39;%&#39;),
-            pi1=paste0(&#39;pi1 = &#39;,round(1-qvalue::qvalue(PValue)$pi0,digits=2)),
-            label=paste0(prop,&#39;\n&#39;,pi1),n_eqtl=sum(PValue&lt;10))
-
-p &lt;- ggplot(matched_snps,aes(PValue,fill=glia_neurons)) + 
+  summarise(n_rep=sum(p_rep_adj &lt; 0.05),
+            n_rep_same_direction=sum(p_rep_adj &lt; 0.05 &amp; sign(beta_metabrain)==sign(slope)),
+            n_tot=n(),
+            prop_rep=n_rep/n_tot,
+            prop_rep_same_direction=n_rep_same_direction/n_tot,
+            prop_rep_same_direction_rep=prop_rep_same_direction/prop_rep,
+            pi1=ifelse(n()&gt;100,round(1-qvalue::qvalue(p_metabrain)$pi0,digits=2),NA)
+  ) %&gt;% 
+  mutate(p1_label=paste0(&#39;Pi1 = &#39;, pi1),
+         prop_rep_label=paste0(&#39;5% FDR = &#39;, round(prop_rep*100,digits=0),&#39;%&#39;),
+         prop_rep_same_label=paste0(&#39;Same direction = &#39;, round(prop_rep_same_direction_rep*100,digits=0),&#39;%&#39;),
+         label=paste0(prop_rep_label,&#39;\n&#39;,prop_rep_same_label,&#39;\n&#39;,p1_label)
+            ) %&gt;% 
+  ungroup()</code></pre>
+<pre><code>`summarise()` ungrouping output (override with `.groups` argument)</code></pre>
+<pre class="r"><code>p &lt;- ggplot(matched_snps,aes(p_metabrain,fill=glia_neurons)) + 
   geom_histogram() + 
   facet_wrap(~glia_neurons,scales=&#39;free_y&#39;) + 
   theme_classic() + 
-  theme(legend.position = &#39;none&#39;,text=element_text(size=20)) +
-  geom_text(data=matched_snps_text_prop,aes(x=0.5,y=Inf,vjust=2.1,label=label),size=8) +
-  ggtitle(&#39;Metabrain Cortex matched pvalues&#39;)
+  theme(legend.position = &#39;none&#39;,text=element_text(size=16)) +
+  geom_text(data=matched_snps_text,aes(x=0.1,y=Inf,vjust=1.1,label=label),size=5,hjust = 0) +
+  ggtitle(&#39;Metabrain Cortex matched SNP-gene pairs&#39;) +
+  xlab(&#39;Pvalue (Metabrain cortex)&#39;)
 ggsave(p,filename=&#39;output/figures/Figure2C.png&#39;,height=5,width=7,dpi = 300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-26-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-28-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="figure-2d" class="section level2">
+<h2>Figure 2D</h2>
+<pre class="r"><code>d &lt;- read_tsv(&#39;output/eqtl/eqtl.PC70.txt&#39;) %&gt;% 
+  filter(adj_p&lt;0.05)
+
+p &lt;- d %&gt;% 
+  ggplot(aes(dist,fill=cell_type)) + 
+  geom_histogram(bins = 50) + 
+  facet_wrap(~cell_type,scales = &#39;free_y&#39;,nrow=4,ncol=2) + 
+  theme_classic() + 
+  theme(legend.position = &#39;none&#39;,
+        text=element_text(size=20),
+        plot.margin =unit(c(5.5, 20, 5.5, 5.5), &quot;points&quot;)) + 
+  xlab(&#39;Distance to TSS&#39;)
+ggsave(p,filename=&#39;output/figures/Figure2D.png&#39;,height=6,width=9,dpi = 300)
+p</code></pre>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-29-1.png" width="864" style="display: block; margin: auto;" /></p>
 <p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-26-1">
-Past versions of unnamed-chunk-26-1.png
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-29-1">
+Past versions of unnamed-chunk-29-1.png
 </button>
 </p>
-<div id="fig-unnamed-chunk-26-1" class="collapse">
+<div id="fig-unnamed-chunk-29-1" class="collapse">
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
 <thead>
@@ -1238,17 +1389,6 @@ Date
 </tr>
 </thead>
 <tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
 <tr>
 <td>
 056f5c7
@@ -1271,64 +1411,9 @@ Julien Bryois
 2021-12-01
 </td>
 </tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-<div id="figure-2d" class="section level2">
-<h2>Figure 2D</h2>
-<pre class="r"><code>d &lt;- read_tsv(&#39;output/eqtl/eqtl.PC70.txt&#39;) %&gt;% 
-  filter(adj_p&lt;0.05)
-
-p &lt;- d %&gt;% 
-  ggplot(aes(dist,fill=cell_type)) + 
-  geom_histogram(bins = 50) + 
-  facet_wrap(~cell_type,scales = &#39;free_y&#39;,nrow=4,ncol=2) + 
-  theme_classic() + 
-  theme(legend.position = &#39;none&#39;,
-        text=element_text(size=20),
-        plot.margin =unit(c(5.5, 20, 5.5, 5.5), &quot;points&quot;)) + 
-  xlab(&#39;Distance to TSS&#39;)
-ggsave(p,filename=&#39;output/figures/Figure2D.png&#39;,height=6,width=9,dpi = 300)
-p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-27-1.png" width="864" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-27-1">
-Past versions of unnamed-chunk-27-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-27-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
 <tr>
 <td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-<tr>
-<td>
-056f5c7
+d2896af
 </td>
 <td>
 Julien Bryois
@@ -1344,7 +1429,10 @@ Julien Bryois
 </div>
 <div id="figure-2e" class="section level2">
 <h2>Figure 2E</h2>
-<pre class="r"><code>d &lt;- read_tsv(&#39;output/eqtl/eqtl.PC70.txt&#39;)</code></pre>
+<pre class="r"><code>d &lt;- read_tsv(&#39;output/eqtl/eqtl.PC70.txt&#39;)
+d_pb &lt;- read_tsv(&#39;output/eqtl/eqtl.pb.PC70.txt&#39;) %&gt;% 
+  dplyr::select(pid,adj_p_pb=adj_p) %&gt;% 
+  separate(pid,into=c(&#39;symbol&#39;,&#39;ensembl&#39;),sep=&#39;_&#39;)</code></pre>
 <pre class="r"><code>loeuf &lt;- read_tsv(&#39;data/gnomad_loeuf/supplementary_dataset_11_full_constraint_metrics.tsv&#39;) %&gt;% 
   filter(canonical==TRUE) %&gt;% 
   dplyr::select(gene,gene_id,transcript,oe_lof_upper,p) %&gt;% 
@@ -1354,21 +1442,41 @@ Julien Bryois
 <pre class="r"><code>d_loeuf &lt;- d %&gt;% 
   separate(pid,into=c(&#39;symbol&#39;,&#39;ensembl&#39;),sep=&#39;_&#39;) %&gt;% 
   left_join(.,loeuf,by=&#39;ensembl&#39;) %&gt;% 
-  mutate(Significant=ifelse(adj_p&lt;0.05,TRUE,FALSE)) %&gt;% 
   filter(!is.na(oe_lof_upper))</code></pre>
-<pre class="r"><code>my_comparisons &lt;- list( c(&quot;FALSE&quot;,&quot;TRUE&quot;))
-p &lt;- ggplot(d_loeuf,aes(Significant,oe_lof_upper,col=cell_type)) + ggbeeswarm::geom_quasirandom(size=0.1) + facet_wrap(~cell_type,ncol=4,nrow=2) + theme_classic() + theme(legend.position=&#39;none&#39;,text=element_text(size=20)) + stat_summary(fun = median, fun.min = median, fun.max = median,
-                 geom = &quot;crossbar&quot;, width = 0.5,size=0.25,color=&#39;black&#39;) + xlab(&quot;Significant (5% FDR)&quot;) + ylab(&quot;LoF observed/expected upper bound
-fraction (LOEUF)&quot;) + ggpubr::stat_compare_means(comparisons = my_comparisons) + scale_y_continuous(expand=c(0.1,0))
-ggsave(p,filename=&#39;output/figures/Figure2E.png&#39;,width = 9,height=6,dpi = 300)
+<pre class="r"><code>d_loeuf &lt;- inner_join(d_loeuf,d_pb,by=c(&#39;ensembl&#39;,&#39;symbol&#39;)) %&gt;% 
+  mutate(Significant=factor(case_when(
+    adj_p&lt;0.05 &amp; adj_p_pb &lt;0.05 ~ &quot;Both&quot;,
+    adj_p&lt;0.05 &amp; adj_p_pb &gt;=0.05 ~ &quot;Cell&quot;,
+    adj_p&gt;=0.05 &amp; adj_p_pb &lt;0.05 ~ &quot;Bulk&quot;,
+    adj_p&gt;=0.05 &amp; adj_p_pb &gt;=0.05 ~ &quot;None&quot;),
+    levels=c(&#39;None&#39;,&#39;Cell&#39;,&#39;Bulk&#39;,&#39;Both&#39;)))</code></pre>
+<pre class="r"><code>my_comparisons &lt;- list( c(&quot;None&quot;,&quot;Cell&quot;),
+                        c(&quot;Cell&quot;,&quot;Bulk&quot;),
+                        c(&quot;Bulk&quot;,&quot;Both&quot;),
+                        c(&quot;None&quot;,&quot;Bulk&quot;),
+                        c(&quot;None&quot;,&quot;Both&quot;)
+                        )</code></pre>
+<p>By Glia vs Neurons</p>
+<pre class="r"><code>d_loeuf_short &lt;- d_loeuf %&gt;% mutate(type=ifelse(grepl(&#39;neurons&#39;,cell_type),&#39;Neurons&#39;,&#39;Glia&#39;))</code></pre>
+<pre class="r"><code>p &lt;- d_loeuf_short %&gt;% 
+  ggplot(.,aes(Significant,oe_lof_upper,col=type)) + 
+  ggbeeswarm::geom_quasirandom(size=0.1) +
+  facet_wrap(~type,ncol=2) + 
+  theme_classic() + 
+  theme(legend.position=&#39;none&#39;,text=element_text(size=20)) + 
+  stat_summary(fun = median, fun.min = median, fun.max = median,
+                 geom = &quot;crossbar&quot;, width = 0.5,size=0.25,color=&#39;black&#39;) + xlab(&quot;Significant (5% FDR)&quot;) + ylab(&quot;LoF observed/expected\nupper bound fraction (LOEUF)&quot;) + 
+  ggpubr::stat_compare_means(comparisons = my_comparisons) +
+  scale_y_continuous(expand=c(0.1,0))
+ggsave(p,filename=&#39;output/figures/figure2E.png&#39;,width = 6,height=4,dpi = 300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-31-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-36-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-31-1">
-Past versions of unnamed-chunk-31-1.png
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-36-1">
+Past versions of unnamed-chunk-36-1.png
 </button>
 </p>
-<div id="fig-unnamed-chunk-31-1" class="collapse">
+<div id="fig-unnamed-chunk-36-1" class="collapse">
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
 <thead>
@@ -1387,13 +1495,24 @@ Date
 <tbody>
 <tr>
 <td>
-bb7b4d3
+056f5c7
 </td>
 <td>
 Julien Bryois
 </td>
 <td>
-2022-01-28
+2021-12-01
+</td>
+</tr>
+<tr>
+<td>
+811141f
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2021-12-01
 </td>
 </tr>
 </tbody>
@@ -1448,13 +1567,13 @@ cell_type_name &lt;- &#39;Astrocytes&#39;</code></pre>
 <pre class="r"><code>nsun2 &lt;- plot_eqtl(cell_type_name,gene_name,snp_name,&#39;#e97e72&#39;)</code></pre>
 <pre class="r"><code>p &lt;- nsun2 + hla &amp; theme(text=element_text(size=24),plot.title = element_text(size=20))
 p &amp; theme(text=element_text(size=12),plot.title = element_text(size=12))</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-39-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-44-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-39-1">
-Past versions of unnamed-chunk-39-1.png
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-44-1">
+Past versions of unnamed-chunk-44-1.png
 </button>
 </p>
-<div id="fig-unnamed-chunk-39-1" class="collapse">
+<div id="fig-unnamed-chunk-44-1" class="collapse">
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
 <thead>
@@ -1471,6 +1590,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+f999a54
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-02-02
+</td>
+</tr>
 <tr>
 <td>
 bb7b4d3
@@ -1500,44 +1630,7 @@ cell_type_name &lt;- &#39;Excitatory neurons&#39;</code></pre>
 <pre class="r"><code>glud1 &lt;- plot_eqtl(cell_type_name,gene_name,snp_name,&#39;#87ab34&#39;) + theme(axis.title.y = element_blank())</code></pre>
 <pre class="r"><code>p &lt;- met + glud1 &amp; theme(text=element_text(size=24),plot.title = element_text(size=20))
 p &amp; theme(text=element_text(size=12),plot.title = element_text(size=12))</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-44-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-44-1">
-Past versions of unnamed-chunk-44-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-44-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-49-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>ggsave(p,filename = &#39;output/figures/Figure2G.png&#39;,width=12,height=5)</code></pre>
 </div>
 <div id="figure-3a" class="section level2">
@@ -1583,44 +1676,7 @@ Julien Bryois
 p &lt;- fdensity_res  %&gt;% filter(!sig%in%c(&#39;Pericytes eQTL&#39;,&#39;Endo eQTL&#39;),grepl(&#39;ATAC&#39;,annot)) %&gt;% ggplot(.,aes((X1+X2)/2,X3_norm,col=sig)) + geom_line() + facet_grid(sig~annot) + theme_classic() + theme(legend.position = &#39;none&#39;,text=element_text(size=18),axis.title = element_text(size=30)) + xlab(&#39;Distance to cis-eQTL (kb)&#39;) + ylab(&#39;Density&#39;) + scale_x_continuous(breaks=c(-500000,0,500000),labels = c(&#39;-500&#39;,&#39;0&#39;,&#39;500&#39;)) + scale_y_continuous(breaks=c(0.005,0.010,0.015),labels = c(&#39;0.005&#39;,&#39;0.01&#39;,&#39;0.015&#39;)) + scale_color_manual(values=cols)
 ggsave(p,filename = &#39;output/figures/Figure3A.png&#39;,width=11,height=8.5,dpi = 300)
 p + theme(text=element_text(size=10),axis.title = element_text(size=14))</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-47-1.png" width="960" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-47-1">
-Past versions of unnamed-chunk-47-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-47-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-52-1.png" width="960" style="display: block; margin: auto;" /></p>
 </div>
 <div id="figure-3b" class="section level2">
 <h2>Figure 3B</h2>
@@ -1663,44 +1719,7 @@ Julien Bryois
   theme(legend.position=&#39;right&#39;, text=element_text(size=18))
 ggsave(p,filename=&#39;output/figures/Figure3B.png&#39;,height=6,width=10,dpi = 300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-50-1.png" width="960" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-50-1">
-Past versions of unnamed-chunk-50-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-50-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-55-1.png" width="960" style="display: block; margin: auto;" /></p>
 </div>
 <div id="figure-3c" class="section level2">
 <h2>Figure 3C</h2>
@@ -1723,13 +1742,13 @@ Julien Bryois
   group_by(cell_type_id,cell_type_test) %&gt;% 
   summarise(pi1=1-qvalue::qvalue(p)$pi0)</code></pre>
 <pre class="r"><code>pi1 %&gt;% spread(cell_type_test,pi1) %&gt;% column_to_rownames(&#39;cell_type_id&#39;) %&gt;% pheatmap::pheatmap(.,display_numbers = TRUE,number_color = &#39;black&#39;,angle_col = 45) %&gt;% print()</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-54-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-59-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-54-1">
-Past versions of unnamed-chunk-54-1.png
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-59-1">
+Past versions of unnamed-chunk-59-1.png
 </button>
 </p>
-<div id="fig-unnamed-chunk-54-1" class="collapse">
+<div id="fig-unnamed-chunk-59-1" class="collapse">
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
 <thead>
@@ -1746,6 +1765,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+f999a54
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-02-02
+</td>
+</tr>
 <tr>
 <td>
 bb7b4d3
@@ -1799,44 +1829,7 @@ snp_name &lt;- &#39;rs8038713&#39;
 cell_type_name &lt;- &#39;Oligodendrocytes&#39;
 chrm5 &lt;- plot_eqtl_specific(cell_type_name,gene_name,snp_name) + theme(text=element_text(size=20),plot.title = element_text(size=12))
 chrm5 + theme(text=element_text(size=14))</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-59-1.png" width="960" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-59-1">
-Past versions of unnamed-chunk-59-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-59-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-64-1.png" width="960" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>ggsave(chrm5,filename = &#39;output/figures/Figure3D.png&#39;,width=9,height=5)</code></pre>
 </div>
 <div id="figure-3e" class="section level2">
@@ -1846,44 +1839,7 @@ snp_name &lt;- &#39;rs13131368&#39;
 cell_type_name &lt;- &#39;Microglia&#39;
 p &lt;- plot_eqtl_specific(cell_type_name,gene_name,snp_name) + theme(text=element_text(size=20),plot.title = element_text(size=12))
 p + theme(text=element_text(size=14))</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-60-1.png" width="960" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-60-1">
-Past versions of unnamed-chunk-60-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-60-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-65-1.png" width="960" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>ggsave(p,filename = &#39;output/figures/Figure3E.png&#39;,width=9,height=5)</code></pre>
 </div>
 <div id="figure-3f" class="section level2">
@@ -1893,44 +1849,7 @@ snp_name &lt;- &#39;rs6437374&#39;
 cell_type_name &lt;- &#39;Astrocytes&#39;
 p &lt;- plot_eqtl_specific(cell_type_name,gene_name,snp_name) + theme(text=element_text(size=20),plot.title = element_text(size=12))
 p + theme(text=element_text(size=14))</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-61-1.png" width="960" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-61-1">
-Past versions of unnamed-chunk-61-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-61-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-66-1.png" width="960" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>ggsave(p,filename = &#39;output/figures/Figure3F.png&#39;,width=9,height=5)</code></pre>
 </div>
 <div id="figure-4a" class="section level2">
@@ -1988,44 +1907,7 @@ my_limits &lt;- function(x) {
   dplyr::count(trait,n_genes_per_loci,cell_type2)</code></pre>
 <pre class="r"><code>p &lt;-  ggplot(x,aes(n_genes_per_loci,n,fill=cell_type2)) + geom_col() + facet_wrap(~trait,scales = &#39;free&#39;) + xlab(&#39;Number of coloc genes&#39;) + ylab(&#39;Number of loci&#39;) + theme_classic() + scale_x_continuous(breaks=my_breaks,limits=my_limits) + guides(fill=guide_legend(title=&#39;&#39;))
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-67-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-67-1">
-Past versions of unnamed-chunk-67-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-67-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-72-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>p &lt;- p + theme(text=element_text(size=50),axis.ticks.length=unit(.25, &quot;cm&quot;),legend.position=&#39;top&#39;,legend.text = element_text(size=22)) 
 ggsave(p,filename=&#39;output/figures/Figure4A.png&#39;,width=16,height=12,dpi = 300)</code></pre>
 </div>
@@ -2097,55 +1979,31 @@ ggsave(p_figure,filename=&#39;output/figures/Figure4B.png&#39;,width=19,height=1
 p + theme(legend.position=&#39;top&#39;,text=element_text(size=14),legend.title = element_blank()) +
   guides(colour = guide_legend(override.aes = list(size=5))) +
   ggpubr::stat_compare_means(comparisons = my_comparisons,size=4,vjust = -0.3,bracket.size = 1)</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-73-1.png" width="576" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-73-1">
-Past versions of unnamed-chunk-73-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-73-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-78-1.png" width="576" style="display: block; margin: auto;" /></p>
 </div>
 <div id="figure-4c" class="section level2">
 <h2>Figure 4C</h2>
 <pre class="r"><code>coloc_heatmap &lt;- function(file,threshold=0.7,width=7,height=5,out_name){
     
   coloc_all &lt;- read_tsv(file)
+  trait &lt;- basename(file) %&gt;% gsub(&#39;coloc.&#39;,&#39;&#39;,.) %&gt;% gsub(&#39;.txt&#39;,&#39;&#39;,.)
+  
+  metabrain_s1 &lt;- readxl::read_xlsx(&#39;data/metabrain/media-1.xlsx&#39;,skip=1,sheet = 2) %&gt;% 
+    mutate(disease=case_when(
+      outcome==&quot;Alzheimer’s disease&quot; ~ &#39;ad&#39;,
+      outcome==&quot;Multiple sclerosis&quot; ~ &#39;ms&#39;,
+      outcome==&quot;Parkinson’s disease&quot; ~ &#39;pd&#39;,
+      outcome==&quot;Schizophrenia&quot; ~ &#39;scz&#39;,
+      TRUE ~ outcome
+    )) %&gt;% 
+    dplyr::select(gene,disease) %&gt;% 
+    filter(disease==trait)
 
   #Get best coloc if same gene in same cell type was tested in two different loci
   coloc_all &lt;- coloc_all %&gt;% group_by(ensembl,tissue) %&gt;% 
     slice_max(n=1,order_by=PP.H4.abf,with_ties=FALSE) %&gt;% 
-    ungroup()
+    ungroup() %&gt;% 
+    mutate(symbol=ifelse(symbol%in%metabrain_s1$gene,paste0(symbol,&#39;*&#39;),symbol))
   
   #Get best coloc if same symbol in same cell type was tested multiple times (different ensembl name for same symbol at same locus)
   coloc_all &lt;- coloc_all %&gt;% group_by(symbol,tissue) %&gt;% 
@@ -2253,44 +2111,7 @@ Julien Bryois
 <pre class="r"><code>m &lt;- m[c(&#39;AQP4&#39;,&#39;CLDN5&#39;,&#39;SLC17A7&#39;,&#39;GAD2&#39;,&#39;C1QA&#39;,&#39;MOG&#39;,&#39;PDGFRA&#39;,&#39;RGS5&#39;),]</code></pre>
 <pre class="r"><code>pheatmap::pheatmap(t(m),scale=&#39;row&#39;,cluster_cols = FALSE,cluster_rows = FALSE,angle_col = 0,filename = &#39;output/figures/FigureS1.png&#39;,height = 2,width=7)</code></pre>
 <pre class="r"><code>pheatmap::pheatmap(t(m),scale=&#39;row&#39;,cluster_cols = FALSE,cluster_rows = FALSE,angle_col = 0)</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-83-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-83-1">
-Past versions of unnamed-chunk-83-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-83-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-88-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="figure-s2---pi1-plots-all" class="section level2">
 <h2>Figure S2 - Pi1 plots all</h2>
@@ -2302,119 +2123,53 @@ p &lt;- d %&gt;% ggplot(.,aes(bpval,fill=cell_type)) + geom_histogram(bins=30, b
 
 ggsave(p,filename=&#39;output/figures/FigureS2.png&#39;,width=8,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-84-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-84-1">
-Past versions of unnamed-chunk-84-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-84-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-89-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="figure-s3---metabrain" class="section level2">
 <h2>Figure S3 - Metabrain</h2>
 <div id="shared-eqtl-per-cell-type" class="section level3">
 <h3>Shared eQTL per cell type</h3>
 <pre class="r"><code>matched_snps &lt;- read_tsv(&#39;output/eqtl/eqtl.PC70.metabrain.matched.txt&#39;)</code></pre>
-<pre class="r"><code>matched_snps_text_prop &lt;- matched_snps %&gt;% 
-  add_count(cell_type) %&gt;%
+<pre class="r"><code>matched_snps_text &lt;- matched_snps %&gt;% 
   group_by(cell_type) %&gt;% 
-  summarise(n_eqtl=unique(n),
-            prop=paste0(&#39;prop = &#39;,round(sum(PValue&lt;0.05)*100/sum(PValue&lt;10),digits=1),&#39;%&#39;),
-            pi1=paste0(&#39;pi1 = &#39;,ifelse(n_eqtl&lt;100,&#39;NA&#39;,
-                                       round(1-qvalue::qvalue(PValue,)$pi0,digits=2))),
-            label=paste0(prop,&#39;\n&#39;,pi1))</code></pre>
-<pre class="r"><code>p &lt;- ggplot(matched_snps,aes(PValue,fill=cell_type)) + 
+  summarise(n_rep=sum(p_rep_adj &lt; 0.05),
+            n_rep_same_direction=sum(p_rep_adj &lt; 0.05 &amp; sign(beta_metabrain)==sign(slope)),
+            n_tot=n(),
+            prop_rep=n_rep/n_tot,
+            prop_rep_same_direction=n_rep_same_direction/n_tot,
+            prop_rep_same_direction_rep=prop_rep_same_direction/prop_rep,
+            pi1=ifelse(n()&gt;100,round(1-qvalue::qvalue(p_metabrain)$pi0,digits=2),NA)
+  ) %&gt;% 
+  mutate(p1_label=paste0(&#39;Pi1 = &#39;, pi1),
+         prop_rep_label=paste0(&#39;5% FDR = &#39;, round(prop_rep*100,digits=0),&#39;%&#39;),
+         prop_rep_same_label=paste0(&#39;Same direction = &#39;, round(prop_rep_same_direction_rep*100,digits=0),&#39;%&#39;),
+         label=paste0(prop_rep_label,&#39;\n&#39;,prop_rep_same_label,&#39;\n&#39;,p1_label)
+            ) %&gt;% 
+  ungroup()</code></pre>
+<pre><code>`summarise()` ungrouping output (override with `.groups` argument)</code></pre>
+<pre class="r"><code>p &lt;- ggplot(matched_snps,aes(p_metabrain,fill=cell_type)) + 
   geom_histogram() + 
   facet_wrap(~cell_type,scales=&#39;free_y&#39;,nrow=2) + 
   theme_classic() + 
   theme(legend.position = &#39;none&#39;) + 
-  ggtitle(&#39;Metabrain Cortex matched pvalues&#39;) + 
-  geom_text(data=matched_snps_text_prop,aes(x=0.5,y=Inf,vjust=1.5,label=label))
+  geom_text(data=matched_snps_text,aes(x=0.5,y=Inf,vjust=1.1,label=label)) +
+  ggtitle(&#39;Metabrain Cortex matched SNP-gene pairs&#39;) +
+  xlab(&#39;Pvalue (Metabrain cortex)&#39;)
 
 ggsave(p,filename=&#39;output/figures/FigureS3A.png&#39;,width=12,height=3,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-87-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-87-1">
-Past versions of unnamed-chunk-87-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-87-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-92-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="non-replicating-eqtl" class="section level3">
 <h3>non-replicating eQTL</h3>
 <pre class="r"><code>matched_snp_short &lt;- matched_snps %&gt;% 
-  mutate(replication_status=
-           factor(ifelse(PValue&lt;0.05,&#39;Replication p&lt;0.05&#39;,&#39;Replication p&gt;0.05&#39;))) %&gt;% 
-  dplyr::select(ensembl,cell_type,SNP,replication_status)</code></pre>
+  dplyr::select(ensembl,cell_type,SNP,Replication)</code></pre>
 <pre class="r"><code>d &lt;- read_tsv(&#39;output/eqtl/eqtl.PC70.txt&#39;) %&gt;% 
   filter(adj_p&lt;0.05) %&gt;% 
   dplyr::rename(SNP=sid) %&gt;% 
   separate(pid,into=c(&#39;symbol&#39;,&#39;ensembl&#39;),sep=&#39;_&#39;)</code></pre>
 <pre class="r"><code>d_sig &lt;- inner_join(d,matched_snp_short,by=c(&#39;ensembl&#39;,&#39;cell_type&#39;,&#39;SNP&#39;))</code></pre>
-<pre class="r"><code>p &lt;- ggplot(d_sig,aes(replication_status,abs(dist+1),col=replication_status)) + 
+<pre class="r"><code>p &lt;- ggplot(d_sig,aes(Replication,abs(dist+1),col=Replication)) + 
   ggbeeswarm::geom_quasirandom(size=0.1) + 
   geom_boxplot(alpha=0.1,outlier.shape = NA,col=&#39;black&#39;,width=0.25) + 
   facet_wrap(~cell_type,nrow=2) + 
@@ -2427,44 +2182,7 @@ Julien Bryois
 
 ggsave(p,filename=&#39;output/figures/FigureS3C.png&#39;,width=12,height=3,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-91-1.png" width="960" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-91-1">
-Past versions of unnamed-chunk-91-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-91-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-96-1.png" width="960" style="display: block; margin: auto;" /></p>
 </div>
 <div id="loeuf" class="section level3">
 <h3>Loeuf</h3>
@@ -2475,7 +2193,7 @@ Julien Bryois
   dplyr::rename(ensembl=gene_id) %&gt;% 
   dplyr::select(-gene,-transcript)</code></pre>
 <pre class="r"><code>d_sig &lt;- inner_join(d_sig,loeuf,by=&#39;ensembl&#39;)</code></pre>
-<pre class="r"><code>p &lt;- ggplot(d_sig,aes(replication_status,oe_lof_upper,col=replication_status)) +
+<pre class="r"><code>p &lt;- ggplot(d_sig,aes(Replication,oe_lof_upper,col=Replication)) +
   ggbeeswarm::geom_quasirandom(size=0.1) + 
   geom_boxplot(alpha=0.1,outlier.shape = NA,col=&#39;black&#39;,width=0.25) + 
   facet_wrap(~cell_type,nrow=2) +
@@ -2488,44 +2206,7 @@ Julien Bryois
 
 ggsave(p,filename=&#39;output/figures/FigureS3B.png&#39;,width=12,height=3,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-94-1.png" width="960" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-94-1">
-Past versions of unnamed-chunk-94-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-94-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-99-1.png" width="960" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="figure-s4s5-eqtl-location" class="section level2">
@@ -2586,44 +2267,7 @@ bedtools closest -D b -k 500 -a eqtl_5FDR.bed -b Homo_sapiens.GRCh38.96.filtered
   xlab(&#39;&#39;)
 ggsave(p,filename=&#39;output/figures/FigureS4.png&#39;,width=5,height=3,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-100-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-100-1">
-Past versions of unnamed-chunk-100-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-100-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-105-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="rank-of-affected-gene" class="section level3">
 <h3>Rank of affected gene</h3>
@@ -2643,44 +2287,7 @@ Julien Bryois
   ylab(&#39;Proportion of eQTL&#39;)
 ggsave(p,filename=&#39;output/figures/FigureS5.png&#39;,width=6,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-102-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-102-1">
-Past versions of unnamed-chunk-102-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-102-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-107-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="figure-s6---eqtl-expression-level" class="section level2">
@@ -2743,44 +2350,7 @@ Julien Bryois
 <pre class="r"><code>p &lt;- p1 + p2 +  plot_layout(widths = c(1, 4))
 ggsave(p,filename=&#39;output/figures/FigureS6.png&#39;,width=14,height=5,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-111-1.png" width="1152" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-111-1">
-Past versions of unnamed-chunk-111-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-111-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-116-1.png" width="1152" style="display: block; margin: auto;" /></p>
 </div>
 <div id="figure-s7---independent-eqtls" class="section level2">
 <h2>Figure S7 - Independent eQTLs</h2>
@@ -2793,44 +2363,7 @@ Julien Bryois
   ggplot(.,aes(reorder(cell_type,n),n,fill=reorder(cell_type,n)))+geom_col() +coord_flip() + theme_classic() + ylab(&#39;Number of genes with an independent cis-eQTL (5%FDR)&#39;) + xlab(&#39;&#39;) + theme(legend.position = &#39;none&#39;) + geom_text(aes(label=n),hjust=1.2)
 ggsave(p,filename=&#39;output/figures/FigureS7B.png&#39;,width=6,height=2.5,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-113-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-113-1">
-Past versions of unnamed-chunk-113-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-113-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-118-1.png" width="672" style="display: block; margin: auto;" /></p>
 <div id="distance-to-tss" class="section level3">
 <h3>Distance to TSS</h3>
 <pre class="r"><code>p &lt;- filter(d,rank==1) %&gt;% 
@@ -2842,44 +2375,7 @@ Julien Bryois
   xlab(&#39;Distance to TSS&#39;)
 ggsave(p,filename=&#39;output/figures/FigureS7C.png&#39;,width=7,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-114-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-114-1">
-Past versions of unnamed-chunk-114-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-114-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-119-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>p &lt;- d %&gt;% 
   mutate(`n indep eQTL`=as.factor(rank+1)) %&gt;% 
   ggplot(.,aes(`n indep eQTL`,abs(dist_phe_var+1),group=`n indep eQTL`,col=`n indep eQTL`)) +
@@ -2894,44 +2390,7 @@ Julien Bryois
 
 ggsave(p,filename=&#39;output/figures/FigureS7D.png&#39;,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-115-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-115-1">
-Past versions of unnamed-chunk-115-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-115-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-120-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="figure-s8---caveman" class="section level2">
@@ -2982,13 +2441,13 @@ bedtools intersect -loj -wa -wb -a finemapped_SNPs.bed -b corces_hg19.bed &gt; f
 
 ggsave(p,filename=paste0(&#39;output/figures/FigureS8A.png&#39;),width=7,height=4,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-121-1.png" width="672" style="display: block; margin: auto;" /></p>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-126-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-121-1">
-Past versions of unnamed-chunk-121-1.png
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-126-1">
+Past versions of unnamed-chunk-126-1.png
 </button>
 </p>
-<div id="fig-unnamed-chunk-121-1" class="collapse">
+<div id="fig-unnamed-chunk-126-1" class="collapse">
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
 <thead>
@@ -3005,6 +2464,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+f999a54
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-02-02
+</td>
+</tr>
 <tr>
 <td>
 bb7b4d3
@@ -3032,44 +2502,7 @@ Julien Bryois
   facet_wrap(~cell_type,scales=&#39;free_y&#39;)
 ggsave(p,filename=&#39;output/figures/FigureS8B.png&#39;,width=5,height=3,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-123-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-123-1">
-Past versions of unnamed-chunk-123-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-123-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-128-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="figure-s9---epigenome-enrichment" class="section level2">
@@ -3105,44 +2538,7 @@ Julien Bryois
 
 ggsave(p,filename = &#39;output/figures/FigureS9.png&#39;,width=12,height=8,limitsize = FALSE,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-126-1.png" width="1152" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-126-1">
-Past versions of unnamed-chunk-126-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-126-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-131-1.png" width="1152" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="figure-s10---epigenome-enrichment" class="section level2">
@@ -3176,13 +2572,13 @@ Julien Bryois
 
 ggsave(p,filename = &#39;output/figures/FigureS10.png&#39;,width=8,height=6,limitsize = FALSE,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-129-1.png" width="960" style="display: block; margin: auto;" /></p>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-134-1.png" width="960" style="display: block; margin: auto;" /></p>
 <p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-129-1">
-Past versions of unnamed-chunk-129-1.png
+<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-134-1">
+Past versions of unnamed-chunk-134-1.png
 </button>
 </p>
-<div id="fig-unnamed-chunk-129-1" class="collapse">
+<div id="fig-unnamed-chunk-134-1" class="collapse">
 <div class="table-responsive">
 <table class="table table-condensed table-hover">
 <thead>
@@ -3199,6 +2595,17 @@ Date
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+f999a54
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-02-02
+</td>
+</tr>
 <tr>
 <td>
 bb7b4d3
@@ -3251,44 +2658,7 @@ Julien Bryois
 <pre class="r"><code>p &lt;- ggplot(d_short,aes(specific,abs(dist),col=specific)) + geom_boxplot(width=0.2,outlier.shape = NA) + ggbeeswarm::geom_quasirandom(size=0.1,alpha=0.3) + theme_classic() + xlab(&#39;&#39;) + ylab(&quot;Log10(absolute distance to TSS)&quot;) + scale_y_log10(expand=c(0.1,0)) + theme(text=element_text(size=20)) + ggpubr::stat_compare_means(vjust=-1) + theme(legend.position = &#39;none&#39;) + facet_wrap(~test)
 ggsave(p,filename=&#39;output/figures/FigureS11.png&#39;,width=12,height=5,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-134-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-134-1">
-Past versions of unnamed-chunk-134-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-134-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-139-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="figure-s12---cell-type-specific-eqtl" class="section level2">
@@ -3361,235 +2731,15 @@ Julien Bryois
 <pre class="r"><code>p &lt;- plot_loeuf_int(&#39;Aggregate&#39;)
 ggsave(p,filename=&#39;output/figures/FigureS12A.png&#39;,width=17,height=3,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-140-1.png" width="1152" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-140-1">
-Past versions of unnamed-chunk-140-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-140-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-145-1.png" width="1152" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>p &lt;- plot_loeuf_int(&#39;At least one&#39;)
 ggsave(p,filename=&#39;output/figures/FigureS12B.png&#39;,width=17,height=3,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-141-1.png" width="1152" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-141-1">
-Past versions of unnamed-chunk-141-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-141-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-146-1.png" width="1152" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>p &lt;- plot_loeuf_int(&#39;All&#39;)
 ggsave(p,filename=&#39;output/figures/FigureS12C.png&#39;,width=17,height=3,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-142-1.png" width="1152" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-142-1">
-Past versions of unnamed-chunk-142-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-142-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
-<div id="figure-s13---cell-type-specific-eqtl" class="section level2">
-<h2>Figure S13 - cell type specific eQTL</h2>
-<div id="magma" class="section level3">
-<h3>MAGMA</h3>
-<pre class="r"><code>entrez_2_ensembl &lt;- AnnotationDbi::toTable(org.Hs.eg.db::org.Hs.egENSEMBL) %&gt;% 
-  add_count(gene_id,name = &#39;n_entrez&#39; ) %&gt;% add_count(ensembl_id,name=&#39;n_ensembl&#39;) %&gt;% 
-  filter(n_entrez==1,n_ensembl==1) %&gt;% 
-  dplyr::select(-n_entrez,-n_ensembl) %&gt;% 
-  dplyr::rename(ensembl=ensembl_id,GENE=gene_id) %&gt;% 
-  as_tibble()</code></pre>
-<pre class="r"><code>dir.create(&#39;data/magma_interaction_eqtl/&#39;,showWarnings = FALSE)
-d &lt;- read_tsv(&#39;output/eqtl_specific/eqtl.PC70.specific.txt&#39;) %&gt;% 
-  #Sets pvalue to NA if the model did not converge
-  mutate(nb_pvalue_aggregate=ifelse(nb_pvalue_aggregate_model_converged==FALSE,NA,nb_pvalue_aggregate)) %&gt;% 
-  mutate(nb_pvalue_at_least_one=ifelse(nb_pvalue_at_least_one_model_converged==FALSE,NA,nb_pvalue_at_least_one)) %&gt;%   #Remove genes for which the model did not converge (9 genes)
-  filter(!is.na(nb_pvalue_aggregate),
-         !is.na(nb_pvalue_at_least_one),
-         nb_pvalue_at_least_one!=Inf) %&gt;% 
-  #Get adjusted pvalues
-  mutate(nb_pvalue_aggregate_adj=p.adjust(nb_pvalue_aggregate,method=&#39;fdr&#39;),
-         nb_pvalue_at_least_one_adj=p.adjust(nb_pvalue_at_least_one,method = &#39;fdr&#39;)) %&gt;% 
-  #For each row, get the maximum pvalue across all cell types, this will be the gene-level pvalue testing whether the genetic effect on gene expression is different than all other cell types
-  rowwise() %&gt;% 
-  mutate(nb_pvalue_sig_all=
-           max(Astrocytes_p,`Endothelial cells_p`,`Excitatory neurons_p`,`Inhibitory neurons_p`,Microglia_p,Oligodendrocytes_p,`OPCs / COPs_p`,Pericytes_p,na.rm=TRUE)) %&gt;% 
-  ungroup() %&gt;% 
-  mutate(nb_pvalue_all_adj = p.adjust(nb_pvalue_sig_all,method=&#39;fdr&#39;)) %&gt;% 
-  separate(gene_id,into=c(&#39;symbol&#39;,&#39;ensembl&#39;),sep=&#39;_&#39;) %&gt;% 
-  filter(nb_pvalue_all_adj&lt;0.05) %&gt;% 
-  inner_join(.,entrez_2_ensembl,by=&#39;ensembl&#39;) %&gt;% 
-  mutate(cell_type_id=make.names(cell_type_id)) %&gt;% 
-  dplyr::select(GENE,cell_type_id) %&gt;% 
-  write_tsv(.,path = &#39;data/magma_interaction_eqtl/cell_type_specific.txt&#39;,col_names =FALSE)</code></pre>
-<pre class="bash"><code>cd data/magma_interaction_eqtl
-source ~/.bashrc
-
-##Gene sets
-cell_type_specific_eqtl=&#39;cell_type_specific.txt&#39;
-
-##GWAS
-ms=&#39;../gwas/ms/ms.annotated_35kbup_10_down.genes.raw&#39;
-ad=&#39;../gwas/ad/ad.annotated_35kbup_10_down.genes.raw&#39;
-pd=&#39;../gwas/pd/parkinsonMeta2020.annotated_35kbup_10_down.genes.raw&#39;
-scz=&#39;../gwas/scz/scz3.annotated_35kbup_10_down.genes.raw&#39;
-
-##Run MAGMA
-magma --gene-results $ms --set-annot $cell_type_specific_eqtl col=1,2  --out ms
-magma --gene-results $ad --set-annot $cell_type_specific_eqtl col=1,2  --out ad
-magma --gene-results $pd --set-annot $cell_type_specific_eqtl col=1,2  --out pd
-magma --gene-results $scz --set-annot $cell_type_specific_eqtl col=1,2  --out scz</code></pre>
-<pre class="r"><code>files &lt;- list.files(&#39;data/magma_interaction_eqtl&#39;,pattern=&#39;.gsa.out&#39;,full.names = T)</code></pre>
-<pre class="r"><code>d &lt;- tibble(file_names=files) %&gt;% 
-  mutate(trait=gsub(&#39;\\..+&#39;,&#39;&#39;,basename(file_names))) %&gt;% 
-  mutate(file_content=map(file_names,read.table,header=T)) %&gt;%
-  unnest(file_content) %&gt;% 
-  group_by(trait) %&gt;% 
-  mutate(fdr.local=p.adjust(P,method=&#39;fdr&#39;)) %&gt;% 
-  mutate(Significance=ifelse(fdr.local&lt;=0.05,&#39;FDR&lt;5%&#39;,&#39;Not significant&#39;)) %&gt;% 
-  mutate(trait=factor(case_when(
-    trait==&#39;ad&#39; ~ &#39;Alzheimer&#39;,
-    trait==&#39;ms&#39; ~ &#39;Multiple Sclerosis&#39;,
-    trait==&#39;pd&#39; ~ &#39;Parkinson&#39;,
-    trait==&#39;scz&#39; ~ &#39;Schizophrenia&#39;),levels=c(&#39;Alzheimer&#39;,&#39;Multiple Sclerosis&#39;,&#39;Parkinson&#39;,&#39;Schizophrenia&#39;))) %&gt;% 
-  mutate(VARIABLE=gsub(&#39;\\.&#39;,&#39; &#39;,VARIABLE) %&gt;% gsub(&#39;OPCs   COPs&#39;,&#39;OPCs / COPs&#39;,.))</code></pre>
-<pre class="r"><code>cbPalette &lt;- c(&quot;#D55E00&quot;,&quot;#56B4E9&quot;,&quot;#CC79A7&quot;)
-#
-p &lt;- ggplot(d,aes(VARIABLE,-log10(P),fill=Significance)) + geom_col() + facet_wrap(~trait) + coord_flip() + theme_classic() + xlab(&#39;&#39;)
-ggsave(p,filename=&#39;output/figures/FigureS13.png&#39;,width=8,dpi=300)
-p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-148-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-148-1">
-Past versions of unnamed-chunk-148-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-148-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-147-1.png" width="1152" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="figure-s14---cell-type-specific-eqtl" class="section level2">
@@ -3630,6 +2780,13 @@ snp_name &lt;- &#39;rs8038713&#39;
 cell_type_name &lt;- &#39;Oligodendrocytes&#39;
 p &lt;- plot_eqtl_specific(cell_type_name,gene_name,snp_name) + theme(text=element_text(size=20),plot.title = element_text(size=12))
 p + theme(text=element_text(size=14))</code></pre>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-151-1.png" width="960" style="display: block; margin: auto;" /></p>
+<pre class="r"><code>ggsave(p,filename = &#39;output/figures/FigureS14A.png&#39;,width=9,height=5)</code></pre>
+<pre class="r"><code>gene_name &lt;- &#39;ACAP2_ENSG00000114331&#39;
+snp_name &lt;- &#39;rs6437374&#39;
+cell_type_name &lt;- &#39;Astrocytes&#39;
+p &lt;- plot_eqtl_specific(cell_type_name,gene_name,snp_name) + theme(text=element_text(size=20),plot.title = element_text(size=12))
+p + theme(text=element_text(size=14))</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-152-1.png" width="960" style="display: block; margin: auto;" /></p>
 <p>
 <button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-152-1">
@@ -3655,48 +2812,15 @@ Date
 <tbody>
 <tr>
 <td>
-bb7b4d3
+f999a54
 </td>
 <td>
 Julien Bryois
 </td>
 <td>
-2022-01-28
+2022-02-02
 </td>
 </tr>
-</tbody>
-</table>
-</div>
-</div>
-<pre class="r"><code>ggsave(p,filename = &#39;output/figures/FigureS14A.png&#39;,width=9,height=5)</code></pre>
-<pre class="r"><code>gene_name &lt;- &#39;ACAP2_ENSG00000114331&#39;
-snp_name &lt;- &#39;rs6437374&#39;
-cell_type_name &lt;- &#39;Astrocytes&#39;
-p &lt;- plot_eqtl_specific(cell_type_name,gene_name,snp_name) + theme(text=element_text(size=20),plot.title = element_text(size=12))
-p + theme(text=element_text(size=14))</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-153-1.png" width="960" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-153-1">
-Past versions of unnamed-chunk-153-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-153-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
 <tr>
 <td>
 bb7b4d3
@@ -3740,44 +2864,7 @@ Julien Bryois
 <pre class="r"><code>p &lt;- ggplot(d_gather,aes(p,fill=cell_type_id)) + geom_histogram() + facet_grid(cell_type_id~cell_type_test,scales = &#39;free_y&#39;) +theme_classic() + xlab(&#39;Interaction p-value&#39;) + theme(legend.position=&#39;none&#39;) + geom_text(data=pi1,aes(x=0.5,y=Inf,label=paste0(&#39;pi1=&#39;,round(pi1,digits=2)),vjust=1.5))
 ggsave(p,filename=&#39;output/figures/FigureS15.png&#39;,width=14,height=10,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-157-1.png" width="960" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-157-1">
-Past versions of unnamed-chunk-157-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-157-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-156-1.png" width="960" style="display: block; margin: auto;" /></p>
 </div>
 </div>
 <div id="figure-s16---number-of-coloc-loci" class="section level2">
@@ -3786,62 +2873,52 @@ Julien Bryois
 coloc_ad &lt;- read_tsv(&#39;output/coloc/coloc.ad.txt&#39;) %&gt;% mutate(trait=&#39;Alzheimer&#39;)
 coloc_scz &lt;- read_tsv(&#39;output/coloc/coloc.scz.txt&#39;) %&gt;% mutate(trait=&#39;Schizophrenia&#39;)
 coloc_pd &lt;- read_tsv(&#39;output/coloc/coloc.pd.txt&#39;) %&gt;% mutate(trait=&#39;Parkinson&#39;)</code></pre>
-<pre class="r"><code>coloc &lt;- rbind(coloc_ms,coloc_ad,coloc_scz,coloc_pd)</code></pre>
-<pre class="r"><code>get_loci_explained &lt;- function(thresh){
-  filter(coloc,PP.H4.abf &gt;= thresh) %&gt;% 
-    group_by(trait) %&gt;% 
-    summarise(n_loci_sig=length(unique(locus))) %&gt;% 
-    mutate(threshold=thresh)
-}</code></pre>
-<pre class="r"><code>thresholds &lt;- c(0,0.7)
-n_loci &lt;- lapply(thresholds,get_loci_explained) %&gt;% bind_rows() %&gt;% 
-  mutate(threshold=factor(case_when(
-    threshold == 0 ~ &#39;All loci&#39;,
-    threshold == 0.7 ~ &#39;PP &gt;0.7&#39;,
-  ),levels=c(&#39;All loci&#39;,&#39;PP &gt;0.7&#39;)))</code></pre>
-<pre class="r"><code>p &lt;- n_loci %&gt;% filter(threshold%in%c(&#39;All loci&#39;,&#39;PP &gt;0.7&#39;)) %&gt;% 
-  ggplot(.,aes(trait,n_loci_sig,fill=threshold)) + geom_col(position = position_dodge()) + facet_wrap(~trait,scales = &#39;free&#39;) + theme_classic() + theme(axis.ticks.x = element_blank(),axis.text.x = element_blank(),text=element_text(size=18),legend.title = element_blank()) + xlab(&#39;&#39;) + 
-  ylab(&#39;Number of loci&#39;) + geom_text(aes(label=n_loci_sig),position = position_dodge(width=0.9),vjust=1.1,size=8)
+<pre class="r"><code>coloc &lt;- rbind(coloc_ms,coloc_ad,coloc_scz,coloc_pd) %&gt;% 
+  dplyr::select(symbol,trait,locus,PP.H4.abf)</code></pre>
+<pre class="r"><code>#Get all genes at GWAS loci in our study
+gene_locus &lt;- coloc %&gt;% dplyr::select(locus,symbol,trait) %&gt;% unique() </code></pre>
+<pre class="r"><code>#Get metabrain results
+metabrain_s1 &lt;- readxl::read_xlsx(&#39;data/metabrain/media-1.xlsx&#39;,skip=1,sheet = 2) %&gt;% 
+    mutate(disease=case_when(
+      outcome==&quot;Alzheimer’s disease&quot; ~ &#39;Alzheimer&#39;,
+      outcome==&quot;Multiple sclerosis&quot; ~ &#39;Multiple Sclerosis&#39;,
+      outcome==&quot;Parkinson’s disease&quot; ~ &#39;Parkinson&#39;,
+      outcome==&quot;Schizophrenia&quot; ~ &#39;Schizophrenia&#39;,
+      TRUE ~ outcome
+    )) %&gt;% 
+    dplyr::select(symbol=gene,trait=disease) %&gt;% 
+    filter(trait%in%c(&#39;Alzheimer&#39;,&#39;Multiple Sclerosis&#39;,&#39;Parkinson&#39;,&#39;Schizophrenia&#39;)) %&gt;% 
+  inner_join(.,gene_locus,by=c(&#39;symbol&#39;,&#39;trait&#39;))</code></pre>
+<pre><code>New names:
+* beta -&gt; beta...3
+* SE -&gt; SE...4
+* p -&gt; p...5
+* beta -&gt; beta...7
+* SE -&gt; SE...8
+* ...</code></pre>
+<pre class="r"><code>coloc$locus_metabrain_sig &lt;- coloc$locus%in%metabrain_s1$locus</code></pre>
+<pre class="r"><code>n_loci &lt;- coloc %&gt;% 
+  mutate(locus_study_sig=ifelse(PP.H4.abf&gt;0.7,TRUE,FALSE)) %&gt;% 
+  group_by(locus,trait) %&gt;% 
+  summarise(locus_metabrain_sig=any(locus_metabrain_sig),locus_study_sig=any(locus_study_sig)) %&gt;% 
+  ungroup() %&gt;% 
+  dplyr::count(trait,locus_metabrain_sig,locus_study_sig) %&gt;% 
+  mutate(label=factor(case_when(
+    locus_metabrain_sig &amp; locus_study_sig ~ &#39;Cell type and Metabrain&#39;,
+    locus_metabrain_sig &amp; !locus_study_sig ~ &#39;Metabrain only&#39;,
+    !locus_metabrain_sig &amp; locus_study_sig ~ &#39;Cell type only&#39;,
+    !locus_metabrain_sig &amp; !locus_study_sig ~ &#39;All&#39;
+  ),levels=c(&#39;All&#39;,&#39;Cell type only&#39;,&#39;Cell type and Metabrain&#39;,&#39;Metabrain only&#39;))) %&gt;% 
+  dplyr::select(-locus_metabrain_sig,-locus_study_sig) %&gt;% 
+  group_by(trait) %&gt;% 
+  mutate(n=ifelse(label==&#39;All&#39;,sum(n),n))</code></pre>
+<pre><code>`summarise()` regrouping output by &#39;locus&#39; (override with `.groups` argument)</code></pre>
+<pre class="r"><code>p &lt;- n_loci %&gt;% 
+  ggplot(.,aes(trait,n,fill=label)) + geom_col(position = position_dodge()) + facet_wrap(~trait,scales = &#39;free&#39;) + theme_classic() + theme(axis.ticks.x = element_blank(),axis.text.x = element_blank(),text=element_text(size=18),legend.title = element_blank()) + xlab(&#39;&#39;) + 
+  ylab(&#39;Number of loci&#39;) + geom_text(aes(label=n),position = position_dodge(width=0.9),vjust=1.1,size=8)
 ggsave(p,filename = &#39;output/figures/FigureS16.png&#39;,width = 8,height = 6,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-162-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-162-1">
-Past versions of unnamed-chunk-162-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-162-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-163-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="figure-s17---exp-of-ad-coloc-genes" class="section level2">
 <h2>Figure S17 - Exp of AD coloc genes</h2>
@@ -3871,44 +2948,7 @@ sum_expression &lt;- sum_expression %&gt;% filter(ensembl%in%coloc_ad$ensembl)</
   as.matrix() </code></pre>
 <pre class="r"><code>pheatmap::pheatmap(log2(m+1),display_numbers = TRUE,number_color = &#39;black&#39;,angle_col = 45,cellwidth = 30,filename = &#39;output/figures/FigureS17.png&#39;,height = 5,width=7)</code></pre>
 <pre class="r"><code>pheatmap::pheatmap(log2(m+1),display_numbers = TRUE,number_color = &#39;black&#39;,angle_col = 45,cellwidth = 30)</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-170-1.png" width="960" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-170-1">
-Past versions of unnamed-chunk-170-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-170-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-171-1.png" width="960" style="display: block; margin: auto;" /></p>
 </div>
 <div id="figure-s18---gwas-enrichment" class="section level2">
 <h2>Figure S18 - GWAS enrichment</h2>
@@ -4003,44 +3043,7 @@ scale_y_reordered &lt;- function(..., sep = &quot;___&quot;) {
   scale_x_reordered() + 
   ggtitle(&#39;GWAS enrichment of top 1000 most specific genes&#39;)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-181-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-181-1">
-Past versions of unnamed-chunk-181-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-181-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-182-1.png" width="672" style="display: block; margin: auto;" /></p>
 <pre class="r"><code>ggsave(p,filename=&#39;output/figures/FigureS18.png&#39;,width=8,height=5,dpi=300)</code></pre>
 </div>
 <div id="figure-s19---coloc-ms-gtex-and-dice" class="section level2">
@@ -4147,44 +3150,7 @@ d &lt;- mutate(d,outlier=ifelse(C1&gt;threshold$x1 &amp; C1&lt;threshold$x2 &amp
 p &lt;- ggplot(d) +geom_point(aes(C1,C2,col= super_pop),size=0.5) + theme_bw() + xlab(&#39;MDS1&#39;) + ylab(&#39;MDS2&#39;) + geom_rect(data=threshold,aes(xmin=x1,xmax=x2,ymin=y1,ymax=y2),alpha=0.1,color=&#39;red&#39;) + theme(text=element_text(size=18))
 ggsave(p,filename=&#39;output/figures/FigureS20.png&#39;,width=7,height=5,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-185-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-185-1">
-Past versions of unnamed-chunk-185-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-185-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-186-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 <div id="figures21---eqtls-number-vs-pcs" class="section level2">
 <h2>FigureS21 - eQTLs number vs PCs</h2>
@@ -4195,44 +3161,693 @@ Julien Bryois
 <pre class="r"><code>p &lt;- d %&gt;% ggplot(.,aes(PCs,n,col=cell_type)) + geom_point() + geom_line(aes(group=cell_type)) + theme_classic() + xlab(&#39;Number of expression PCs used as covariate&#39;) + guides(fill = guide_legend(reverse=T)) + ylab(&#39;Number of cis-eQTL (5%FDR)&#39;) + scale_x_continuous(breaks=seq(20, 120, 20)) + guides(col=guide_legend(title=&quot;Cell type&quot;)) + theme(text=element_text(size=18))
 ggsave(p,filename=&#39;output/figures/FigureS21.png&#39;,width=8,dpi=300)
 p</code></pre>
-<p><img src="figure/plot_figures.Rmd/unnamed-chunk-187-1.png" width="672" style="display: block; margin: auto;" /></p>
-<p>
-<button type="button" class="btn btn-default btn-xs btn-workflowr btn-workflowr-fig" data-toggle="collapse" data-target="#fig-unnamed-chunk-187-1">
-Past versions of unnamed-chunk-187-1.png
-</button>
-</p>
-<div id="fig-unnamed-chunk-187-1" class="collapse">
-<div class="table-responsive">
-<table class="table table-condensed table-hover">
-<thead>
-<tr>
-<th>
-Version
-</th>
-<th>
-Author
-</th>
-<th>
-Date
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-bb7b4d3
-</td>
-<td>
-Julien Bryois
-</td>
-<td>
-2022-01-28
-</td>
-</tr>
-</tbody>
-</table>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-188-1.png" width="672" style="display: block; margin: auto;" /></p>
 </div>
 </div>
+<div id="revision" class="section level1">
+<h1>Revision</h1>
+<div id="loeuf-eqtl-vs-none-cell-type" class="section level2">
+<h2>LOEUF eQTL vs None (cell type)</h2>
+<pre class="r"><code>loeuf &lt;- read_tsv(&#39;data/gnomad_loeuf/supplementary_dataset_11_full_constraint_metrics.tsv&#39;) %&gt;% 
+  filter(canonical==TRUE) %&gt;% 
+  dplyr::select(gene,gene_id,transcript,oe_lof_upper,p) %&gt;% 
+  mutate(oe_lof_upper_bin = ntile(oe_lof_upper, 10)) %&gt;% 
+  dplyr::rename(ensembl=gene_id) %&gt;% 
+  dplyr::select(-gene,-transcript)</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  .default = col_double(),
+  gene = col_character(),
+  transcript = col_character(),
+  canonical = col_logical(),
+  constraint_flag = col_character(),
+  transcript_type = col_character(),
+  gene_id = col_character(),
+  gene_type = col_character(),
+  brain_expression = col_logical(),
+  chromosome = col_character()
+)</code></pre>
+<pre><code>See spec(...) for full column specifications.</code></pre>
+<pre class="r"><code>d_loeuf &lt;- read_tsv(&#39;output/eqtl/eqtl.PC70.txt&#39;) %&gt;% 
+  separate(pid,into=c(&#39;symbol&#39;,&#39;ensembl&#39;),sep=&#39;_&#39;) %&gt;% 
+  left_join(.,loeuf,by=&#39;ensembl&#39;) %&gt;% 
+  mutate(Significant=ifelse(adj_p&lt;0.05,TRUE,FALSE)) %&gt;% 
+  filter(!is.na(oe_lof_upper))</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  cell_type = col_character(),
+  pid = col_character(),
+  nvar = col_double(),
+  shape1 = col_double(),
+  shape2 = col_double(),
+  dummy = col_double(),
+  sid = col_character(),
+  dist = col_double(),
+  npval = col_double(),
+  slope = col_double(),
+  ppval = col_double(),
+  bpval = col_double(),
+  adj_p = col_double()
+)</code></pre>
+<pre class="r"><code>my_comparisons &lt;- list( c(&quot;FALSE&quot;,&quot;TRUE&quot;))
+p &lt;- ggplot(d_loeuf,aes(Significant,oe_lof_upper,col=cell_type)) + ggbeeswarm::geom_quasirandom(size=0.1) + facet_wrap(~cell_type,ncol=4,nrow=2) + theme_classic() + theme(legend.position=&#39;none&#39;,text=element_text(size=20)) + stat_summary(fun = median, fun.min = median, fun.max = median,
+                 geom = &quot;crossbar&quot;, width = 0.5,size=0.25,color=&#39;black&#39;) + xlab(&quot;Significant (5% FDR)&quot;) + ylab(&quot;LoF observed/expected upper bound
+fraction (LOEUF)&quot;) + ggpubr::stat_compare_means(comparisons = my_comparisons) + scale_y_continuous(expand=c(0.1,0))
+ggsave(p,filename=&#39;output/figures/FigureSX1.png&#39;,height=6,width=9,dpi = 300)
+p</code></pre>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-191-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="loeuf-eqtl-vs-bulk" class="section level2">
+<h2>LOEUF eQTL vs bulk</h2>
+<pre class="r"><code>#eQTL bulk (aggregate across all cells from and invididual)
+d_pb &lt;- read_tsv(&#39;output/eqtl/eqtl.pb.PC70.txt&#39;) %&gt;% 
+  dplyr::select(pid,adj_p_pb=adj_p) %&gt;% 
+  separate(pid,into=c(&#39;symbol&#39;,&#39;ensembl&#39;),sep=&#39;_&#39;)</code></pre>
+<pre class="r"><code>loeuf &lt;- read_tsv(&#39;data/gnomad_loeuf/supplementary_dataset_11_full_constraint_metrics.tsv&#39;) %&gt;% 
+  filter(canonical==TRUE) %&gt;% 
+  dplyr::select(gene,gene_id,transcript,oe_lof_upper,p) %&gt;% 
+  mutate(oe_lof_upper_bin = ntile(oe_lof_upper, 10)) %&gt;% 
+  dplyr::rename(ensembl=gene_id) %&gt;% 
+  dplyr::select(-gene,-transcript)</code></pre>
+<pre class="r"><code>d_loeuf &lt;- read_tsv(&#39;output/eqtl/eqtl.PC70.txt&#39;) %&gt;% 
+  separate(pid,into=c(&#39;symbol&#39;,&#39;ensembl&#39;),sep=&#39;_&#39;) %&gt;% 
+  left_join(.,loeuf,by=&#39;ensembl&#39;) %&gt;% 
+  filter(!is.na(oe_lof_upper)) %&gt;% 
+  inner_join(.,d_pb,by=c(&#39;ensembl&#39;,&#39;symbol&#39;)) %&gt;% 
+  mutate(Significant=factor(case_when(
+    adj_p&lt;0.05 &amp; adj_p_pb &lt;0.05 ~ &quot;Both&quot;,
+    adj_p&lt;0.05 &amp; adj_p_pb &gt;=0.05 ~ &quot;Cell&quot;,
+    adj_p&gt;=0.05 &amp; adj_p_pb &lt;0.05 ~ &quot;Bulk&quot;,
+    adj_p&gt;=0.05 &amp; adj_p_pb &gt;=0.05 ~ &quot;None&quot;),
+    levels=c(&#39;None&#39;,&#39;Cell&#39;,&#39;Bulk&#39;,&#39;Both&#39;)))</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  cell_type = col_character(),
+  pid = col_character(),
+  nvar = col_double(),
+  shape1 = col_double(),
+  shape2 = col_double(),
+  dummy = col_double(),
+  sid = col_character(),
+  dist = col_double(),
+  npval = col_double(),
+  slope = col_double(),
+  ppval = col_double(),
+  bpval = col_double(),
+  adj_p = col_double()
+)</code></pre>
+<pre class="r"><code>agg_all &lt;- d_loeuf %&gt;% 
+  dplyr::select(ensembl,oe_lof_upper,adj_p,adj_p_pb) %&gt;% 
+  group_by(ensembl,oe_lof_upper) %&gt;% 
+  summarise(sig_cell_type=ifelse(sum(adj_p&lt;0.05)&gt;0,TRUE,FALSE),
+            sig_bulk=ifelse(sum(adj_p_pb&lt;0.05)&gt;0,TRUE,FALSE)) %&gt;% 
+  mutate(Significant=factor(case_when(
+    sig_cell_type==TRUE &amp; sig_bulk==TRUE ~ &quot;Both&quot;,
+    sig_cell_type==TRUE &amp; sig_bulk==FALSE ~ &quot;Cell&quot;,
+    sig_cell_type==FALSE &amp; sig_bulk==TRUE ~ &quot;Bulk&quot;,
+    sig_cell_type==FALSE &amp; sig_bulk==FALSE ~ &quot;None&quot;),
+    levels=c(&#39;None&#39;,&#39;Cell&#39;,&#39;Bulk&#39;,&#39;Both&#39;))) %&gt;% 
+  mutate(cell_type=&#39;All&#39;) %&gt;% 
+  ungroup() %&gt;% 
+  dplyr::select(cell_type,oe_lof_upper,Significant)</code></pre>
+<pre><code>`summarise()` regrouping output by &#39;ensembl&#39; (override with `.groups` argument)</code></pre>
+<pre class="r"><code>d_loeuf_short &lt;- d_loeuf %&gt;% dplyr::select(cell_type,oe_lof_upper,Significant)</code></pre>
+<pre class="r"><code>all &lt;- rbind(agg_all,d_loeuf_short)</code></pre>
+<pre class="r"><code>my_comparisons &lt;- list( c(&quot;None&quot;,&quot;Cell&quot;),
+                        c(&quot;Cell&quot;,&quot;Bulk&quot;),
+                        c(&quot;Bulk&quot;,&quot;Both&quot;),
+                        c(&quot;None&quot;,&quot;Bulk&quot;),
+                        c(&quot;None&quot;,&quot;Both&quot;)
+                        )</code></pre>
+<pre class="r"><code>p &lt;- all %&gt;% ggplot(.,aes(Significant,oe_lof_upper,col=cell_type)) + ggbeeswarm::geom_quasirandom(size=0.1) + facet_wrap(~cell_type,nrow=3) + theme_classic() + theme(legend.position=&#39;none&#39;,text=element_text(size=20)) + stat_summary(fun = median, fun.min = median, fun.max = median,
+                 geom = &quot;crossbar&quot;, width = 0.5,size=0.25,color=&#39;black&#39;) + xlab(&quot;Significant (5% FDR)&quot;) + ylab(&quot;LoF observed/expected upper bound
+fraction (LOEUF)&quot;) + ggpubr::stat_compare_means(comparisons = my_comparisons,step.increase = 0.2) + scale_y_continuous(expand=c(0.1,0)) +
+  scale_color_manual(values=c(&#39;#2e73bc&#39;,hue_pal()(8)))
+ggsave(p,filename=&#39;output/figures/FigureSX2.png&#39;,width = 11,height=7,dpi = 300)
+p</code></pre>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-199-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="effect-size-discovery-vs-metabrain" class="section level2">
+<h2>Effect size discovery vs metabrain</h2>
+<div id="all" class="section level3">
+<h3>All</h3>
+<pre class="r"><code>matched_snps &lt;- read_tsv(&#39;output/eqtl/eqtl.PC70.metabrain.matched.txt&#39;) %&gt;% 
+  mutate(glia_neurons=case_when(
+  cell_type %in% c(&#39;Excitatory neurons&#39;,&#39;Inhibitory neurons&#39;) ~ &#39;Neurons&#39;,
+  TRUE ~ &#39;Glia&#39;))</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  SNP_id_hg38 = col_character(),
+  ensembl = col_character(),
+  AlleleAssessed = col_character(),
+  beta_metabrain = col_double(),
+  se_metabrain = col_double(),
+  p_metabrain = col_double(),
+  cell_type = col_character(),
+  symbol = col_character(),
+  SNP = col_character(),
+  chr_hg38 = col_double(),
+  effect_allele = col_character(),
+  other_allele = col_character(),
+  slope = col_double(),
+  se = col_double(),
+  bpval = col_double(),
+  adj_p = col_double(),
+  p_rep_adj = col_double(),
+  Replication = col_character()
+)</code></pre>
+<pre class="r"><code>matched_snps_class &lt;- matched_snps %&gt;% dplyr::mutate(cell_type=glia_neurons)</code></pre>
+<pre class="r"><code>matched_snps &lt;- rbind(matched_snps,matched_snps_class) %&gt;% 
+  dplyr::mutate(cell_type=factor(cell_type,
+                                 levels=c(&#39;Neurons&#39;,&#39;Glia&#39;,&#39;Astrocytes&#39;,&#39;Endothelial cells&#39;,&#39;Excitatory neurons&#39;,&#39;Inhibitory neurons&#39;,&#39;Microglia&#39;,&#39;Oligodendrocytes&#39;,&#39;OPCs / COPs&#39;,&#39;Pericytes&#39;)))</code></pre>
+<pre class="r"><code>null_snps &lt;- read_tsv(&#39;output/eqtl/eqtl.PC70.metabrain.matched.null.txt&#39;) %&gt;% 
+  mutate(glia_neurons=case_when(
+  cell_type %in% c(&#39;Excitatory neurons&#39;,&#39;Inhibitory neurons&#39;) ~ &#39;Neurons&#39;,
+  TRUE ~ &#39;Glia&#39;))</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  SNP_id_hg38 = col_character(),
+  ensembl = col_character(),
+  AlleleAssessed = col_character(),
+  beta_metabrain = col_double(),
+  se_metabrain = col_double(),
+  p_metabrain = col_double(),
+  cell_type = col_character(),
+  symbol = col_character(),
+  SNP = col_character(),
+  chr_hg38 = col_double(),
+  effect_allele = col_character(),
+  other_allele = col_character(),
+  slope = col_double(),
+  se = col_double(),
+  bpval = col_double(),
+  adj_p = col_double()
+)</code></pre>
+<pre class="r"><code>null_snps_class &lt;- null_snps %&gt;% dplyr::mutate(cell_type=glia_neurons)</code></pre>
+<pre class="r"><code>null_snps &lt;- rbind(null_snps,null_snps_class)</code></pre>
+<pre class="r"><code>cell_types &lt;- unique(matched_snps$cell_type)</code></pre>
+<pre class="r"><code>cor_b &lt;- function(sig,null){
+  
+  var_e_discovery &lt;- mean(sig$se^2)
+  var_e_replication &lt;- mean(sig$se_metabrain^2)
+  
+  re &lt;- cor(null$beta_metabrain,null$slope)
+
+  numerator &lt;- cov(sig$beta_metabrain,sig$slope) - re*sqrt(var_e_discovery*var_e_replication)
+  
+  denominator &lt;- sqrt( (var(sig$slope) - var_e_discovery) * (var(sig$beta_metabrain) - var_e_replication) )
+
+  out &lt;- numerator/denominator
+  
+  return(out)
+}</code></pre>
+<pre class="r"><code>rb_res &lt;- lapply(cell_types,function(cell_type_name){
+  
+  sig_cell &lt;- filter(matched_snps,cell_type==cell_type_name)
+  null_snps_cell &lt;- filter(null_snps,cell_type==cell_type_name)
+
+  rb &lt;- cor_b(sig_cell,null_snps_cell) 
+  pearson &lt;- cor(sig_cell$beta_metabrain,sig_cell$slope)
+  spearman &lt;- cor(sig_cell$beta_metabrain,sig_cell$slope,method=&#39;spearman&#39;)
+  out &lt;- tibble(cell_type=cell_type_name,rb=rb,cor_pearson=pearson,cor_spearman=spearman)
+
+  return(out)
+}) %&gt;% 
+  bind_rows() %&gt;% 
+  arrange(rb)</code></pre>
+<pre class="r"><code>matched_snps_text &lt;- matched_snps %&gt;% 
+  group_by(cell_type) %&gt;% 
+  summarise(n_rep=sum(p_rep_adj &lt; 0.05),
+            n_rep_same_direction=sum(p_rep_adj &lt; 0.05 &amp; sign(beta_metabrain)==sign(slope)),
+            n_tot=n(),
+            prop_rep=n_rep/n_tot,
+            prop_rep_same_direction=n_rep_same_direction/n_tot,
+            prop_rep_same_direction_rep=prop_rep_same_direction/prop_rep,
+            pi1=ifelse(n()&gt;100,round(1-qvalue::qvalue(p_metabrain)$pi0,digits=2),NA)
+  ) %&gt;% 
+  inner_join(.,rb_res,by=&#39;cell_type&#39;) %&gt;% 
+  mutate(p1_label=paste0(&#39;Pi1 = &#39;, pi1),
+         prop_rep_label=paste0(&#39;5% FDR = &#39;, round(prop_rep*100,digits=0),&#39;%&#39;),
+         prop_rep_same_label=paste0(&#39;Same direction = &#39;, round(prop_rep_same_direction_rep*100,digits=0),&#39;%&#39;),
+         rb_label=paste0(&#39;Rb = &#39;,round(rb,digits=2)),
+         label=paste0(prop_rep_label,&#39;\n&#39;,prop_rep_same_label,&#39;\n&#39;,p1_label,&#39;\n&#39;,rb_label)
+            ) %&gt;% 
+  ungroup() %&gt;% 
+  dplyr::mutate(cell_type=factor(cell_type,
+                                 levels=c(&#39;Neurons&#39;,&#39;Glia&#39;,&#39;Astrocytes&#39;,&#39;Endothelial cells&#39;,&#39;Excitatory neurons&#39;,&#39;Inhibitory neurons&#39;,&#39;Microglia&#39;,&#39;Oligodendrocytes&#39;,&#39;OPCs / COPs&#39;,&#39;Pericytes&#39;)))</code></pre>
+<pre><code>`summarise()` ungrouping output (override with `.groups` argument)</code></pre>
+<pre class="r"><code>p &lt;- ggplot(matched_snps,aes(slope,beta_metabrain,col=Replication)) + 
+  geom_point(size=0.3) + 
+  facet_wrap(~cell_type,nrow=2) +
+  theme_classic() +
+  geom_hline(yintercept = 0,linetype=3) +
+  geom_vline(xintercept = 0,linetype=3) +
+  geom_abline(linetype=3) +
+  xlab(&#39;Effect size (discovery)&#39;) +
+  ylab(&#39;Effect size (replication)&#39;) +
+  geom_text(data=matched_snps_text,aes(x=-2,y=Inf,vjust=1.1,hjust = 0,label=label),size=2.4,inherit.aes = FALSE) +
+  ggtitle(&#39;Replication in Metabrain Cortex - Matched SNP-genes&#39;)
+ggsave(p,filename=&#39;output/figures/FigureSX.png&#39;,width=13,dpi=300,height=5)
+p</code></pre>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-210-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="cell-type-vs-bulk" class="section level2">
+<h2>Cell type vs bulk</h2>
+<pre class="r"><code>d &lt;- read_tsv(&#39;output/eqtl/eqtl.PC70.txt&#39;) %&gt;% 
+  dplyr::count(adj_p&lt;0.05) %&gt;% 
+  filter(`adj_p &lt; 0.05`)
+d_pb &lt;- read_tsv(&#39;output/eqtl/eqtl.pb.PC70.txt&#39;) %&gt;% 
+  dplyr::count(adj_p&lt;0.05)%&gt;% 
+  filter(`adj_p &lt; 0.05`)</code></pre>
+<pre class="r"><code>p1 &lt;- tibble(`Cell type`=d$n,Bulk=d_pb$n) %&gt;% 
+  gather(type,value) %&gt;% 
+  mutate(type=factor(type,levels=c(&#39;Cell type&#39;,&#39;Bulk&#39;))) %&gt;% 
+  ggplot(.,aes(type,value,fill=type)) + 
+  geom_col() +
+  theme_classic() +
+  xlab(&#39;&#39;) +
+  ylab(&#39;Number of cis-eQTL (5% FDR)&#39;) +
+  theme(legend.position = &#39;none&#39;) +
+  geom_text(aes(label=value,vjust=1.1))</code></pre>
+<pre class="r"><code>cell_type &lt;- read_tsv(&#39;output/eqtl/eqtl.PC70.txt&#39;) %&gt;% 
+  dplyr::select(cell_type=cell_type,pid,slope_cell=slope)</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  cell_type = col_character(),
+  pid = col_character(),
+  nvar = col_double(),
+  shape1 = col_double(),
+  shape2 = col_double(),
+  dummy = col_double(),
+  sid = col_character(),
+  dist = col_double(),
+  npval = col_double(),
+  slope = col_double(),
+  ppval = col_double(),
+  bpval = col_double(),
+  adj_p = col_double()
+)</code></pre>
+<pre class="r"><code>bulk &lt;- read_tsv(&#39;output/eqtl/eqtl.pb.PC70.txt&#39;) %&gt;% 
+  dplyr::select(tissue=cell_type,pid,slope_tissue=slope)</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  cell_type = col_character(),
+  pid = col_character(),
+  nvar = col_double(),
+  shape1 = col_double(),
+  shape2 = col_double(),
+  dummy = col_double(),
+  sid = col_character(),
+  dist = col_double(),
+  npval = col_double(),
+  slope = col_double(),
+  ppval = col_double(),
+  bpval = col_double(),
+  adj_p = col_double()
+)</code></pre>
+<pre class="r"><code>d &lt;- inner_join(cell_type,bulk,by=&#39;pid&#39;)</code></pre>
+<pre class="r"><code>p2 &lt;- d %&gt;% gather(type,value,-cell_type,-tissue,-pid) %&gt;% 
+  mutate(type=ifelse(type==&#39;slope_cell&#39;,&#39;cell type level&#39;,&#39;tissue-like level&#39;)) %&gt;% 
+  filter(value&lt;6*sd(value)) %&gt;% #filter out outliers (effect sizes &gt;6sd from the mean)
+  mutate(cell_type=ifelse(grepl(&#39;neurons&#39;,cell_type),&#39;Neurons&#39;,&#39;Glia&#39;)) %&gt;% 
+  ggplot(.,aes(cell_type,abs(value),col=type)) +
+  ggbeeswarm::geom_quasirandom(dodge.width = 0.9,size=0.2) + 
+  ggpubr::stat_compare_means(aes(group = type),label = &quot;p.format&quot;) +
+  stat_summary(fun = median, 
+                 fun.min = median, 
+                 fun.max = median,
+                 geom = &quot;crossbar&quot;,
+                 width = 0.5,
+                 size=0.25,
+                 color=&#39;black&#39;,
+                 position = position_dodge(width = 0.9),
+                 aes(group=type)
+  ) +
+  xlab(&#39;&#39;) +
+  ylab(&#39;Absolute effect size&#39;) +
+  theme_classic() +
+  facet_wrap(~cell_type,ncol=4,scales = &#39;free_x&#39;) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank(),legend.position = &#39;none&#39;)</code></pre>
+<pre class="r"><code>p3 &lt;- d %&gt;% gather(type,value,-cell_type,-tissue,-pid) %&gt;% 
+  mutate(type=ifelse(type==&#39;slope_cell&#39;,&#39;cell type level&#39;,&#39;tissue-like level&#39;)) %&gt;% 
+  filter(value&lt;6*sd(value)) %&gt;% #filter out outliers (effect sizes &gt;6sd from the mean)
+  ggplot(.,aes(cell_type,abs(value),col=type))+
+  ggbeeswarm::geom_quasirandom(dodge.width = 0.9,size=0.2) + 
+  ggpubr::stat_compare_means(aes(group = type),label = &quot;p.format&quot;) +
+  stat_summary(fun = median, 
+                 fun.min = median, 
+                 fun.max = median,
+                 geom = &quot;crossbar&quot;,
+                 width = 0.5,
+                 size=0.25,
+                 color=&#39;black&#39;,
+                 position = position_dodge(width = 0.9),
+                 aes(group=type)
+  ) +
+  xlab(&#39;&#39;) +
+  ylab(&#39;Absolute effect size&#39;) +
+  theme_classic() +
+  facet_wrap(~cell_type,ncol=4,scales = &#39;free_x&#39;) +
+  theme(axis.text.x = element_blank(), axis.ticks.x = element_blank())</code></pre>
+<pre class="r"><code>p &lt;-((p1 / p2 + plot_layout(guides = &#39;auto&#39;)) | p3) + plot_layout(guides = &#39;collect&#39;,widths = c(1, 2))
+ggsave(p,filename=&#39;output/figures/FigureSZ.png&#39;,width=10,dpi=300,height=6)
+p</code></pre>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-217-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+<div id="pcs" class="section level2">
+<h2>PCs</h2>
+<p>From expression data</p>
+<pre class="r"><code>sum_expression_ms &lt;- readRDS(&#39;data_sensitive/expression/ms_sum_expression.individual_id.rds&#39;) %&gt;% mutate(dataset=&#39;ms&#39;)
+sum_expression_ad &lt;- readRDS(&#39;data_sensitive/expression/ad_sum_expression.individual_id.rds&#39;) %&gt;% mutate(dataset=&#39;ad&#39;)
+sum_expression &lt;- rbind(sum_expression_ms,sum_expression_ad)</code></pre>
+<p>Get number of cells and total counts (log)</p>
+<pre class="r"><code>exp_info &lt;- sum_expression %&gt;% 
+  group_by(cell_type,individual_id) %&gt;% 
+  summarise(log_tot_counts=log(sum(counts)+1),
+            n_cells=unique(n_cells)) %&gt;% 
+  ungroup()</code></pre>
+<pre><code>`summarise()` regrouping output by &#39;cell_type&#39; (override with `.groups` argument)</code></pre>
+<pre class="r"><code>ad_meta &lt;- read_tsv(&#39;data_sensitive/expression/sample_individual_ad.txt&#39;) %&gt;% 
+  group_by(individual_id) %&gt;% 
+  summarise(n_samples_per_id=n(),
+            tissue=paste0(tissue,collapse=&#39;,&#39;),
+            age=unique(age),
+            post_mortem_m=unique(post_mortem_m),
+            sex=unique(sex))</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  sample_id = col_character(),
+  individual_id = col_character(),
+  age = col_double(),
+  post_mortem_m = col_double(),
+  sex = col_character(),
+  tissue = col_character()
+)</code></pre>
+<pre><code>`summarise()` ungrouping output (override with `.groups` argument)</code></pre>
+<pre class="r"><code>ms_meta &lt;- read_tsv(&#39;data_sensitive/expression/sample_individual_ms.txt&#39;) %&gt;% 
+  group_by(individual_id) %&gt;% 
+  summarise(n_samples_per_id=n(),
+            tissue=paste0(unique(tissue),collapse=&#39;,&#39;),
+            age=unique(age),
+            post_mortem_m=unique(post_mortem_m),
+            sex=unique(sex))</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  sample_id = col_character(),
+  individual_id = col_character(),
+  age = col_double(),
+  post_mortem_m = col_double(),
+  sex = col_character(),
+  tissue = col_character()
+)</code></pre>
+<pre><code>`summarise()` regrouping output by &#39;individual_id&#39; (override with `.groups` argument)</code></pre>
+<pre class="r"><code>meta &lt;- rbind(ad_meta,ms_meta) %&gt;% 
+  mutate(tissue=case_when(
+    tissue==&#39;GM&#39; ~ &#39;Cortex&#39;,
+    tissue==&#39;WM&#39; ~ &#39;Deep white matter&#39;,
+    tissue==&#39;GM,WM&#39; ~ &#39;Cortex,Deep white matter&#39;,
+    tissue==&#39;Prefrontal cortex&#39; ~ &#39;Cortex&#39;,
+    tissue==&#39;Deep white matter,Prefrontal cortex&#39; ~ &#39;Cortex,Deep white matter&#39;,
+    tissue==&#39;Deep white matter,Temporal cortex&#39; ~ &#39;Cortex,Deep white matter&#39;,
+    TRUE ~ tissue
+  ))</code></pre>
+<pre class="r"><code>pc_files &lt;- list.files(&#39;data_sensitive/eqtl/PC70/&#39;,pattern=&#39;.cov.txt.gz&#39;,full.names = TRUE)</code></pre>
+<pre class="r"><code>get_pc_var_assoc &lt;- function(i){
+  
+  message(i)
+  #Read covariate file, add expression related metadata and metadata
+  d &lt;- read_tsv(pc_files[i]) %&gt;% 
+  t() %&gt;% 
+  as.data.frame() %&gt;% 
+  rownames_to_column() %&gt;% 
+  setNames(.[1,]) %&gt;% 
+  dplyr::slice(2:n()) %&gt;% 
+  dplyr::rename(individual_id=id) %&gt;% 
+  mutate(cell_type=basename(pc_files[i]) %&gt;% gsub(&#39;.cov.txt.gz&#39;,&#39;&#39;,.) %&gt;% gsub(&#39;\\.&#39;,&#39; &#39;,.) %&gt;% gsub(&#39;OPCs   COPs&#39;,&#39;OPCs / COPs&#39;,.)) %&gt;% 
+  mutate(across(contains(&#39;PC&#39;),as.numeric)) %&gt;% 
+  left_join(.,exp_info,by=c(&#39;individual_id&#39;,&#39;cell_type&#39;)) %&gt;% 
+  left_join(.,meta,by=&#39;individual_id&#39;) %&gt;% 
+  as_tibble() %&gt;% 
+    dplyr::rename(PC1_genotype=PC1,
+                  PC2_genotype=PC2,
+                  PC3_genotype=PC3)
+  
+  #Compute correlation between numerical variables and expression PCs
+  num &lt;- dplyr::select(d,PC1_genotype,PC2_genotype,PC3_genotype,log_tot_counts,n_cells,n_samples_per_id,age,post_mortem_m,PC1_exp:PC70_exp) %&gt;% 
+  gather(x_var,x_val,PC1_genotype:post_mortem_m) %&gt;% 
+  gather(y_var,y_val,PC1_exp:PC70_exp) %&gt;% 
+  group_by(x_var,y_var) %&gt;% 
+  summarise(pvalue=cor.test(x_val,y_val)$p.value) %&gt;% 
+  arrange(pvalue)
+  
+  #Compute linear regression for factors
+  fact &lt;- dplyr::select(d,study,diagnosis,tissue,sex,PC1_exp:PC70_exp) %&gt;% 
+  gather(x_var,x_val,study:sex) %&gt;% 
+  gather(y_var,y_val,PC1_exp:PC70_exp) %&gt;% 
+  group_by(x_var,y_var) %&gt;% 
+  summarise(pvalue = anova(lm(y_val~1), lm(y_val~x_val))$`Pr(&gt;F)`[2]) %&gt;% 
+  arrange(pvalue)
+  
+  #get results
+  res &lt;- rbind(num,fact) %&gt;% 
+  mutate(p_adj=p.adjust(pvalue,method=&#39;fdr&#39;)) %&gt;% 
+  arrange(p_adj) %&gt;% 
+  mutate(sig=ifelse(p_adj&lt;0.05,&#39;5% FDR&#39;,&#39;Not significant&#39;)) %&gt;% 
+  group_by(y_var) %&gt;% 
+  mutate(n_sig=sum(sig==&#39;5% FDR&#39;)) %&gt;% 
+  filter(n_sig&gt;0) %&gt;% 
+  mutate(exp_PC=gsub(&#39;PC&#39;,&#39;&#39;,y_var) %&gt;% gsub(&#39;_exp&#39;,&#39;&#39;,.) %&gt;% as.numeric()) %&gt;% 
+  arrange(exp_PC)
+  
+  #set factor levels
+  lev &lt;- res %&gt;% dplyr::select(y_var,exp_PC) %&gt;% unique()
+  res &lt;- mutate(res,y_var=factor(y_var,levels=lev$y_var))
+  
+  #set cell type tested
+  res &lt;- res %&gt;% mutate(cell_type=unique(d$cell_type))
+  return(res)
+}</code></pre>
+<pre class="r"><code>pc_res &lt;- lapply(1:length(pc_files),get_pc_var_assoc) %&gt;% 
+  bind_rows()</code></pre>
+<pre><code>1</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  .default = col_character()
+)</code></pre>
+<pre><code>See spec(...) for full column specifications.</code></pre>
+<pre><code>`summarise()` regrouping output by &#39;x_var&#39; (override with `.groups` argument)
+`summarise()` regrouping output by &#39;x_var&#39; (override with `.groups` argument)</code></pre>
+<pre><code>2</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  .default = col_character()
+)</code></pre>
+<pre><code>See spec(...) for full column specifications.</code></pre>
+<pre><code>`summarise()` regrouping output by &#39;x_var&#39; (override with `.groups` argument)
+`summarise()` regrouping output by &#39;x_var&#39; (override with `.groups` argument)</code></pre>
+<pre><code>3</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  .default = col_character()
+)</code></pre>
+<pre><code>See spec(...) for full column specifications.</code></pre>
+<pre><code>`summarise()` regrouping output by &#39;x_var&#39; (override with `.groups` argument)
+`summarise()` regrouping output by &#39;x_var&#39; (override with `.groups` argument)</code></pre>
+<pre><code>4</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  .default = col_character()
+)</code></pre>
+<pre><code>See spec(...) for full column specifications.</code></pre>
+<pre><code>`summarise()` regrouping output by &#39;x_var&#39; (override with `.groups` argument)
+`summarise()` regrouping output by &#39;x_var&#39; (override with `.groups` argument)</code></pre>
+<pre><code>5</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  .default = col_character()
+)</code></pre>
+<pre><code>See spec(...) for full column specifications.</code></pre>
+<pre><code>`summarise()` regrouping output by &#39;x_var&#39; (override with `.groups` argument)
+`summarise()` regrouping output by &#39;x_var&#39; (override with `.groups` argument)</code></pre>
+<pre><code>6</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  .default = col_character()
+)</code></pre>
+<pre><code>See spec(...) for full column specifications.</code></pre>
+<pre><code>`summarise()` regrouping output by &#39;x_var&#39; (override with `.groups` argument)
+`summarise()` regrouping output by &#39;x_var&#39; (override with `.groups` argument)</code></pre>
+<pre><code>7</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  .default = col_character()
+)</code></pre>
+<pre><code>See spec(...) for full column specifications.</code></pre>
+<pre><code>`summarise()` regrouping output by &#39;x_var&#39; (override with `.groups` argument)
+`summarise()` regrouping output by &#39;x_var&#39; (override with `.groups` argument)</code></pre>
+<pre><code>8</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  .default = col_character()
+)</code></pre>
+<pre><code>See spec(...) for full column specifications.</code></pre>
+<pre><code>`summarise()` regrouping output by &#39;x_var&#39; (override with `.groups` argument)
+`summarise()` regrouping output by &#39;x_var&#39; (override with `.groups` argument)</code></pre>
+<pre class="r"><code>px &lt;- pc_res %&gt;% filter(y_var%in%c(&#39;PC1_exp&#39;,&#39;PC2_exp&#39;,&#39;PC3_exp&#39;,&#39;PC4_exp&#39;,&#39;PC5_exp&#39;)) %&gt;% ggplot(.,aes(-log10(pvalue),x_var,fill=sig)) + 
+    geom_col() +
+    facet_grid(y_var~cell_type) + 
+    theme_bw() + 
+    ylab(&#39;&#39;) +
+  ggtitle(&#39;Association of technical covariates with expression PCs&#39;)</code></pre>
+<pre class="r"><code>#Plot of Astrocytes PCs vs top associated variables
+i &lt;- 1
+d &lt;- read_tsv(pc_files[i]) %&gt;% 
+  t() %&gt;% 
+  as.data.frame() %&gt;% 
+  rownames_to_column() %&gt;% 
+  setNames(.[1,]) %&gt;% 
+  dplyr::slice(2:n()) %&gt;% 
+  dplyr::rename(individual_id=id) %&gt;% 
+  mutate(cell_type=basename(pc_files[i]) %&gt;% gsub(&#39;.cov.txt.gz&#39;,&#39;&#39;,.) %&gt;% gsub(&#39;\\.&#39;,&#39; &#39;,.) %&gt;% gsub(&#39;OPCs   COPs&#39;,&#39;OPCs / COPs&#39;,.)) %&gt;% 
+  mutate(across(contains(&#39;PC&#39;),as.numeric)) %&gt;% 
+  left_join(.,exp_info,by=c(&#39;individual_id&#39;,&#39;cell_type&#39;)) %&gt;% 
+  left_join(.,meta,by=&#39;individual_id&#39;) %&gt;% 
+  as_tibble() %&gt;% 
+    dplyr::rename(PC1_genotype=PC1,
+                  PC2_genotype=PC2,
+                  PC3_genotype=PC3)</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  .default = col_character()
+)</code></pre>
+<pre><code>See spec(...) for full column specifications.</code></pre>
+<pre class="r"><code>p1 &lt;- ggplot(d,aes(PC1_exp,PC2_exp,col=study)) + geom_point() + theme_classic()
+p2 &lt;- ggplot(d,aes(PC1_exp,PC2_exp,col=tissue)) + geom_point() + theme_classic()
+p3 &lt;- ggplot(d,aes(PC1_exp,PC2_exp,col=PC1_genotype)) + geom_point() + theme_classic()  + scale_color_viridis_c()
+p4 &lt;- ggplot(d,aes(PC1_exp,PC2_exp,col=diagnosis)) + geom_point() + theme_classic()</code></pre>
+<pre class="r"><code>py &lt;- p1 + p2 + p3 + p4 + plot_annotation(title = &#39;Astrocytes&#39;) &amp; xlab(&#39;PC1 expression&#39;) &amp; ylab(&#39;PC2 expression&#39;) 
+p &lt;- px +py + plot_layout(widths = c(2, 1))
+ggsave(p,filename=paste0(&#39;output/figures/FigureSY.png&#39;),width=24,height=8)
+p</code></pre>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-228-1.png" width="960" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="additional-code" class="section level1">
+<h1>Additional code</h1>
+<div id="cell-type-specific-eqtl" class="section level2">
+<h2>cell type specific eQTL</h2>
+<div id="magma" class="section level3">
+<h3>MAGMA</h3>
+<pre class="r"><code>entrez_2_ensembl &lt;- AnnotationDbi::toTable(org.Hs.eg.db::org.Hs.egENSEMBL) %&gt;% 
+  add_count(gene_id,name = &#39;n_entrez&#39; ) %&gt;% add_count(ensembl_id,name=&#39;n_ensembl&#39;) %&gt;% 
+  filter(n_entrez==1,n_ensembl==1) %&gt;% 
+  dplyr::select(-n_entrez,-n_ensembl) %&gt;% 
+  dplyr::rename(ensembl=ensembl_id,GENE=gene_id) %&gt;% 
+  as_tibble()</code></pre>
+<pre class="r"><code>dir.create(&#39;data/magma_interaction_eqtl/&#39;,showWarnings = FALSE)
+d &lt;- read_tsv(&#39;output/eqtl_specific/eqtl.PC70.specific.txt&#39;) %&gt;% 
+  #Sets pvalue to NA if the model did not converge
+  mutate(nb_pvalue_aggregate=ifelse(nb_pvalue_aggregate_model_converged==FALSE,NA,nb_pvalue_aggregate)) %&gt;% 
+  mutate(nb_pvalue_at_least_one=ifelse(nb_pvalue_at_least_one_model_converged==FALSE,NA,nb_pvalue_at_least_one)) %&gt;%   #Remove genes for which the model did not converge (9 genes)
+  filter(!is.na(nb_pvalue_aggregate),
+         !is.na(nb_pvalue_at_least_one),
+         nb_pvalue_at_least_one!=Inf) %&gt;% 
+  #Get adjusted pvalues
+  mutate(nb_pvalue_aggregate_adj=p.adjust(nb_pvalue_aggregate,method=&#39;fdr&#39;),
+         nb_pvalue_at_least_one_adj=p.adjust(nb_pvalue_at_least_one,method = &#39;fdr&#39;)) %&gt;% 
+  #For each row, get the maximum pvalue across all cell types, this will be the gene-level pvalue testing whether the genetic effect on gene expression is different than all other cell types
+  rowwise() %&gt;% 
+  mutate(nb_pvalue_sig_all=
+           max(Astrocytes_p,`Endothelial cells_p`,`Excitatory neurons_p`,`Inhibitory neurons_p`,Microglia_p,Oligodendrocytes_p,`OPCs / COPs_p`,Pericytes_p,na.rm=TRUE)) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(nb_pvalue_all_adj = p.adjust(nb_pvalue_sig_all,method=&#39;fdr&#39;)) %&gt;% 
+  separate(gene_id,into=c(&#39;symbol&#39;,&#39;ensembl&#39;),sep=&#39;_&#39;) %&gt;% 
+  filter(nb_pvalue_all_adj&lt;0.05) %&gt;% 
+  inner_join(.,entrez_2_ensembl,by=&#39;ensembl&#39;) %&gt;% 
+  mutate(cell_type_id=make.names(cell_type_id)) %&gt;% 
+  dplyr::select(GENE,cell_type_id) %&gt;% 
+  write_tsv(.,path = &#39;data/magma_interaction_eqtl/cell_type_specific.txt&#39;,col_names =FALSE)</code></pre>
+<pre class="bash"><code>cd data/magma_interaction_eqtl
+source ~/.bashrc
+
+##Gene sets
+cell_type_specific_eqtl=&#39;cell_type_specific.txt&#39;
+
+##GWAS
+ms=&#39;../gwas/ms/ms.annotated_35kbup_10_down.genes.raw&#39;
+ad=&#39;../gwas/ad/ad.annotated_35kbup_10_down.genes.raw&#39;
+pd=&#39;../gwas/pd/parkinsonMeta2020.annotated_35kbup_10_down.genes.raw&#39;
+scz=&#39;../gwas/scz/scz3.annotated_35kbup_10_down.genes.raw&#39;
+
+##Run MAGMA
+magma --gene-results $ms --set-annot $cell_type_specific_eqtl col=1,2  --out ms
+magma --gene-results $ad --set-annot $cell_type_specific_eqtl col=1,2  --out ad
+magma --gene-results $pd --set-annot $cell_type_specific_eqtl col=1,2  --out pd
+magma --gene-results $scz --set-annot $cell_type_specific_eqtl col=1,2  --out scz</code></pre>
+<pre class="r"><code>files &lt;- list.files(&#39;data/magma_interaction_eqtl&#39;,pattern=&#39;.gsa.out&#39;,full.names = T)</code></pre>
+<pre class="r"><code>d &lt;- tibble(file_names=files) %&gt;% 
+  mutate(trait=gsub(&#39;\\..+&#39;,&#39;&#39;,basename(file_names))) %&gt;% 
+  mutate(file_content=map(file_names,read.table,header=T)) %&gt;%
+  unnest(file_content) %&gt;% 
+  group_by(trait) %&gt;% 
+  mutate(fdr.local=p.adjust(P,method=&#39;fdr&#39;)) %&gt;% 
+  mutate(Significance=ifelse(fdr.local&lt;=0.05,&#39;FDR&lt;5%&#39;,&#39;Not significant&#39;)) %&gt;% 
+  mutate(trait=factor(case_when(
+    trait==&#39;ad&#39; ~ &#39;Alzheimer&#39;,
+    trait==&#39;ms&#39; ~ &#39;Multiple Sclerosis&#39;,
+    trait==&#39;pd&#39; ~ &#39;Parkinson&#39;,
+    trait==&#39;scz&#39; ~ &#39;Schizophrenia&#39;),levels=c(&#39;Alzheimer&#39;,&#39;Multiple Sclerosis&#39;,&#39;Parkinson&#39;,&#39;Schizophrenia&#39;))) %&gt;% 
+  mutate(VARIABLE=gsub(&#39;\\.&#39;,&#39; &#39;,VARIABLE) %&gt;% gsub(&#39;OPCs   COPs&#39;,&#39;OPCs / COPs&#39;,.))</code></pre>
+<pre class="r"><code>cbPalette &lt;- c(&quot;#D55E00&quot;,&quot;#56B4E9&quot;,&quot;#CC79A7&quot;)
+#
+p &lt;- ggplot(d,aes(VARIABLE,-log10(P),fill=Significance)) + geom_col() + facet_wrap(~trait) + coord_flip() + theme_classic() + xlab(&#39;&#39;)
+ggsave(p,filename=&#39;output/figures/FigureS13.png&#39;,width=8,dpi=300)
+p</code></pre>
+<p><img src="figure/plot_figures.Rmd/unnamed-chunk-234-1.png" width="672" style="display: block; margin: auto;" /></p>
+</div>
+</div>
+<div id="locuszoom" class="section level2">
+<h2>Locuszoom</h2>
+<pre class="r"><code>dir.create(&#39;data/locuszoom/&#39;,showWarnings = FALSE)</code></pre>
+<pre class="r"><code>ad_coloc &lt;- read_tsv(&#39;output/coloc/coloc.ad.txt&#39;)</code></pre>
+<pre><code>Parsed with column specification:
+cols(
+  .default = col_double(),
+  locus = col_character(),
+  closest_gene = col_character(),
+  GWAS_snp = col_character(),
+  GWAS_snp_pos = col_character(),
+  symbol = col_character(),
+  ensembl = col_character(),
+  tissue = col_character(),
+  type = col_character(),
+  coloc_method = col_character()
+)</code></pre>
+<pre><code>See spec(...) for full column specifications.</code></pre>
+<pre class="r"><code>ad_gwas &lt;- data.table::fread(&#39;data/gwas/ad/GCST90012877_buildGRCh37.tsv&#39;,data.table = FALSE) %&gt;% as_tibble()</code></pre>
+<pre class="r"><code>get_locuszoom_input &lt;- function(coloc,gwas,cell_type,symbol_selected){
+  
+  locus &lt;- coloc %&gt;% filter(symbol==symbol_selected,tissue==cell_type) %&gt;% pull(locus)
+
+  chr &lt;- gsub(&#39;:.+&#39;,&#39;&#39;,locus) %&gt;% gsub(&#39;chr&#39;,&#39;&#39;,.)
+  start &lt;- gsub(&#39;chr.+:&#39;,&#39;&#39;,locus) %&gt;% gsub(&#39;_.+&#39;,&#39;&#39;,.) %&gt;% as.numeric()
+  end &lt;- gsub(&#39;chr.+:&#39;,&#39;&#39;,locus) %&gt;% gsub(&#39;.+_&#39;,&#39;&#39;,.) %&gt;% as.numeric()
+  
+  gwas_locus &lt;- filter(gwas,chromosome==chr,
+                       base_pair_location&gt;=start &amp; base_pair_location&lt;=end) %&gt;% 
+    dplyr::select(variant_id,pvalue_gwas=p_value)
+  
+  eqtl &lt;- data.table::fread(paste0(&#39;data_sensitive/eqtl/PC70_nominal/&#39;,make.names(cell_type),&#39;.&#39;,chr,&#39;.gz&#39;),data.table = FALSE) %&gt;% as_tibble() %&gt;% 
+    separate(V1,into=c(&#39;symbol&#39;,&#39;ensembl&#39;),sep=&#39;_&#39;) %&gt;% 
+    filter(symbol==symbol_selected) %&gt;% 
+    dplyr::select(variant_id=V2,pvalue_eqtl=V4)
+  
+  out &lt;- inner_join(gwas_locus,eqtl,by=&#39;variant_id&#39;)
+  write_tsv(out,path = paste0(&#39;data/locuszoom/&#39;,symbol_selected,&#39;.&#39;,cell_type,&#39;.txt&#39;))
+}</code></pre>
+<pre class="r"><code>get_locuszoom_input(ad_coloc,ad_gwas,&#39;Microglia&#39;,&#39;INPP5D&#39;)
+get_locuszoom_input(ad_coloc,ad_gwas,&#39;Microglia&#39;,&#39;PICALM&#39;)</code></pre>
 <br>
 <p>
 <button type="button" class="btn btn-default btn-workflowr btn-workflowr-sessioninfo" data-toggle="collapse" data-target="#workflowr-sessioninfo" style="display: block;">
@@ -4291,71 +3906,73 @@ other attached packages:
 [33] workflowr_1.6.2                        
 
 loaded via a namespace (and not attached):
-  [1] tidyselect_1.1.0            htmlwidgets_1.5.1          
-  [3] RSQLite_2.2.0               BiocParallel_1.22.0        
-  [5] munsell_0.5.0               withr_2.2.0                
-  [7] colorspace_1.4-1            knitr_1.28                 
-  [9] rstudioapi_0.11             ggsignif_0.6.0             
- [11] labeling_0.3                git2r_0.27.1               
- [13] GenomeInfoDbData_1.2.3      bit64_0.9-7                
- [15] farver_2.0.3                pheatmap_1.0.12            
- [17] rprojroot_1.3-2             vctrs_0.3.1                
- [19] generics_0.0.2              xfun_0.14                  
- [21] BiocFileCache_1.12.0        R6_2.4.1                   
- [23] ggbeeswarm_0.6.0            clue_0.3-57                
- [25] bitops_1.0-6                DelayedArray_0.14.0        
- [27] assertthat_0.2.1            promises_1.1.1             
- [29] nnet_7.3-14                 beeswarm_0.2.3             
- [31] gtable_0.3.0                Cairo_1.5-12.2             
- [33] rlang_0.4.10                GlobalOptions_0.1.2        
- [35] splines_4.0.1               rstatix_0.6.0              
- [37] acepack_1.4.1               checkmate_2.0.0            
- [39] broom_0.5.6                 BiocManager_1.30.10        
- [41] yaml_2.2.1                  reshape2_1.4.4             
- [43] abind_1.4-5                 modelr_0.1.8               
- [45] backports_1.1.7             httpuv_1.5.4               
- [47] Hmisc_4.4-0                 RBGL_1.64.0                
- [49] tools_4.0.1                 ellipsis_0.3.1             
- [51] RColorBrewer_1.1-2          Rcpp_1.0.6                 
- [53] plyr_1.8.6                  base64enc_0.1-3            
- [55] progress_1.2.2              zlibbioc_1.34.0            
- [57] RCurl_1.98-1.2              prettyunits_1.1.1          
- [59] ggpubr_0.4.0                rpart_4.1-15               
- [61] openssl_1.4.1               GetoptLong_1.0.5           
- [63] SummarizedExperiment_1.18.1 haven_2.3.1                
- [65] ggrepel_0.8.2               cluster_2.1.0              
- [67] fs_1.4.1                    magrittr_1.5               
- [69] data.table_1.12.8           openxlsx_4.1.5             
- [71] circlize_0.4.12             reprex_0.3.0               
- [73] whisker_0.4                 matrixStats_0.56.0         
- [75] hms_0.5.3                   evaluate_0.14              
- [77] XML_3.99-0.3                rio_0.5.16                 
- [79] jpeg_0.1-8.1                readxl_1.3.1               
- [81] gridExtra_2.3               shape_1.4.5                
- [83] compiler_4.0.1              biomaRt_2.44.4             
- [85] crayon_1.3.4                htmltools_0.5.1.1          
- [87] later_1.1.0.1               Formula_1.2-3              
- [89] lubridate_1.7.9             DBI_1.1.0                  
- [91] dbplyr_1.4.4                rappdirs_0.3.1             
- [93] Matrix_1.2-18               car_3.0-8                  
- [95] cli_2.0.2                   pkgconfig_2.0.3            
- [97] GenomicAlignments_1.24.0    foreign_0.8-80             
- [99] xml2_1.3.2                  vipor_0.4.5                
-[101] XVector_0.28.0              rvest_0.3.5                
-[103] digest_0.6.25               graph_1.66.0               
-[105] Biostrings_2.56.0           rmarkdown_2.2              
-[107] cellranger_1.1.0            htmlTable_1.13.3           
-[109] curl_4.3                    Rsamtools_2.4.0            
-[111] rjson_0.2.20                lifecycle_0.2.0            
-[113] nlme_3.1-148                jsonlite_1.6.1             
-[115] Rhdf5lib_1.10.0             carData_3.0-4              
-[117] askpass_1.1                 fansi_0.4.1                
-[119] pillar_1.4.4                lattice_0.20-41            
-[121] httr_1.4.1                  survival_3.1-12            
-[123] glue_1.4.1                  zip_2.0.4                  
-[125] png_0.1-7                   bit_1.1-15.2               
-[127] stringi_1.4.6               blob_1.2.1                 
-[129] latticeExtra_0.6-29         memoise_1.1.0              </code></pre>
+  [1] R.utils_2.9.2               tidyselect_1.1.0           
+  [3] htmlwidgets_1.5.1           RSQLite_2.2.0              
+  [5] BiocParallel_1.22.0         munsell_0.5.0              
+  [7] withr_2.2.0                 colorspace_1.4-1           
+  [9] knitr_1.28                  rstudioapi_0.11            
+ [11] ggsignif_0.6.0              labeling_0.3               
+ [13] git2r_0.27.1                GenomeInfoDbData_1.2.3     
+ [15] bit64_0.9-7                 farver_2.0.3               
+ [17] pheatmap_1.0.12             rprojroot_1.3-2            
+ [19] vctrs_0.3.1                 generics_0.0.2             
+ [21] xfun_0.14                   BiocFileCache_1.12.0       
+ [23] R6_2.4.1                    ggbeeswarm_0.6.0           
+ [25] clue_0.3-57                 bitops_1.0-6               
+ [27] DelayedArray_0.14.0         assertthat_0.2.1           
+ [29] promises_1.1.1              nnet_7.3-14                
+ [31] beeswarm_0.2.3              gtable_0.3.0               
+ [33] Cairo_1.5-12.2              rlang_0.4.10               
+ [35] GlobalOptions_0.1.2         splines_4.0.1              
+ [37] rstatix_0.6.0               acepack_1.4.1              
+ [39] checkmate_2.0.0             broom_0.5.6                
+ [41] BiocManager_1.30.10         yaml_2.2.1                 
+ [43] reshape2_1.4.4              abind_1.4-5                
+ [45] modelr_0.1.8                backports_1.1.7            
+ [47] httpuv_1.5.4                Hmisc_4.4-0                
+ [49] RBGL_1.64.0                 tools_4.0.1                
+ [51] ellipsis_0.3.1              RColorBrewer_1.1-2         
+ [53] Rcpp_1.0.6                  plyr_1.8.6                 
+ [55] base64enc_0.1-3             progress_1.2.2             
+ [57] zlibbioc_1.34.0             RCurl_1.98-1.2             
+ [59] prettyunits_1.1.1           ggpubr_0.4.0               
+ [61] rpart_4.1-15                openssl_1.4.1              
+ [63] GetoptLong_1.0.5            SummarizedExperiment_1.18.1
+ [65] haven_2.3.1                 ggrepel_0.8.2              
+ [67] cluster_2.1.0               fs_1.4.1                   
+ [69] magrittr_1.5                data.table_1.12.8          
+ [71] openxlsx_4.1.5              circlize_0.4.12            
+ [73] reprex_0.3.0                whisker_0.4                
+ [75] matrixStats_0.56.0          hms_0.5.3                  
+ [77] evaluate_0.14               XML_3.99-0.3               
+ [79] rio_0.5.16                  jpeg_0.1-8.1               
+ [81] readxl_1.3.1                gridExtra_2.3              
+ [83] shape_1.4.5                 compiler_4.0.1             
+ [85] biomaRt_2.44.4              crayon_1.3.4               
+ [87] R.oo_1.23.0                 htmltools_0.5.1.1          
+ [89] later_1.1.0.1               Formula_1.2-3              
+ [91] lubridate_1.7.9             DBI_1.1.0                  
+ [93] dbplyr_1.4.4                rappdirs_0.3.1             
+ [95] Matrix_1.2-18               car_3.0-8                  
+ [97] cli_2.0.2                   R.methodsS3_1.8.0          
+ [99] pkgconfig_2.0.3             GenomicAlignments_1.24.0   
+[101] foreign_0.8-80              xml2_1.3.2                 
+[103] vipor_0.4.5                 XVector_0.28.0             
+[105] rvest_0.3.5                 digest_0.6.25              
+[107] graph_1.66.0                Biostrings_2.56.0          
+[109] rmarkdown_2.2               cellranger_1.1.0           
+[111] htmlTable_1.13.3            curl_4.3                   
+[113] Rsamtools_2.4.0             rjson_0.2.20               
+[115] lifecycle_0.2.0             nlme_3.1-148               
+[117] jsonlite_1.6.1              Rhdf5lib_1.10.0            
+[119] carData_3.0-4               askpass_1.1                
+[121] fansi_0.4.1                 pillar_1.4.4               
+[123] lattice_0.20-41             httr_1.4.1                 
+[125] survival_3.1-12             glue_1.4.1                 
+[127] zip_2.0.4                   png_0.1-7                  
+[129] bit_1.1-15.2                stringi_1.4.6              
+[131] blob_1.2.1                  latticeExtra_0.6-29        
+[133] memoise_1.1.0              </code></pre>
 </div>
 </div>
 </div>
