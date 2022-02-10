@@ -2421,7 +2421,7 @@ coloc_heatmap <- function(file,threshold=0.7,width=7,height=5,out_name){
 coloc_heatmap('output/coloc/coloc.ms.gtex_dice.txt',threshold=0.7,height=30,width=10,out_name='output/figures/FigureS21.pdf')
 ```
 
-## FigureS22 - Genotype PCA
+## Figure S22 - Genotype PCA
 
 ```{r,message=FALSE}
 data <- read.table("data_sensitive/genotypes/Combined_with1kg.mds",header=TRUE) %>% dplyr::select(-FID) %>% dplyr::select(IID,C1,C2)
@@ -2599,7 +2599,7 @@ ggsave(p,filename=paste0('output/figures/FigureS23.png'),width=24,height=8)
 p
 ```
 
-## FigureS24 - eQTLs number vs PCs
+## Figure S24 - eQTLs number vs PCs
 
 ```{r,message=FALSE}
 d <- read_tsv('output/eqtl/eqtl.allPCs.txt') %>% 
