@@ -27,10 +27,17 @@ Manually created
 
 ## Table S2
 
+```{r}
+matched_snps <- read_tsv('output/eqtl/eqtl.PC70.metabrain.matched.txt') %>% dplyr::select(cell_type,sid=SNP,ensembl,beta_metabrain,p_metabrain,Replication)
+snp_alleles <- data.table::fread('data_sensitive/genotypes/processed/plink.frq',data.table=FALSE) %>% dplyr::select(sid=SNP,effect_allele=A1,other_allele=A2) %>% as_tibble()
+```
+
 ```{r,message=FALSE}
 tableS2 <- read_tsv('output/eqtl/eqtl.PC70.txt') %>% 
   separate(pid,into=c('symbol','ensembl'),sep='_') %>% 
-  dplyr::select(cell_type,symbol,ensembl,SNP=sid,dist_TSS=dist,slope,bpval,adj_p) %>% 
+  inner_join(.,snp_alleles,by='sid') %>% 
+  left_join(.,matched_snps,by=c('cell_type','sid','ensembl')) %>% 
+  dplyr::select(cell_type,symbol,ensembl,SNP=sid,effect_allele,other_allele,dist_TSS=dist,beta=slope,bpval,adj_p,beta_metabrain,p_metabrain,Replication) %>% 
   write_csv(.,'output/tables/tableS2.csv')
 ```
 
@@ -55,8 +62,8 @@ tableS3 <- read_tsv('output/eqtl/eqtl.70PCs.caveman.txt') %>%
 ```{r,message=FALSE,warning=FALSE}
 tableS4 <- read_tsv('output/eqtl_specific/eqtl.PC70.specific.txt') %>% 
   #Sets pvalue to NA if the model did not converge or if the model output is Inf
-  mutate(nb_pvalue_aggregate=ifelse(nb_pvalue_aggregate_model_converged==FALSE | nb_pvalue_aggregate_model_converged==Inf,NA,nb_pvalue_aggregate)) %>% 
-  mutate(nb_pvalue_at_least_one=ifelse(nb_pvalue_at_least_one_model_converged==FALSE | nb_pvalue_at_least_one==Inf,NA,nb_pvalue_at_least_one)) %>%   #Remove genes for which the model did not converge (9 genes
+  mutate(nb_pvalue_aggregate=ifelse(nb_pvalue_aggregate_model_converged==FALSE,NA,nb_pvalue_aggregate)) %>% 
+  mutate(nb_pvalue_at_least_one=ifelse(nb_pvalue_at_least_one_model_converged==FALSE,NA,nb_pvalue_at_least_one)) %>%
   #Get adjusted pvalues
   mutate(nb_pvalue_aggregate_adj=p.adjust(nb_pvalue_aggregate,method='fdr'),
          nb_pvalue_at_least_one_adj=p.adjust(nb_pvalue_at_least_one,method = 'fdr')) %>% 
