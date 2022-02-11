@@ -959,19 +959,19 @@ coloc_heatmap('output/coloc/coloc.ad.txt',threshold=0.7,height=6,width=7,out_nam
 ## Figure 4D
 
 ```{r,message=FALSE,fig.height=10,fig.width=10,fig.height=6}
-coloc_heatmap('output/coloc/coloc.pd.txt',threshold=0.7,height=6,width=8.5,out_name='output/figures/Figure4D.pdf')
+coloc_heatmap('output/coloc/coloc.pd.txt',threshold=0.7,height=6,width=7,out_name='output/figures/Figure4D.pdf')
 ```
 
 ## Figure 4E
 
 ```{r,message=FALSE,fig.height=14,fig.width=10,fig.height=14}
-coloc_heatmap('output/coloc/coloc.ms.txt',threshold=0.7,height=14,width=7,out_name='output/figures/Figure4E.pdf')
+coloc_heatmap('output/coloc/coloc.ms.txt',threshold=0.8,height=10,width=8.5,out_name='output/figures/Figure4E.pdf')
 ```
 
 ## Figure 4F
 
 ```{r,message=FALSE,fig.height=20,fig.width=10,fig.height=20}
-coloc_heatmap('output/coloc/coloc.scz.txt',threshold=0.7,height=20,width=8,out_name='output/figures/Figure4F.pdf')
+coloc_heatmap('output/coloc/coloc.scz.txt',threshold=0.8,height=20,width=9,out_name='output/figures/Figure4F.pdf')
 ```
 
 # Suplementary figures
@@ -1663,7 +1663,7 @@ p <- d %>%
   scale_y_log10(expand = c(0.1, 0),breaks = trans_breaks("log10", function(x) 10^x),labels = trans_format("log10", math_format(10^.x))) + 
   ggpubr::stat_compare_means(label.x = 1.1,label.y = 6.3,comparisons = list(c('1','2')))
 
-ggsave(p,filename='output/figures/FigureS7D.png',dpi=300)
+ggsave(p,filename='output/figures/FigureS10D.png',dpi=300)
 p
 ```
 
@@ -2034,9 +2034,9 @@ ggsave(p,filename = 'output/figures/FigureS16A.png',width=9,height=5)
 ```
 
 ```{r,message=FALSE,fig.width=10}
-gene_name <- 'ACAP2_ENSG00000114331'
-snp_name <- 'rs6437374'
-cell_type_name <- 'Astrocytes'
+gene_name <- 'TMPRSS5_ENSG00000166682'
+snp_name <- 'rs3863293'
+cell_type_name <- 'Oligodendrocytes'
 p <- plot_eqtl_specific(cell_type_name,gene_name,snp_name) + theme(text=element_text(size=20),plot.title = element_text(size=12))
 p + theme(text=element_text(size=14))
 ggsave(p,filename = 'output/figures/FigureS16B.png',width=9,height=5)
@@ -2060,9 +2060,7 @@ d <- read_tsv('output/eqtl_specific/eqtl.PC70.specific.txt') %>%
 d_gather <- d %>% 
   dplyr::select(-snp_id) %>% 
   gather(cell_type_test,p,-cell_type_id,-gene_id,-nb_pvalue_aggregate,-nb_pvalue_at_least_one,-nb_pvalue_aggregate_model_converged,-nb_pvalue_at_least_one_model_converged) %>% 
-  mutate(cell_type_test=gsub('_p','',cell_type_test)) %>% 
-  mutate(cell_type_id=factor(cell_type_id,levels=c('Microglia','OPCs / COPs', 'Astrocytes','Oligodendrocytes','Inhibitory neurons', 'Excitatory neurons','Endothelial cells','Pericytes')),
-         cell_type_test=factor(cell_type_test,levels=c('Microglia','OPCs / COPs', 'Astrocytes','Oligodendrocytes','Inhibitory neurons', 'Excitatory neurons','Endothelial cells','Pericytes')))
+  mutate(cell_type_test=gsub('_p','',cell_type_test))
 ```
 
 ```{r,message=FALSE}
@@ -2139,8 +2137,9 @@ n_loci <- coloc %>%
 ```{r,message=FALSE}
 p <- n_loci %>% 
   ggplot(.,aes(trait,n,fill=label)) + geom_col(position = position_dodge()) + facet_wrap(~trait,scales = 'free') + theme_classic() + theme(axis.ticks.x = element_blank(),axis.text.x = element_blank(),text=element_text(size=18),legend.title = element_blank()) + xlab('') + 
-  ylab('Number of loci') + geom_text(aes(label=n),position = position_dodge(width=0.9),vjust=1.1,size=8)
-ggsave(p,filename = 'output/figures/FigureS18.png',width = 8,height = 6,dpi=300)
+  ylab('Number of loci') + geom_text(aes(label=n),position = position_dodge(width=0.9),vjust=-0.2,size=8) +
+  scale_y_continuous(expand=c(0.2,0))
+ggsave(p,filename = 'output/figures/FigureS18.png',width = 10,height = 6,dpi=300)
 p
 ```
 
