@@ -11,7 +11,7 @@
 
 <meta name="author" content="Julien Bryois" />
 
-<meta name="date" content="2022-02-10" />
+<meta name="date" content="2022-02-11" />
 
 <title>Plot figures</title>
 
@@ -392,7 +392,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">Plot figures</h1>
 <h4 class="author">Julien Bryois</h4>
-<h4 class="date">February 10, 2022</h4>
+<h4 class="date">February 11, 2022</h4>
 
 </div>
 
@@ -417,7 +417,7 @@ div.tocify {
 <div class="tab-content">
 <div id="summary" class="tab-pane fade in active">
 <p>
-<strong>Last updated:</strong> 2022-02-10
+<strong>Last updated:</strong> 2022-02-11
 </p>
 <p>
 <strong>Checks:</strong> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> 7 <span class="glyphicon glyphicon-exclamation-sign text-danger" aria-hidden="true"></span> 0
@@ -508,16 +508,16 @@ This reproducible <a href="http://rmarkdown.rstudio.com">R Markdown</a> analysis
 <div class="panel panel-default">
 <div class="panel-heading">
 <p class="panel-title">
-<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong2885c04"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 2885c04 </a>
+<a data-toggle="collapse" data-parent="#workflowr-checks" href="#strongRepositoryversionstrong070b937"> <span class="glyphicon glyphicon-ok text-success" aria-hidden="true"></span> <strong>Repository version:</strong> 070b937 </a>
 </p>
 </div>
-<div id="strongRepositoryversionstrong2885c04" class="panel-collapse collapse">
+<div id="strongRepositoryversionstrong070b937" class="panel-collapse collapse">
 <div class="panel-body">
 <p>
 Great! You are using Git for version control. Tracking code development and connecting the code version to the results is critical for reproducibility.
 </p>
 <p>
-The results in this page were generated with repository version 2885c04. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
+The results in this page were generated with repository version 070b937. See the <em>Past versions</em> tab to see a history of the changes made to the R Markdown and HTML files.
 </p>
 <p>
 Note that you need to be careful to ensure that all relevant files for the analysis have been committed to Git prior to generating the results (you can use <code>wflow_publish</code> or <code>wflow_git_commit</code>). workflowr only checks the R Markdown file, but you know if there are other scripts or data files that it depends on. Below is the status of the Git repository when the results were generated:
@@ -603,6 +603,40 @@ Message
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+Rmd
+</td>
+<td>
+070b937
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-02-11
+</td>
+<td>
+plot_figures
+</td>
+</tr>
+<tr>
+<td>
+html
+</td>
+<td>
+104aec6
+</td>
+<td>
+Julien Bryois
+</td>
+<td>
+2022-02-10
+</td>
+<td>
+Build site.
+</td>
+</tr>
 <tr>
 <td>
 Rmd
@@ -2617,15 +2651,15 @@ Julien Bryois
 </div>
 <div id="figure-4d" class="section level2">
 <h2>Figure 4D</h2>
-<pre class="r"><code>coloc_heatmap(&#39;output/coloc/coloc.pd.txt&#39;,threshold=0.7,height=6,width=8.5,out_name=&#39;output/figures/Figure4D.pdf&#39;)</code></pre>
+<pre class="r"><code>coloc_heatmap(&#39;output/coloc/coloc.pd.txt&#39;,threshold=0.7,height=6,width=7,out_name=&#39;output/figures/Figure4D.pdf&#39;)</code></pre>
 </div>
 <div id="figure-4e" class="section level2">
 <h2>Figure 4E</h2>
-<pre class="r"><code>coloc_heatmap(&#39;output/coloc/coloc.ms.txt&#39;,threshold=0.7,height=14,width=7,out_name=&#39;output/figures/Figure4E.pdf&#39;)</code></pre>
+<pre class="r"><code>coloc_heatmap(&#39;output/coloc/coloc.ms.txt&#39;,threshold=0.8,height=10,width=8.5,out_name=&#39;output/figures/Figure4E.pdf&#39;)</code></pre>
 </div>
 <div id="figure-4f" class="section level2">
 <h2>Figure 4F</h2>
-<pre class="r"><code>coloc_heatmap(&#39;output/coloc/coloc.scz.txt&#39;,threshold=0.7,height=20,width=8,out_name=&#39;output/figures/Figure4F.pdf&#39;)</code></pre>
+<pre class="r"><code>coloc_heatmap(&#39;output/coloc/coloc.scz.txt&#39;,threshold=0.8,height=20,width=9,out_name=&#39;output/figures/Figure4F.pdf&#39;)</code></pre>
 </div>
 </div>
 <div id="suplementary-figures" class="section level1">
@@ -3907,7 +3941,7 @@ Julien Bryois
   scale_y_log10(expand = c(0.1, 0),breaks = trans_breaks(&quot;log10&quot;, function(x) 10^x),labels = trans_format(&quot;log10&quot;, math_format(10^.x))) + 
   ggpubr::stat_compare_means(label.x = 1.1,label.y = 6.3,comparisons = list(c(&#39;1&#39;,&#39;2&#39;)))
 
-ggsave(p,filename=&#39;output/figures/FigureS7D.png&#39;,dpi=300)
+ggsave(p,filename=&#39;output/figures/FigureS10D.png&#39;,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-149-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
@@ -4619,9 +4653,9 @@ Julien Bryois
 </div>
 </div>
 <pre class="r"><code>ggsave(p,filename = &#39;output/figures/FigureS16A.png&#39;,width=9,height=5)</code></pre>
-<pre class="r"><code>gene_name &lt;- &#39;ACAP2_ENSG00000114331&#39;
-snp_name &lt;- &#39;rs6437374&#39;
-cell_type_name &lt;- &#39;Astrocytes&#39;
+<pre class="r"><code>gene_name &lt;- &#39;TMPRSS5_ENSG00000166682&#39;
+snp_name &lt;- &#39;rs3863293&#39;
+cell_type_name &lt;- &#39;Oligodendrocytes&#39;
 p &lt;- plot_eqtl_specific(cell_type_name,gene_name,snp_name) + theme(text=element_text(size=20),plot.title = element_text(size=12))
 p + theme(text=element_text(size=14))</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-181-1.png" width="960" style="display: block; margin: auto;" /></p>
@@ -4701,9 +4735,7 @@ Julien Bryois
 <pre class="r"><code>d_gather &lt;- d %&gt;% 
   dplyr::select(-snp_id) %&gt;% 
   gather(cell_type_test,p,-cell_type_id,-gene_id,-nb_pvalue_aggregate,-nb_pvalue_at_least_one,-nb_pvalue_aggregate_model_converged,-nb_pvalue_at_least_one_model_converged) %&gt;% 
-  mutate(cell_type_test=gsub(&#39;_p&#39;,&#39;&#39;,cell_type_test)) %&gt;% 
-  mutate(cell_type_id=factor(cell_type_id,levels=c(&#39;Microglia&#39;,&#39;OPCs / COPs&#39;, &#39;Astrocytes&#39;,&#39;Oligodendrocytes&#39;,&#39;Inhibitory neurons&#39;, &#39;Excitatory neurons&#39;,&#39;Endothelial cells&#39;,&#39;Pericytes&#39;)),
-         cell_type_test=factor(cell_type_test,levels=c(&#39;Microglia&#39;,&#39;OPCs / COPs&#39;, &#39;Astrocytes&#39;,&#39;Oligodendrocytes&#39;,&#39;Inhibitory neurons&#39;, &#39;Excitatory neurons&#39;,&#39;Endothelial cells&#39;,&#39;Pericytes&#39;)))</code></pre>
+  mutate(cell_type_test=gsub(&#39;_p&#39;,&#39;&#39;,cell_type_test))</code></pre>
 <pre class="r"><code>pi1 &lt;- d_gather %&gt;% 
   filter(!is.na(p)) %&gt;% 
   filter(!cell_type_id%in%c(&#39;Endothelial cells&#39;,&#39;Pericytes&#39;)) %&gt;% 
@@ -4822,8 +4854,9 @@ metabrain_s1 &lt;- readxl::read_xlsx(&#39;data/metabrain/media-1.xlsx&#39;,skip=
 <pre><code>`summarise()` regrouping output by &#39;locus&#39; (override with `.groups` argument)</code></pre>
 <pre class="r"><code>p &lt;- n_loci %&gt;% 
   ggplot(.,aes(trait,n,fill=label)) + geom_col(position = position_dodge()) + facet_wrap(~trait,scales = &#39;free&#39;) + theme_classic() + theme(axis.ticks.x = element_blank(),axis.text.x = element_blank(),text=element_text(size=18),legend.title = element_blank()) + xlab(&#39;&#39;) + 
-  ylab(&#39;Number of loci&#39;) + geom_text(aes(label=n),position = position_dodge(width=0.9),vjust=1.1,size=8)
-ggsave(p,filename = &#39;output/figures/FigureS18.png&#39;,width = 8,height = 6,dpi=300)
+  ylab(&#39;Number of loci&#39;) + geom_text(aes(label=n),position = position_dodge(width=0.9),vjust=-0.2,size=8) +
+  scale_y_continuous(expand=c(0.2,0))
+ggsave(p,filename = &#39;output/figures/FigureS18.png&#39;,width = 10,height = 6,dpi=300)
 p</code></pre>
 <p><img src="figure/plot_figures.Rmd/unnamed-chunk-192-1.png" width="672" style="display: block; margin: auto;" /></p>
 <p>
