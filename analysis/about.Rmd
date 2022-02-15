@@ -7,4 +7,5 @@ editor_options:
   chunk_output_type: console
 ---
 
-Analysis code for paper: https://www.medrxiv.org/content/10.1101/2021.10.09.21264604v1
+Analysis code for paper:
+[Cell-type specific cis-eQTLs in eight brain cell-types identifies novel risk genes for human brain disorders](https://www.medrxiv.org/content/10.1101/2021.10.09.21264604v1)
