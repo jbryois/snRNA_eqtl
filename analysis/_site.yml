@@ -1,7 +1,7 @@
-name: "snRNA_eqtl"
+name: snRNA_eqtl
 output_dir: ../docs
 navbar:
-  title: "snRNA_eqtl"
+  title: snRNA_eqtl
   left:
   - text: Home
     href: index.html
@@ -9,6 +9,10 @@ navbar:
     href: about.html
   - text: License
     href: license.html
+  right:
+  - icon: fa-github
+    text: Source code
+    href: https://github.com/jbryois/snRNA_eqtl
 output:
   workflowr::wflow_html:
     toc: yes
